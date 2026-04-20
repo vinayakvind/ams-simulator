@@ -1,0 +1,242 @@
+{
+  "version": "1.0",
+  "total_steps": 5,
+  "generated": "2026-04-21 00:53:08",
+  "steps": [
+    {
+      "index": 1,
+      "chip_name": "lin_asic",
+      "phase": "architecture",
+      "description": "architecture for lin_asic",
+      "timestamp": 1776712988.8410685,
+      "data": {
+        "name": "lin_asic",
+        "power_domains": [
+          {
+            "name": "VBAT",
+            "voltage": 12.0,
+            "source": "external",
+            "description": "Battery / LIN bus supply"
+          },
+          {
+            "name": "VDD_LIN",
+            "voltage": 5.0,
+            "source": "ldo_lin",
+            "description": "LIN transceiver supply"
+          },
+          {
+            "name": "VDD_ANA",
+            "voltage": 3.3,
+            "source": "ldo_analog",
+            "description": "Analog core supply"
+          },
+          {
+            "name": "VDD_DIG",
+            "voltage": 1.8,
+            "source": "ldo_digital",
+            "description": "Digital core supply"
+          }
+        ],
+        "block_hierarchy": [
+          {
+            "name": "bandgap_ref",
+            "type": "analog"
+          },
+          {
+            "name": "ldo_analog",
+            "type": "analog"
+          },
+          {
+            "name": "ldo_digital",
+            "type": "analog"
+          },
+          {
+            "name": "ldo_lin",
+            "type": "analog"
+          },
+          {
+            "name": "lin_transceiver",
+            "type": "analog"
+          },
+          {
+            "name": "spi_controller",
+            "type": "digital"
+          },
+          {
+            "name": "lin_controller",
+            "type": "digital"
+          },
+          {
+            "name": "register_file",
+            "type": "digital"
+          },
+          {
+            "name": "control_logic",
+            "type": "mixed"
+          }
+        ],
+        "interfaces": [
+          {
+            "name": "LIN_BUS",
+            "type": "analog",
+            "direction": "bidirectional",
+            "description": "LIN bus single-wire interface"
+          },
+          {
+            "name": "SPI",
+            "type": "digital",
+            "signals": [
+              "SCLK",
+              "MOSI",
+              "MISO",
+              "CS_N"
+            ],
+            "description": "SPI slave for host MCU register access"
+          },
+          {
+            "name": "IRQ",
+            "type": "digital",
+            "direction": "output",
+            "description": "Interrupt output to host MCU"
+          }
+        ],
+        "signal_routing": []
+      },
+      "status": "completed",
+      "duration_s": null
+    },
+    {
+      "index": 2,
+      "chip_name": "lin_asic",
+      "phase": "block_design",
+      "description": "block_design for lin_asic",
+      "timestamp": 1776712988.8427253,
+      "data": {
+        "blocks_designed": [
+          "bandgap_ref",
+          "ldo_analog",
+          "ldo_digital",
+          "ldo_lin",
+          "lin_transceiver",
+          "spi_controller",
+          "lin_controller",
+          "register_file",
+          "control_logic"
+        ]
+      },
+      "status": "completed",
+      "duration_s": null
+    },
+    {
+      "index": 3,
+      "chip_name": "lin_asic",
+      "phase": "integration",
+      "description": "integration for lin_asic",
+      "timestamp": 1776712988.8430254,
+      "data": {
+        "top_netlist_lines": 545
+      },
+      "status": "completed",
+      "duration_s": null
+    },
+    {
+      "index": 4,
+      "chip_name": "lin_asic",
+      "phase": "verification",
+      "description": "verification for lin_asic",
+      "timestamp": 1776712988.843193,
+      "data": {
+        "checks": [
+          {
+            "check": "block_bandgap_ref_netlist",
+            "status": "PASS",
+            "message": "Block bandgap_ref has netlist"
+          },
+          {
+            "check": "block_ldo_analog_netlist",
+            "status": "PASS",
+            "message": "Block ldo_analog has netlist"
+          },
+          {
+            "check": "block_ldo_digital_netlist",
+            "status": "PASS",
+            "message": "Block ldo_digital has netlist"
+          },
+          {
+            "check": "block_ldo_lin_netlist",
+            "status": "PASS",
+            "message": "Block ldo_lin has netlist"
+          },
+          {
+            "check": "block_lin_transceiver_netlist",
+            "status": "PASS",
+            "message": "Block lin_transceiver has netlist"
+          },
+          {
+            "check": "block_spi_controller_netlist",
+            "status": "PASS",
+            "message": "Block spi_controller has netlist"
+          },
+          {
+            "check": "block_lin_controller_netlist",
+            "status": "PASS",
+            "message": "Block lin_controller has netlist"
+          },
+          {
+            "check": "block_register_file_netlist",
+            "status": "PASS",
+            "message": "Block register_file has netlist"
+          },
+          {
+            "check": "block_control_logic_netlist",
+            "status": "PASS",
+            "message": "Block control_logic has netlist"
+          },
+          {
+            "check": "power_domain_VBAT",
+            "status": "PASS",
+            "message": "Power domain VBAT at 12.0V defined"
+          },
+          {
+            "check": "power_domain_VDD_LIN",
+            "status": "PASS",
+            "message": "Power domain VDD_LIN at 5.0V defined"
+          },
+          {
+            "check": "power_domain_VDD_ANA",
+            "status": "PASS",
+            "message": "Power domain VDD_ANA at 3.3V defined"
+          },
+          {
+            "check": "power_domain_VDD_DIG",
+            "status": "PASS",
+            "message": "Power domain VDD_DIG at 1.8V defined"
+          },
+          {
+            "check": "top_level_netlist",
+            "status": "PASS",
+            "message": "Top-level netlist complete"
+          }
+        ],
+        "passed": 14,
+        "total": 14,
+        "pass_rate": "100.0%"
+      },
+      "status": "completed",
+      "duration_s": null
+    },
+    {
+      "index": 5,
+      "chip_name": "lin_asic",
+      "phase": "signoff",
+      "description": "signoff for lin_asic",
+      "timestamp": 1776712988.8478694,
+      "data": {
+        "status": "complete"
+      },
+      "status": "completed",
+      "duration_s": null
+    }
+  ],
+  "templates": {}
+}

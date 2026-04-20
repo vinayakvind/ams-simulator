@@ -1,0 +1,35 @@
+* LDO Regulator - Digital Core Supply
+* Input: 3.3V (VDD_ANA), Output: 1.8V
+* Optimized for digital load transients
+.SUBCKT LDO_DIGITAL VIN VOUT GND VREF EN
+
+* Error amplifier (simple 2-stage)
+M_D1 n_d1 n_d1 VIN VIN PMOS_3P3 W=8u L=1u
+M_D2 n_d2 n_d1 VIN VIN PMOS_3P3 W=8u L=1u
+M_D3 n_d1 VREF n_tail GND NMOS_3P3 W=15u L=1u
+M_D4 n_d2 n_fb n_tail GND NMOS_3P3 W=15u L=1u
+M_TAIL n_tail n_bias GND GND NMOS_3P3 W=8u L=2u
+
+* Bias
+M_BIAS n_bias n_bias GND GND NMOS_3P3 W=4u L=4u
+R_BIAS n_bias VIN 150k
+
+* Pass transistor
+M_PASS VOUT n_d2 VIN VIN PMOS_3P3 W=3000u L=0.5u
+
+* Decoupling
+C_OUT VOUT GND 4.7u
+C_INT VOUT GND 200p
+
+* Feedback: VOUT * R2/(R1+R2) = VREF (1.2V)
+* For VOUT=1.8V: R1 = 50k, R2 = 100k
+R_FB1 VOUT n_fb 50k
+R_FB2 n_fb GND 100k
+
+* Compensation
+C_COMP n_d2 VOUT 8p
+
+* Enable
+M_EN_SW n_bias EN GND GND NMOS_3P3 W=2u L=0.5u
+
+.ENDS LDO_DIGITAL

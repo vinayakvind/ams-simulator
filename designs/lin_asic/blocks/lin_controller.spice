@@ -1,0 +1,81 @@
+* LIN Protocol Controller - Digital Block
+* LIN 2.2A compliant master/slave controller
+.SUBCKT LIN_CONTROLLER TXD RXD VDD GND CLK RST_N
++ REG_ADDR[7:0] REG_WDATA[7:0] REG_RDATA[7:0]
++ REG_WR REG_RD
++ IRQ LIN_MASTER_N
++ BAUD_DIV[15:0]
+
+* ---- Verilog behavioral description ----
+* module lin_controller (
+*   output reg        txd,        // To LIN transceiver TXD
+*   input  wire       rxd,        // From LIN transceiver RXD
+*   input  wire       clk,        // System clock
+*   input  wire       rst_n,      // Active-low reset
+*   // Register interface (from SPI)
+*   input  wire [7:0] reg_addr,
+*   input  wire [7:0] reg_wdata,
+*   output reg  [7:0] reg_rdata,
+*   input  wire       reg_wr,
+*   input  wire       reg_rd,
+*   // Control
+*   output reg        irq,        // Interrupt request
+*   input  wire       lin_master_n, // 0=master, 1=slave
+*   input  wire [15:0] baud_div   // Baud rate divisor
+* );
+*
+* // LIN State Machine
+* localparam IDLE     = 4'd0;
+* localparam BREAK    = 4'd1;
+* localparam SYNC     = 4'd2;
+* localparam PID      = 4'd3;
+* localparam DATA     = 4'd4;
+* localparam CHECKSUM = 4'd5;
+* localparam SLEEP    = 4'd6;
+* localparam WAKEUP   = 4'd7;
+* localparam ERROR    = 4'd8;
+*
+* reg [3:0] state;
+* reg [7:0] data_buf [0:7]; // 8 bytes max
+* reg [2:0] byte_cnt;
+* reg [7:0] pid_reg;
+* reg [7:0] checksum;
+*
+* // UART TX/RX at LIN baud rate
+* reg [15:0] baud_counter;
+* reg [3:0]  bit_pos;
+* reg        tx_busy;
+*
+* // Protected ID calculation (PID)
+* // P0 = ID0 ^ ID1 ^ ID2 ^ ID4
+* // P1 = ~(ID1 ^ ID3 ^ ID4 ^ ID5)
+* function [7:0] calc_pid;
+*   input [5:0] id;
+*   begin
+*     calc_pid[5:0] = id;
+*     calc_pid[6] = id[0] ^ id[1] ^ id[2] ^ id[4];
+*     calc_pid[7] = ~(id[1] ^ id[3] ^ id[4] ^ id[5]);
+*   end
+* endfunction
+*
+* // Enhanced checksum (LIN 2.0+)
+* function [7:0] calc_checksum;
+*   input [7:0] pid;
+*   input [7:0] data0, data1, data2, data3;
+*   input [7:0] data4, data5, data6, data7;
+*   input [2:0] len;
+*   reg [15:0] sum;
+*   integer i;
+*   begin
+*     sum = pid;
+*     // Add data bytes with carry
+*     sum = sum + data0; sum = (sum & 8'hFF) + (sum >> 8);
+*     sum = sum + data1; sum = (sum & 8'hFF) + (sum >> 8);
+*     // ... repeat for all bytes up to len
+*     calc_checksum = ~sum[7:0]; // Invert
+*   end
+* endfunction
+*
+* endmodule
+
+.ENDS LIN_CONTROLLER

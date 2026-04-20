@@ -51,6 +51,7 @@ ams-gui = "simulator.main:main"
 ams-sim = "simulator.cli.runner:main"
 ams-batch = "simulator.cli.batch:main"
 ams-run = "simulator.dsl.cli:main"
+ams-agent = "simulator.agents.cli:main"
 
 [project.urls]
 "Homepage" = "https://github.com/ams-simulator/ams-simulator"

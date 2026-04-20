@@ -1,0 +1,36 @@
+* LDO Regulator - LIN Transceiver Supply
+* Input: 12.0V (VBAT), Output: 5.0V
+* Designed for LIN bus driver power
+.SUBCKT LDO_LIN VIN VOUT GND VREF EN
+
+* Error amplifier
+M_D1 n_d1 n_d1 VIN VIN PMOS_HV W=10u L=1u
+M_D2 n_d2 n_d1 VIN VIN PMOS_HV W=10u L=1u
+M_D3 n_d1 VREF n_tail GND NMOS_3P3 W=20u L=1u
+M_D4 n_d2 n_fb n_tail GND NMOS_3P3 W=20u L=1u
+M_TAIL n_tail n_bias GND GND NMOS_3P3 W=10u L=2u
+
+* Bias
+M_BIAS n_bias n_bias GND GND NMOS_3P3 W=5u L=4u
+R_BIAS n_bias VIN 300k
+
+* HV Pass transistor (handles VBAT range 8-18V)
+M_PASS VOUT n_d2 VIN VIN PMOS_HV W=8000u L=0.8u
+
+* Output
+C_OUT VOUT GND 2.2u
+C_INT VOUT GND 100p
+
+* Feedback: VOUT=5V, VREF=1.2V -> R1/R2 = 3.167
+R_FB1 VOUT n_fb 316.7k
+R_FB2 n_fb GND 100k
+
+* Compensation
+C_COMP n_d2 VOUT 4p
+R_COMP n_d2 n_rc 15k
+C_COMP2 n_rc VOUT 2p
+
+* Enable
+M_EN_SW n_bias EN GND GND NMOS_3P3 W=2u L=0.5u
+
+.ENDS LDO_LIN

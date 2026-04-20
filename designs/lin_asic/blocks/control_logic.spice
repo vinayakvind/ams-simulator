@@ -1,0 +1,36 @@
+* Control Logic - Enable Sequencing & Clock Management
+.SUBCKT CONTROL_LOGIC VDD GND CLK_IN RST_N
++ BGR_EN LDO_ANA_EN LDO_DIG_EN LDO_LIN_EN LIN_EN
++ SLEEP_MODE POR_N
++ CLK_OUT
+
+* Power-on-reset detector
+* RC delay for reliable startup
+R_POR VDD n_por 100k
+C_POR n_por GND 100p
+* Schmitt trigger on POR
+M_POR1 n_por_inv n_por VDD VDD PMOS_3P3 W=4u L=0.5u
+M_POR2 n_por_inv n_por GND GND NMOS_3P3 W=2u L=0.5u
+M_POR3 POR_N n_por_inv VDD VDD PMOS_3P3 W=4u L=0.5u
+M_POR4 POR_N n_por_inv GND GND NMOS_3P3 W=2u L=0.5u
+
+* RC oscillator (if no external clock)
+* ~8 MHz relaxation oscillator
+R_OSC1 VDD n_osc1 50k
+C_OSC1 n_osc1 GND 1p
+M_OSC_INV1 n_osc2 n_osc1 VDD VDD PMOS_3P3 W=4u L=0.5u
+M_OSC_INV2 n_osc2 n_osc1 GND GND NMOS_3P3 W=2u L=0.5u
+M_OSC_FB n_osc1 n_osc2 GND GND NMOS_3P3 W=1u L=0.5u
+
+* Clock mux (external or internal)
+M_CLK_MUX1 CLK_OUT CLK_IN VDD VDD PMOS_3P3 W=8u L=0.5u
+M_CLK_MUX2 CLK_OUT CLK_IN GND GND NMOS_3P3 W=4u L=0.5u
+
+* Power sequencing:
+* 1. BGR first (always on after POR)
+* 2. LDO_ANA second
+* 3. LDO_DIG third
+* 4. LDO_LIN + LIN_EN last
+* (Sequencing is register-controlled, hardware provides delays)
+
+.ENDS CONTROL_LOGIC

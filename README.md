@@ -58,6 +58,7 @@ A comprehensive **Analog Mixed Signal (AMS) Simulator** with GUI schematic edito
 ### CLI Tools
 - **Single simulation runner**: `ams-sim --netlist circuit.spice --analysis dc`
 - **Batch processing**: `ams-batch --dir ./netlists --workers 4`
+- **Agent-driven chip design**: `ams-agent lin-asic --tech generic180 --output designs`
 - Parallel execution with progress reporting
 
 ### Reporting
@@ -141,6 +142,22 @@ ams-batch --dir ./netlists --analysis dc --report report.html
 
 # Use configuration file
 ams-batch --config batch_config.json
+```
+
+### Command Line - Agent Design Flow
+
+```bash
+# List available agent blocks
+ams-agent list
+
+# Build an individual block netlist
+ams-agent build lin_transceiver --tech generic180 --vdd 3.3 --vio 12.0
+
+# Generate complete LIN ASIC artifacts
+ams-agent lin-asic --tech generic180 --output designs
+
+# Design any chip from a JSON spec
+ams-agent design my_chip --spec my_chip_spec.json --tech generic180
 ```
 
 ### Batch Configuration File (JSON)

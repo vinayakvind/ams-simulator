@@ -1,0 +1,89 @@
+{
+  "chip_name": "lin_asic",
+  "standard": "ISO 17987 (LIN 2.2A aligned)",
+  "design_intent": "Application-specific mixed-signal LIN interface IC with SPI programmable control",
+  "supplies": {
+    "vbat_input": 12.0,
+    "vdd_lin": 5.0,
+    "vdd_analog": 3.3,
+    "vdd_digital": 1.8
+  },
+  "power_tree": [
+    {
+      "domain": "VBAT",
+      "source": "external",
+      "drives": ["lin_transceiver_input", "ldo_lin", "ldo_analog"]
+    },
+    {
+      "domain": "VDD_LIN",
+      "source": "ldo_lin",
+      "drives": ["lin_transceiver"]
+    },
+    {
+      "domain": "VDD_ANA",
+      "source": "ldo_analog",
+      "drives": ["bandgap_ref", "analog_bias", "control_logic_analog"]
+    },
+    {
+      "domain": "VDD_DIG",
+      "source": "ldo_digital",
+      "drives": ["spi_controller", "lin_controller", "register_file", "control_logic_digital"]
+    }
+  ],
+  "analog_blocks": [
+    {
+      "name": "bandgap_ref",
+      "role": "temperature-stable reference for LDO and analog bias"
+    },
+    {
+      "name": "ldo_analog",
+      "role": "regulates analog rail"
+    },
+    {
+      "name": "ldo_digital",
+      "role": "regulates digital rail"
+    },
+    {
+      "name": "ldo_lin",
+      "role": "dedicated LIN transceiver supply"
+    },
+    {
+      "name": "lin_transceiver",
+      "role": "single-wire LIN analog PHY with TX/RX, hysteresis receiver, slew control"
+    }
+  ],
+  "digital_blocks": [
+    {
+      "name": "spi_controller",
+      "role": "host programming interface"
+    },
+    {
+      "name": "register_file",
+      "role": "configuration/status register map for LIN and power control"
+    },
+    {
+      "name": "lin_controller",
+      "role": "LIN framing, PID/checksum, break/sync handling, state machine"
+    },
+    {
+      "name": "control_logic",
+      "role": "power-up sequencing, enables, resets"
+    }
+  ],
+  "interfaces": {
+    "lin": ["LIN_BUS"],
+    "spi": ["SCLK", "MOSI", "MISO", "CS_N"],
+    "control": ["IRQ", "RST_N", "EN", "SLP_N"]
+  },
+  "controls": {
+    "digital_enable_path": "SPI -> REGISTER_FILE -> CONTROL_LOGIC -> analog/digital enables",
+    "lin_enable_registers": ["CTRL", "LIN_CTRL", "SLEEP_CTRL", "IRQ_EN", "IRQ_FLAG"]
+  },
+  "design_outputs": {
+    "top_netlist": "designs/lin_asic/lin_asic_top.spice",
+    "block_netlists_dir": "designs/lin_asic/blocks",
+    "rtl_dir": "designs/lin_asic/rtl",
+    "index": "designs/lin_asic/design_index.json",
+    "report": "designs/lin_asic/reports/design_summary.json"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "updated_utc": "2026-04-21T00:00:00Z",
+  "policy": {
+    "copyright": "Metadata-only catalog. Store links and bibliographic information; do not store copyrighted book content unless licensed.",
+    "allowed_content": [
+      "book metadata",
+      "official publisher links",
+      "open-access resources",
+      "public lecture notes",
+      "repository references"
+    ]
+  },
+  "categories": [
+    {
+      "name": "Analog IC Design",
+      "items": [
+        {
+          "title": "Design of Analog CMOS Integrated Circuits",
+          "authors": ["Behzad Razavi"],
+          "type": "book",
+          "tags": ["cmos", "amplifiers", "analog_basics"],
+          "notes": "Core analog CMOS text"
+        },
+        {
+          "title": "CMOS Circuit Design, Layout, and Simulation",
+          "authors": ["R. Jacob Baker"],
+          "type": "book",
+          "tags": ["layout", "design_flow", "cmos"],
+          "notes": "Strong practical coverage including layout"
+        }
+      ]
+    },
+    {
+      "name": "Data Converters",
+      "items": [
+        {
+          "title": "Data Conversion Handbook",
+          "authors": ["Walt Kester"],
+          "type": "book",
+          "tags": ["adc", "dac", "mixed_signal"],
+          "notes": "Broad ADC/DAC theory and practice"
+        }
+      ]
+    },
+    {
+      "name": "Power Management",
+      "items": [
+        {
+          "title": "Power Management Integrated Circuits",
+          "authors": ["Mingliang Liu"],
+          "type": "book",
+          "tags": ["ldo", "bandgap", "dc_dc"],
+          "notes": "Reference for LDO and regulator topologies"
+        }
+      ]
+    },
+    {
+      "name": "Open Resources",
+      "items": [
+        {
+          "title": "MIT OpenCourseWare - Analog Integrated Circuit Design",
+          "authors": ["MIT OCW"],
+          "type": "course",
+          "url": "https://ocw.mit.edu",
+          "tags": ["open_access", "course"],
+          "notes": "Use course-specific analog IC modules"
+        },
+        {
+          "title": "AllAboutCircuits - Analog Design Articles",
+          "authors": ["AllAboutCircuits"],
+          "type": "articles",
+          "url": "https://www.allaboutcircuits.com",
+          "tags": ["open_access", "tutorials"],
+          "notes": "Practical introductory and intermediate content"
+        }
+      ]
+    }
+  ]
+}

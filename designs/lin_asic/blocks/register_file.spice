@@ -1,0 +1,84 @@
+* Register File - LIN ASIC Configuration Registers
+* 8-bit address, 8-bit data, SPI-accessible
+.SUBCKT REGISTER_FILE VDD GND CLK RST_N
++ REG_ADDR[7:0] REG_WDATA[7:0] REG_RDATA[7:0]
++ REG_WR REG_RD
++ LIN_EN ANA_EN BGR_EN LDO_ANA_EN LDO_DIG_EN LDO_LIN_EN
++ SLEEP_MODE MASTER_MODE
++ BAUD_DIV[15:0]
++ LIN_TX_DATA[7:0] LIN_RX_DATA[7:0]
++ IRQ_EN[7:0] IRQ_FLAG[7:0]
+
+* Register Map (Verilog implementation)
+* module register_file (
+*   input  wire       clk,
+*   input  wire       rst_n,
+*   input  wire [7:0] reg_addr,
+*   input  wire [7:0] reg_wdata,
+*   output reg  [7:0] reg_rdata,
+*   input  wire       reg_wr,
+*   input  wire       reg_rd,
+*   // Control outputs
+*   output reg        lin_en,
+*   output reg        ana_en,
+*   output reg        bgr_en,
+*   output reg        ldo_ana_en,
+*   output reg        ldo_dig_en,
+*   output reg        ldo_lin_en,
+*   output reg        sleep_mode,
+*   output reg        master_mode,
+*   output reg [15:0] baud_div,
+*   output reg  [7:0] irq_en,
+*   input  wire [7:0] irq_flag
+* );
+*
+* // Register storage
+* reg [7:0] regs [0:31];
+*
+* // Read-only registers
+* localparam CHIP_ID  = 8'h00; // Value: 0x4C (L for LIN)
+* localparam CHIP_REV = 8'h01; // Value: 0x10 (Rev 1.0)
+*
+* // Control register bits
+* // CTRL (0x02): [7:6]=reserved [5]=TEST [4]=SLEEP
+* //              [3]=BGR_EN [2]=LDO_LIN_EN [1]=LDO_DIG_EN [0]=LDO_ANA_EN
+*
+* // LIN_CTRL (0x04): [7]=LIN_EN [6]=MASTER [5:4]=reserved
+* //                  [3:2]=DATA_LEN [1]=ENHANCED_CKSUM [0]=AUTO_BAUD
+*
+* always @(posedge clk or negedge rst_n) begin
+*   if (!rst_n) begin
+*     regs[8'h00] <= 8'h4C; // CHIP_ID
+*     regs[8'h01] <= 8'h10; // CHIP_REV
+*     regs[8'h02] <= 8'h0F; // CTRL: all LDOs + BGR enabled
+*     regs[8'h04] <= 8'h80; // LIN_CTRL: LIN enabled, slave mode
+*     regs[8'h07] <= 8'h08; // LIN_DL: 8 bytes default
+*     regs[8'h11] <= 8'h01; // BAUD_DIV_H (19.2kbps default)
+*     regs[8'h12] <= 8'hA1; // BAUD_DIV_L
+*   end else if (reg_wr) begin
+*     case (reg_addr)
+*       8'h00, 8'h01, 8'h03, 8'h05, 8'h10: ; // Read-only
+*       8'h14: regs[reg_addr] <= regs[reg_addr] & ~reg_wdata; // W1C
+*       default: regs[reg_addr] <= reg_wdata;
+*     endcase
+*   end
+* end
+*
+* // Read mux
+* always @(*) begin
+*   reg_rdata = regs[reg_addr];
+* end
+*
+* // Decode control outputs
+* assign lin_en     = regs[8'h04][7];
+* assign master_mode= regs[8'h04][6];
+* assign bgr_en     = regs[8'h02][3];
+* assign ldo_lin_en = regs[8'h02][2];
+* assign ldo_dig_en = regs[8'h02][1];
+* assign ldo_ana_en = regs[8'h02][0];
+* assign sleep_mode = regs[8'h02][4];
+* assign baud_div   = {regs[8'h11], regs[8'h12]};
+*
+* endmodule
+
+.ENDS REGISTER_FILE

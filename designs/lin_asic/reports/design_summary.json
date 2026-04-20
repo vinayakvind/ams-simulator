@@ -1,0 +1,124 @@
+{
+  "chip_name": "lin_asic",
+  "technology": "generic180",
+  "supply_voltage": 3.3,
+  "io_voltage": 12.0,
+  "block_count": 9,
+  "blocks": [
+    "bandgap_ref",
+    "ldo_analog",
+    "ldo_digital",
+    "ldo_lin",
+    "lin_transceiver",
+    "spi_controller",
+    "lin_controller",
+    "register_file",
+    "control_logic"
+  ],
+  "verification": {
+    "checks": [
+      {
+        "check": "block_bandgap_ref_netlist",
+        "status": "PASS",
+        "message": "Block bandgap_ref has netlist"
+      },
+      {
+        "check": "block_ldo_analog_netlist",
+        "status": "PASS",
+        "message": "Block ldo_analog has netlist"
+      },
+      {
+        "check": "block_ldo_digital_netlist",
+        "status": "PASS",
+        "message": "Block ldo_digital has netlist"
+      },
+      {
+        "check": "block_ldo_lin_netlist",
+        "status": "PASS",
+        "message": "Block ldo_lin has netlist"
+      },
+      {
+        "check": "block_lin_transceiver_netlist",
+        "status": "PASS",
+        "message": "Block lin_transceiver has netlist"
+      },
+      {
+        "check": "block_spi_controller_netlist",
+        "status": "PASS",
+        "message": "Block spi_controller has netlist"
+      },
+      {
+        "check": "block_lin_controller_netlist",
+        "status": "PASS",
+        "message": "Block lin_controller has netlist"
+      },
+      {
+        "check": "block_register_file_netlist",
+        "status": "PASS",
+        "message": "Block register_file has netlist"
+      },
+      {
+        "check": "block_control_logic_netlist",
+        "status": "PASS",
+        "message": "Block control_logic has netlist"
+      },
+      {
+        "check": "power_domain_VBAT",
+        "status": "PASS",
+        "message": "Power domain VBAT at 12.0V defined"
+      },
+      {
+        "check": "power_domain_VDD_LIN",
+        "status": "PASS",
+        "message": "Power domain VDD_LIN at 5.0V defined"
+      },
+      {
+        "check": "power_domain_VDD_ANA",
+        "status": "PASS",
+        "message": "Power domain VDD_ANA at 3.3V defined"
+      },
+      {
+        "check": "power_domain_VDD_DIG",
+        "status": "PASS",
+        "message": "Power domain VDD_DIG at 1.8V defined"
+      },
+      {
+        "check": "top_level_netlist",
+        "status": "PASS",
+        "message": "Top-level netlist complete"
+      }
+    ],
+    "passed": 14,
+    "total": 14,
+    "pass_rate": "100.0%"
+  },
+  "design_log": [
+    "[00:53:08] === Starting chip design: lin_asic ===",
+    "[00:53:08] Technology: generic180",
+    "[00:53:08] Supply: 3.3V, IO: 12.0V",
+    "[00:53:08] \n--- Phase 1: Architecture Definition ---",
+    "[00:53:08]   Architecture: 4 power domains, 9 blocks",
+    "[00:53:08] \n--- Phase 2: Block Design ---",
+    "[00:53:08]   Designing block: bandgap_ref",
+    "[00:53:08]     -> analog block, 7 transistors",
+    "[00:53:08]   Designing block: ldo_analog",
+    "[00:53:08]     -> analog block, 8 transistors",
+    "[00:53:08]   Designing block: ldo_digital",
+    "[00:53:08]     -> analog block, 8 transistors",
+    "[00:53:08]   Designing block: ldo_lin",
+    "[00:53:08]     -> analog block, 8 transistors",
+    "[00:53:08]   Designing block: lin_transceiver",
+    "[00:53:08]     -> analog block, 22 transistors",
+    "[00:53:08]   Designing block: spi_controller",
+    "[00:53:08]     -> digital block, 0 transistors",
+    "[00:53:08]   Designing block: lin_controller",
+    "[00:53:08]     -> digital block, 0 transistors",
+    "[00:53:08]   Designing block: register_file",
+    "[00:53:08]     -> digital block, 0 transistors",
+    "[00:53:08]   Designing block: control_logic",
+    "[00:53:08]     -> mixed block, 10 transistors",
+    "[00:53:08] \n--- Phase 3: Top-Level Integration ---",
+    "[00:53:08] \n--- Phase 4: Verification ---",
+    "[00:53:08] \n--- Phase 5: Sign-off ---"
+  ]
+}
