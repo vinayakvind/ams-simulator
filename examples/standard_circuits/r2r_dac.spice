@@ -1,0 +1,85 @@
+* R-2R Ladder DAC - 8-bit Digital to Analog Converter
+* Reference voltage: 2.5V
+* Output range: 0 to 2.5V * (255/256)
+
+* Reference voltage
+Vref vref 0 DC 2.5V
+
+* Digital inputs (binary weighted)
+* Example: input code = 10101010 (170 decimal = 1.66V)
+V_b7 b7 0 DC 2.5V
+V_b6 b6 0 DC 0V
+V_b5 b5 0 DC 2.5V
+V_b4 b4 0 DC 0V
+V_b3 b3 0 DC 2.5V
+V_b2 b2 0 DC 0V
+V_b1 b1 0 DC 2.5V
+V_b0 b0 0 DC 0V
+
+* R-2R Ladder Network
+* Standard topology: LSB termination at n0, rungs connect successive nodes
+* Each section divides the contribution by 2
+
+* LSB termination (2R from n0 to ground)
+R_term_lsb n0 0 20k
+
+* LSB section (b0)
+R_2r_b0 b0 n0 20k
+R_r_0 n0 n1 10k
+
+* b1 section
+R_2r_b1 b1 n1 20k
+R_r_1 n1 n2 10k
+
+* b2 section
+R_2r_b2 b2 n2 20k
+R_r_2 n2 n3 10k
+
+* b3 section
+R_2r_b3 b3 n3 20k
+R_r_3 n3 n4 10k
+
+* b4 section
+R_2r_b4 b4 n4 20k
+R_r_4 n4 n5 10k
+
+* b5 section
+R_2r_b5 b5 n5 20k
+R_r_5 n5 n6 10k
+
+* b6 section
+R_2r_b6 b6 n6 20k
+R_r_6 n6 output 10k
+
+* b7 section (MSB) - connects directly to output
+R_2r_b7 b7 output 20k
+
+* Output buffer (unity gain op-amp)
+E_buf vout 0 output 0 1
+
+* Output load
+R_load vout 0 10k
+
+* DC Analysis - sweep all codes
+* (Simplified - testing single code)
+.DC V_b0 0 2.5 2.5
+
+* Transient Analysis - ramp through codes
+.TRAN 1u 256u
+
+* Measurements
+.MEASURE DC Vout_code170 FIND V(vout) WHEN V(b7)=2.5 V(b5)=2.5 V(b3)=2.5 V(b1)=2.5
+
+* Expected Results:
+* - For code 10101010 (170): Vout = 2.5V * 170/256 = 1.66V
+* - For code 11111111 (255): Vout = 2.5V * 255/256 = 2.49V
+* - For code 00000000 (0): Vout = 0V
+* - LSB = 2.5V/256 = 9.77mV
+
+* R-2R Theory:
+* Looking from any bit, sees 2R to node, R to next section
+* Each section divides by 2
+* Vout = Vref * (b7/2 + b6/4 + b5/8 + ... + b0/256)
+* Vout = Vref * sum(bi * 2^(i-8)) for i=0 to 7
+
+.END

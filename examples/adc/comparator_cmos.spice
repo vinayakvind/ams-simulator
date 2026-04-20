@@ -1,0 +1,109 @@
+* CMOS Differential Comparator with Latch
+* High-gain comparator for ADC applications
+* Technology: 180nm CMOS
+* Supply: 1.8V
+
+* Include technology library
+.include ../technology/cmos_180nm.lib
+
+* Power supply
+VDD vdd 0 DC 1.8V
+VSS vss 0 DC 0V
+
+* Input signals for testing
+* Positive input (signal to compare)
+Vin_p inp 0 DC 0.9V
+
+* Negative input (reference voltage)
+Vin_n inn 0 DC 0.85V
+
+* Clock signal for latching (10MHz)
+Vclk clk 0 PULSE(0 1.8 0 50p 50p 45n 100n)
+
+* ============================================================
+* COMPARATOR CIRCUIT
+* ============================================================
+
+* Pre-amplifier Stage (Differential Pair)
+* ---------------------------------------------
+* Input differential pair (NMOS)
+M1 d1 inp tail vss nmos_1v8 W=2u L=0.5u
+M2 d2 inn tail vss nmos_1v8 W=2u L=0.5u
+
+* Tail current source (bias current = 50uA)
+Itail tail vss DC 50u
+
+* Active load (PMOS current mirror)
+M3 d1 d1 vdd vdd pmos_1v8 W=4u L=0.5u
+M4 d2 d1 vdd vdd pmos_1v8 W=4u L=0.5u
+
+* Second gain stage (Common source amplifier)
+* ---------------------------------------------
+M5 d3 d2 vss vss nmos_1v8 W=5u L=0.5u
+M6 d3 d3 vdd vdd pmos_1v8 W=8u L=0.5u
+
+* Output buffer stage
+* ---------------------------------------------
+M7 preout d3 vss vss nmos_1v8 W=8u L=0.35u
+M8 preout d3 vdd vdd pmos_1v8 W=12u L=0.35u
+
+* Latch Stage (Clocked SR Latch)
+* ---------------------------------------------
+* Reset switches (when clock is low)
+.model sw_rst VSWITCH (RON=100 ROFF=100MEG VT=0.9V VH=0.1V)
+Srst1 latch_p vss clk_b 0 sw_rst
+Srst2 latch_n vss clk_b 0 sw_rst
+
+* Clock inverter
+M9 clk_b clk vss vss nmos_1v8 W=2u L=0.18u
+M10 clk_b clk vdd vdd pmos_1v8 W=4u L=0.18u
+
+* Input switches (sample when clock is high)
+.model sw_samp VSWITCH (RON=500 ROFF=100MEG VT=0.9V VH=0.1V)
+Ssamp1 preout latch_p clk 0 sw_samp
+Ssamp2 preout latch_n clk 0 sw_samp
+
+* Cross-coupled inverter pair (latch)
+M11 latch_p latch_n vss vss nmos_1v8 W=1u L=0.18u
+M12 latch_p latch_n vdd vdd pmos_1v8 W=2u L=0.18u
+M13 latch_n latch_p vss vss nmos_1v8 W=1u L=0.18u
+M14 latch_n latch_p vdd vdd pmos_1v8 W=2u L=0.18u
+
+* Output stage (strong buffer)
+* ---------------------------------------------
+M15 comp_out latch_p vss vss nmos_1v8 W=10u L=0.18u
+M16 comp_out latch_p vdd vdd pmos_1v8 W=15u L=0.18u
+
+* Load capacitance (represents interconnect + next stage)
+Cload comp_out 0 100f
+
+* ============================================================
+* MEASUREMENTS
+* ============================================================
+
+* Measure comparator delay (input crossing to output switching)
+* Measure DC gain of pre-amplifier
+* Measure input-referred offset
+
+* ============================================================
+* SIMULATION COMMANDS
+* ============================================================
+
+* Operating point analysis
+.OP
+
+* DC sweep to find offset and gain
+.DC Vin_p 0.7 1.1 0.01
+
+* Transient analysis to verify dynamic operation
+.TRAN 10p 500n UIC
+
+* Save all node voltages and key currents
+.SAVE V(inp) V(inn) V(d1) V(d2) V(d3) V(preout) V(comp_out) V(clk)
+.SAVE I(Itail)
+
+* Print measurements
+.PRINT TRAN V(inp) V(inn) V(comp_out)
+.PRINT DC V(inp) V(comp_out)
+
+.END

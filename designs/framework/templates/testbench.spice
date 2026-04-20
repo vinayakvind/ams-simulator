@@ -1,0 +1,30 @@
+* Testbench Template
+* Replace <BLOCK_NAME> and customize for your block
+* =====================================================
+
+* Include block netlist
+.include <block_name>.spice
+
+* Technology models
+.MODEL NMOS_3P3 NMOS (VTO=0.5 KP=120u LAMBDA=0.01 GAMMA=0.4 PHI=0.8)
+.MODEL PMOS_3P3 PMOS (VTO=-0.5 KP=40u LAMBDA=0.01 GAMMA=0.4 PHI=0.8)
+.MODEL PMOS_HV PMOS (VTO=-0.8 KP=20u LAMBDA=0.005)
+.MODEL NPN_VERT NPN (IS=1e-15 BF=100 BR=1)
+
+* Supplies
+V_VDD VDD 0 DC 3.3
+V_EN EN 0 DC 3.3
+
+* DUT instantiation
+* X_DUT <port1> <port2> ... <SUBCKT_NAME>
+
+* Output loads
+R_LOAD VOUT 0 100k
+
+* Analysis commands (uncomment as needed)
+* .OP
+* .DC V_VDD 1.8 5.5 0.1
+* .AC DEC 50 1 1G
+* .TRAN 10n 50u
+
+.end

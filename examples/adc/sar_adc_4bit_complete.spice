@@ -1,0 +1,246 @@
+* 4-Bit Successive Approximation Register (SAR) ADC
+* Complete CMOS Implementation
+* Technology: 180nm CMOS
+* Resolution: 4 bits
+* Sample rate: 100kSPS
+* Architecture: SAR with R-2R DAC, Comparator, and S/H
+
+* Include technology library
+.include ../technology/cmos_180nm.lib
+
+* ============================================================
+* POWER SUPPLIES
+* ============================================================
+VDD vdd 0 DC 1.8V
+AVDD avdd 0 DC 1.8V
+DVDD dvdd 0 DC 1.8V
+* Reference voltage (defines full-scale range)
+Vref vref 0 DC 1.6V
+
+* ============================================================
+* INPUT SIGNAL (Analog input to be digitized)
+* ============================================================
+* Test signal: Slow ramp from 0.2V to 1.4V over 160us
+* This will cover entire ADC range and show all digital codes
+Vin_analog vin_analog 0 PWL(
++ 0 0.2V 
++ 160u 1.4V
++ 200u 1.4V
++ )
+
+* ============================================================
+* CLOCK GENERATION
+* ============================================================
+* Master clock: 500kHz (2us period)
+* Each conversion takes 10 clocks (sample + 4 bits + 5 clocks overhead)
+Vclk_master clk_master 0 PULSE(0 1.8 0 1n 1n 1u 2u)
+
+* Sample clock: Goes high for 2us every 10us (sampling phase)
+Vclk_sample clk_sample 0 PULSE(0 1.8 0 1n 1n 2u 10u)
+
+* Conversion start pulse: Rising edge triggers SAR logic
+Vclk_convert clk_convert 0 PULSE(0 1.8 2u 1n 1n 100n 10u)
+
+* ============================================================
+* SAMPLE-AND-HOLD CIRCUIT
+* ============================================================
+
+* Input buffer (unity-gain voltage follower)
+Evin_buf vin_buf 0 vin_analog 0 1.0
+Rbuf1 vin_buf vin_buf2 100
+Cbuf1 vin_buf2 0 100f
+
+* Sampling switch (tracks during clk_sample high, holds when low)
+.model sw_sample VSWITCH (RON=100 ROFF=100G VT=0.9V VH=0.1V)
+Ssample vin_buf2 sh_node clk_sample 0 sw_sample
+
+* Hold capacitor (stores sampled voltage)
+Chold sh_node 0 5p
+
+* Output buffer for S/H (prevents loading)
+Esh_out sh_out 0 sh_node 0 1.0
+Rsh_out sh_out sh_out_buf 100
+Csh_out sh_out_buf 0 100f
+
+* ============================================================
+* SAR CONTROL LOGIC (Simplified digital control)
+* ============================================================
+
+* SAR state machine using digital sources
+* In real design, this would be synthesized digital logic
+
+* Bit 3 (MSB) - tried first
+Vbit3_ctrl bit3_try 0 PULSE(0 1.8 2.5u 1n 1n 2u 10u)
+
+* Bit 2 - tried second  
+Vbit2_ctrl bit2_try 0 PULSE(0 1.8 4.5u 1n 1n 2u 10u)
+
+* Bit 1 - tried third
+Vbit1_ctrl bit1_try 0 PULSE(0 1.8 6.5u 1n 1n 2u 10u)
+
+* Bit 0 (LSB) - tried last
+Vbit0_ctrl bit0_try 0 PULSE(0 1.8 8.5u 1n 1n 2u 10u)
+
+* ============================================================
+* 4-BIT R-2R DAC
+* ============================================================
+
+* Current steering R-2R ladder with CMOS switches
+* Converts digital code to analog voltage for comparison
+
+* R-2R ladder resistors
+Rref_dac vref n_dac3 10k
+R3a n_dac3 n_dac2 10k
+R2a n_dac2 n_dac1 10k
+R1a n_dac1 n_dac0 10k
+R0a n_dac0 dac_out_raw 10k
+
+* 2R resistors to switch nodes
+R3b sw_dac3 0 20k
+R2b sw_dac2 0 20k
+R1b sw_dac1 0 20k
+R0b sw_dac0 0 20k
+
+* CMOS switches controlled by digital bits
+* Bit high: connects to ladder, Bit low: connects to ground
+.model sw_dac VSWITCH (RON=500 ROFF=10G VT=0.9V VH=0.1V)
+Ssw_dac3 n_dac3 sw_dac3 dac_b3 0 sw_dac
+Ssw_dac2 n_dac2 sw_dac2 dac_b2 0 sw_dac
+Ssw_dac1 n_dac1 sw_dac1 dac_b1 0 sw_dac
+Ssw_dac0 n_dac0 sw_dac0 dac_b0 0 sw_dac
+
+* DAC output buffer
+Edac_buf dac_out 0 dac_out_raw 0 1.0
+Rdac_buf dac_out dac_out2 100
+Cdac_buf dac_out2 0 200f
+
+* ============================================================
+* COMPARATOR
+* ============================================================
+
+* High-gain differential comparator
+* Compares S/H output with DAC output
+
+* Input differential pair
+M_cmp1 d_cmp1 sh_out_buf tail_cmp 0 nmos_1v8 W=5u L=0.5u
+M_cmp2 d_cmp2 dac_out2 tail_cmp 0 nmos_1v8 W=5u L=0.5u
+
+* Tail current (bias for differential pair)
+Itail_cmp tail_cmp 0 DC 100u
+
+* Active load (current mirror)
+M_cmp3 d_cmp1 d_cmp1 avdd avdd pmos_1v8 W=10u L=0.5u
+M_cmp4 d_cmp2 d_cmp1 avdd avdd pmos_1v8 W=10u L=0.5u
+
+* Second gain stage
+M_cmp5 d_cmp3 d_cmp2 0 0 nmos_1v8 W=15u L=0.35u
+M_cmp6 d_cmp3 d_cmp3 avdd avdd pmos_1v8 W=25u L=0.35u
+
+* Output stage (rail-to-rail buffer)
+M_cmp7 comp_out_analog d_cmp3 0 0 nmos_1v8 W=20u L=0.18u
+M_cmp8 comp_out_analog d_cmp3 avdd avdd pmos_1v8 W=30u L=0.18u
+
+* Digital threshold buffer (converts to logic level)
+Ecomp_dig comp_out 0 comp_out_analog 0 10
+Vcomp_th_hi comp_out_clip dvdd comp_out 0 MAX
+Vcomp_th_lo comp_out_logic 0 comp_out_clip 0 MAX
+Rcomp_logic comp_out_logic comp_out_logic2 100
+Ccomp_logic comp_out_logic2 0 50f
+
+* ============================================================
+* SAR REGISTER LOGIC
+* ============================================================
+
+* Simplified SAR control - stores comparison results
+* Real implementation would use flip-flops and state machine
+
+* SR Latches for each bit (set by bit_try, reset by comparison)
+* Bit 3 (MSB)
+Esr3_s latch3_s 0 VALUE={IF(V(bit3_try)>0.9 & V(clk_master)>0.9, 1.8, 0)}
+Esr3_r latch3_r 0 VALUE={IF(V(comp_out_logic2)<0.9 & V(bit3_try)>0.9, 1.8, 0)}
+Esr3_q dac_b3_pre 0 VALUE={IF(V(latch3_s)>0.9, 1.8, IF(V(latch3_r)>0.9, 0, V(dac_b3_pre)))}
+Rdac_b3 dac_b3_pre dac_b3 10
+Cdac_b3 dac_b3 0 50f
+
+* Bit 2
+Esr2_s latch2_s 0 VALUE={IF(V(bit2_try)>0.9 & V(clk_master)>0.9, 1.8, 0)}
+Esr2_r latch2_r 0 VALUE={IF(V(comp_out_logic2)<0.9 & V(bit2_try)>0.9, 1.8, 0)}
+Esr2_q dac_b2_pre 0 VALUE={IF(V(latch2_s)>0.9, 1.8, IF(V(latch2_r)>0.9, 0, V(dac_b2_pre)))}
+Rdac_b2 dac_b2_pre dac_b2 10
+Cdac_b2 dac_b2 0 50f
+
+* Bit 1
+Esr1_s latch1_s 0 VALUE={IF(V(bit1_try)>0.9 & V(clk_master)>0.9, 1.8, 0)}
+Esr1_r latch1_r 0 VALUE={IF(V(comp_out_logic2)<0.9 & V(bit1_try)>0.9, 1.8, 0)}
+Esr1_q dac_b1_pre 0 VALUE={IF(V(latch1_s)>0.9, 1.8, IF(V(latch1_r)>0.9, 0, V(dac_b1_pre)))}
+Rdac_b1 dac_b1_pre dac_b1 10
+Cdac_b1 dac_b1 0 50f
+
+* Bit 0 (LSB)
+Esr0_s latch0_s 0 VALUE={IF(V(bit0_try)>0.9 & V(clk_master)>0.9, 1.8, 0)}
+Esr0_r latch0_r 0 VALUE={IF(V(comp_out_logic2)<0.9 & V(bit0_try)>0.9, 1.8, 0)}
+Esr0_q dac_b0_pre 0 VALUE={IF(V(latch0_s)>0.9, 1.8, IF(V(latch0_r)>0.9, 0, V(dac_b0_pre)))}
+Rdac_b0 dac_b0_pre dac_b0 10
+Cdac_b0 dac_b0 0 50f
+
+* ============================================================
+* OUTPUT DIGITAL CODE
+* ============================================================
+
+* Convert binary outputs to decimal value for plotting
+Eout_decimal dout_decimal 0 VALUE={
++ (V(dac_b3)>0.9)*8 + (V(dac_b2)>0.9)*4 + (V(dac_b1)>0.9)*2 + (V(dac_b0)>0.9)*1
++ }
+
+* Create ideal ADC output for comparison
+Eout_ideal dout_ideal 0 VALUE={INT(V(vin_analog)/V(vref)*16)}
+
+* ============================================================
+* MEASUREMENTS
+* ============================================================
+
+* Measure DNL (Differential Non-Linearity)
+* Measure INL (Integral Non-Linearity)
+* Measure SNR and ENOB (Effective Number of Bits)
+* Measure conversion time
+
+.measure tran conversion_time 
++ TRIG V(clk_sample) VAL=0.9 FALL=1 
++ TARG V(dac_b0) VAL=0.9 CROSS=1
+
+* Measure final output code at end of conversion
+.measure tran final_code FIND V(dout_decimal) AT=9.5u
+
+* ============================================================
+* SIMULATION COMMANDS
+* ============================================================
+
+* DC operating point
+.OP
+
+* Transient analysis - simulate 20 complete conversions
+.TRAN 10n 200u UIC
+
+* Save all important signals
+.SAVE V(vin_analog) V(sh_out_buf) V(dac_out2) V(comp_out_analog)
+.SAVE V(dac_b3) V(dac_b2) V(dac_b1) V(dac_b0)
+.SAVE V(clk_sample) V(clk_master)
+.SAVE V(dout_decimal) V(dout_ideal)
+.SAVE V(d_cmp1) V(d_cmp2) V(d_cmp3)
+
+.PRINT TRAN V(vin_analog) V(dout_decimal) V(clk_sample)
+
+* ============================================================
+* CHARACTERIZATION
+* ============================================================
+
+* Sweep input voltage to characterize transfer function
+*.DC Vin_analog 0 1.6 0.01
+
+* Monte Carlo analysis for offset and gain error
+*.MC 100 TRAN 10n 10u
+
+* Corner analysis (TT, FF, SS, FS, SF)
+*.LIB '../technology/corners_180nm.lib' TT
+
+.END

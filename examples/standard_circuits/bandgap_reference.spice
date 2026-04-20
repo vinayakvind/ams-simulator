@@ -1,0 +1,71 @@
+* Bandgap Voltage Reference
+* Produces temperature-stable 1.25V reference
+* Uses PTAT and CTAT currents for compensation
+* Classic Brokaw bandgap topology
+
+* Power Supply
+Vdd vdd 0 DC 3.3V
+
+* Bias Current Source
+I_bias vdd bias 10u
+
+* Current Mirror (PMOS)
+M_p1 bias bias vdd vdd PMOS W=10u L=1u
+M_p2 col1 bias vdd vdd PMOS W=10u L=1u
+M_p3 col2 bias vdd vdd PMOS W=10u L=1u
+
+* BJT Pair (different areas for delta-Vbe)
+* Q1: 1x area, Q2: 8x area
+Q1 col1 col1 e1 NPN AREA=1
+Q2 col2 col2 e2 NPN AREA=8
+
+* Emitter resistors
+* R1 sets the PTAT current: I = (kT/q * ln(8)) / R1
+R1 e1 0 10k
+R2 e2 node_r2 1.25k
+R3 node_r2 0 10k
+
+* Output buffer (emitter follower)
+Q_buf col1 out_int output NPN AREA=2
+R_load output 0 10k
+
+* Startup circuit
+R_start vdd start_node 100k
+M_start start_node start_node col1 0 NMOS W=1u L=1u
+
+* Output capacitor for stability
+C_out output 0 100p
+
+* BJT Models
+.MODEL NPN NPN (IS=1e-15 BF=100 VA=100 TF=0.1n)
+.MODEL PMOS PMOS (VTO=-0.7 KP=50u LAMBDA=0.04)
+.MODEL NMOS NMOS (VTO=0.7 KP=110u LAMBDA=0.04)
+
+* DC Analysis
+.DC Vdd 1.5 5 0.01
+
+* Temperature Analysis  
+.DC TEMP -40 125 5
+
+* AC Analysis for stability
+.AC DEC 20 1 100MEG
+
+* Measurements
+.MEASURE DC Vbg_nom FIND V(output) AT Vdd=3.3
+.MEASURE DC Vbg_min FIND V(output) AT Vdd=1.8
+.MEASURE DC Line_reg PARAM (Vbg_at_5V - Vbg_at_2V)/(5-2)*100
+
+* Expected Results:
+* - Output voltage: ~1.25V (bandgap of silicon)
+* - Temperature coefficient: <50ppm/°C
+* - Line regulation: <0.1%/V
+* - Minimum supply: ~1.5V
+
+* Theory:
+* Vbg = Vbe + (kT/q) * ln(n) * (R2+R3)/R1
+* Where n = area ratio = 8
+* Vbe has negative tempco (~-2mV/°C)
+* (kT/q)*ln(n) has positive tempco
+* Proper ratio cancels temperature dependence
+
+.END

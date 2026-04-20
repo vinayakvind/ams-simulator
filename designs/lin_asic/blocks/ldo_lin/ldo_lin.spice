@@ -1,0 +1,35 @@
+* Bandgap Voltage Reference - Brokaw Topology
+* Supply: 3.3V, Output: ~1.2V
+* Temperature coefficient: < 50 ppm/°C
+.SUBCKT BANDGAP_REF VDD VREF GND EN
+
+* Startup circuit
+M_START1 n_start1 EN GND GND NMOS_3P3 W=2u L=0.5u
+M_START2 n_start1 n_start1 VDD VDD PMOS_3P3 W=4u L=0.5u
+M_START3 n_bp n_start1 VDD VDD PMOS_3P3 W=4u L=0.5u
+
+* PMOS current mirror (cascode for accuracy)
+M_P1 n_c1 n_bp VDD VDD PMOS_3P3 W=20u L=2u
+M_P2 n_c2 n_bp VDD VDD PMOS_3P3 W=20u L=2u
+M_P3 n_bp n_bp VDD VDD PMOS_3P3 W=20u L=2u
+
+* BJT pair (Q2 has 8x area of Q1)
+Q1 n_c1 n_c1 n_e1 GND NPN_VERT AREA=1
+Q2 n_c2 n_c2 n_e2 GND NPN_VERT AREA=8
+
+* Emitter resistors for delta-VBE
+R1 n_e1 n_r1 10k
+R2 n_e2 n_r1 1.25k
+
+* Output resistor divider for VREF = VBE + (R3/R2)*Vt*ln(8)
+R3 n_r1 GND 25k
+
+* Output buffer
+M_BUF1 VREF n_c1 VDD VDD PMOS_3P3 W=40u L=1u
+R_OUT VREF GND 100k
+C_FILT VREF GND 10p
+
+* Enable control
+M_EN n_bp EN GND GND NMOS_3P3 W=2u L=0.5u
+
+.ENDS BANDGAP_REF

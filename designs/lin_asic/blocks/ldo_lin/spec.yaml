@@ -1,0 +1,15 @@
+block:
+  name: ldo_lin
+  type: analog
+  generator: ''
+  description: ldo_lin block
+ports:
+- name: VDD
+  direction: inout
+- name: GND
+  direction: inout
+specs: {}
+testbench:
+  dc_op:
+    description: DC operating point
+    pass_criteria: TBD

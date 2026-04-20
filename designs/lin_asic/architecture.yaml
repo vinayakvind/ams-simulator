@@ -1,0 +1,35 @@
+chip:
+  name: LIN_ASIC
+  technology: generic180
+blocks:
+- name: bandgap
+  type: analog
+  generator: bandgap_ref
+  ports:
+  - VDD
+  - VREF
+  - GND
+  - EN
+- name: ldo_analog
+  type: analog
+  generator: ldo_analog
+  ports:
+  - VIN
+  - VOUT
+  - GND
+  - VREF
+  - EN
+- name: ldo_digital
+  type: analog
+  generator: ldo_digital
+  ports:
+  - VIN
+  - VOUT
+  - GND
+  - VREF
+  - EN
+- name: ldo_lin
+  type: analog
+  ports:
+  - VDD
+  - GND

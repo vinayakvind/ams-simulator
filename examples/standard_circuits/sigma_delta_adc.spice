@@ -1,0 +1,76 @@
+* Sigma-Delta ADC - First Order Modulator
+* Oversampling ratio: 64x
+* Signal bandwidth: 20kHz
+* Sample rate: 2.56 MHz (64 * 2 * 20kHz)
+
+* Power Supplies
+Vdd vdd 0 DC 3.3V
+Vss vss 0 DC 0V
+Vref_p vref_p 0 DC 2.5V
+Vref_n vref_n 0 DC 0V
+
+* Analog input signal (1kHz sine wave)
+Vin analog_in 0 SIN(1.25 1.0 1k 0 0)
+
+* Sampling clock (2.56 MHz)
+V_clk clk 0 PULSE(0 3.3 0 1n 1n 195n 390n)
+
+* ============================================
+* First-Order Sigma-Delta Modulator
+* ============================================
+
+* Integrator (switched-capacitor implementation)
+* Summing node: input - feedback
+E_sum sum_node 0 POLY(2) analog_in 0 fb_dac 0 0 1 -1
+
+* Integrator
+* H(z) = z^-1 / (1 - z^-1)
+C_int int_out 0 10p IC=1.25
+G_int 0 int_out sum_node 0 1u
+
+* Comparator (1-bit quantizer)
+* Output is 1 if integrator > Vref/2, else 0
+E_comp bitstream 0 TABLE {V(int_out)} (0,0) (1.249,0) (1.251,3.3) (2.5,3.3)
+
+* 1-bit DAC (feedback)
+* If bitstream=high, output Vref_p; else output Vref_n
+E_dac fb_dac 0 TABLE {V(bitstream)} (0,0) (1.6,0) (1.7,2.5) (3.3,2.5)
+
+* ============================================
+* Digital Decimation Filter (simplified)
+* ============================================
+
+* In real implementation, this would be:
+* 1. CIC filter (comb + integrator cascade)
+* 2. FIR filter for additional filtering
+* 3. Downsampler by OSR
+
+* Simplified analog reconstruction (for visualization)
+R_dec bitstream dec_filt 100k
+C_dec dec_filt 0 1n
+
+* ============================================
+* Models
+* ============================================
+
+* Transient Analysis
+.TRAN 100n 2m
+
+* Measurements
+.MEASURE TRAN Bitstream_avg AVG V(bitstream) FROM=1m TO=2m
+.MEASURE TRAN Input_avg AVG V(analog_in) FROM=1m TO=2m
+.MEASURE TRAN Dec_out AVG V(dec_filt) FROM=1m TO=2m
+
+* Expected Results:
+* - Bitstream density proportional to input
+* - SNR improvement: 9dB per octave of OSR
+* - With OSR=64: ~30dB SNR improvement
+* - Effective resolution: ~10-12 bits
+
+* Theory:
+* Sigma-Delta modulation shapes quantization noise
+* Noise is pushed to high frequencies
+* Decimation filter removes high-frequency noise
+* SNR = 6.02*N + 1.76 + 30*log10(OSR/pi) for Nth order
+
+.END

@@ -1,0 +1,78 @@
+{
+  "bandgap_reference": {
+    "status": "OK",
+    "elements": 15,
+    "freq_points": 40,
+    "analysis": "ac"
+  },
+  "boost_converter": {
+    "status": "OK",
+    "elements": 8,
+    "time_points": 101,
+    "signals": 6,
+    "analysis": "transient"
+  },
+  "buck_boost_converter": {
+    "status": "OK",
+    "elements": 8,
+    "time_points": 101,
+    "signals": 6,
+    "analysis": "transient"
+  },
+  "buck_converter": {
+    "status": "OK",
+    "elements": 7,
+    "time_points": 101,
+    "signals": 6,
+    "analysis": "transient"
+  },
+  "differential_amplifier": {
+    "status": "OK",
+    "elements": 13,
+    "time_points": 101,
+    "signals": 11,
+    "analysis": "transient"
+  },
+  "flyback_converter": {
+    "status": "OK",
+    "elements": 13,
+    "time_points": 101,
+    "signals": 9,
+    "analysis": "transient"
+  },
+  "ldo_regulator": {
+    "status": "OK",
+    "elements": 9,
+    "time_points": 101,
+    "signals": 9,
+    "analysis": "transient"
+  },
+  "r2r_dac": {
+    "status": "OK",
+    "elements": 27,
+    "time_points": 101,
+    "signals": 21,
+    "analysis": "transient"
+  },
+  "rc_highpass": {
+    "status": "OK",
+    "elements": 4,
+    "time_points": 101,
+    "signals": 4,
+    "analysis": "transient"
+  },
+  "sar_adc": {
+    "status": "OK",
+    "elements": 7,
+    "time_points": 101,
+    "signals": 8,
+    "analysis": "transient"
+  },
+  "sigma_delta_adc": {
+    "status": "OK",
+    "elements": 9,
+    "time_points": 101,
+    "signals": 11,
+    "analysis": "transient"
+  }
+}

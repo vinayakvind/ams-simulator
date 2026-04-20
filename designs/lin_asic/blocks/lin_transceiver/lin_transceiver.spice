@@ -1,0 +1,90 @@
+* LIN Bus Transceiver - Analog TX/RX
+* Compliant with ISO 17987-4 / LIN 2.2A Physical Layer
+* Bus voltage: 12.0V (VBAT), Logic: 3.3V/5V
+.SUBCKT LIN_TRANSCEIVER LIN_BUS TXD RXD VDD VBAT GND EN SLP_N
+
+* =====================================================
+* LIN BUS DRIVER (Transmitter)
+* =====================================================
+* Open-drain push-pull driver with slew rate control
+* Dominant state: LIN_BUS pulled to GND through NMOS
+* Recessive state: LIN_BUS pulled to VBAT through pull-up R + diode
+
+* Slew rate control circuit
+* Limits dV/dt to 1-4 V/us for EMC compliance
+R_SR1 n_txd_buf n_sr 20k
+C_SR n_sr GND 10p
+M_SR_P n_gate_p n_sr VDD VDD PMOS_3P3 W=10u L=1u
+M_SR_N n_gate_n n_sr GND GND NMOS_3P3 W=5u L=1u
+
+* Pre-driver stage
+M_PRE_P n_predrive n_gate_p VDD VDD PMOS_3P3 W=20u L=0.5u
+M_PRE_N n_predrive n_gate_n GND GND NMOS_3P3 W=10u L=0.5u
+
+* Main bus driver (open-drain NMOS)
+* Strong pull-down for dominant state
+M_DRV LIN_BUS n_predrive GND GND NMOS_HV W=200u L=0.8u
+
+* LIN bus pull-up network (master node)
+* 1k series resistor + blocking diode to VBAT
+D_PU VBAT n_pu DIODE_HV
+R_PU n_pu LIN_BUS 1k
+
+* Internal pull-up (slave nodes use 30k)
+R_PU_INT LIN_BUS n_pu_int 30k
+D_PU_INT n_pu_int VBAT DIODE_HV
+
+* TX input buffer with enable gating
+M_TX_EN n_txd_buf TXD GND GND NMOS_3P3 W=5u L=0.5u
+M_TX_EN2 n_txd_buf EN VDD VDD PMOS_3P3 W=5u L=0.5u
+
+* =====================================================
+* LIN BUS RECEIVER
+* =====================================================
+* Comparator with hysteresis for noise immunity
+* Thresholds per LIN spec:
+*   Dominant (logic 0): V_bus < 0.4 * VSUP
+*   Recessive (logic 1): V_bus > 0.6 * VSUP
+
+* Threshold voltage divider (from VBAT)
+R_TH_H VBAT n_th_h 400k
+R_TH_M n_th_h n_th_l 200k
+R_TH_L n_th_l GND 400k
+* n_th_h = 0.6*VBAT (recessive threshold)
+* n_th_l = 0.4*VBAT (dominant threshold)
+
+* Hysteresis comparator
+M_RX_D1 n_rx1 n_rx1 VDD VDD PMOS_3P3 W=8u L=1u
+M_RX_D2 n_rx2 n_rx1 VDD VDD PMOS_3P3 W=8u L=1u
+M_RX_D3 n_rx1 LIN_BUS n_rx_tail GND NMOS_3P3 W=10u L=1u
+M_RX_D4 n_rx2 n_th_mid n_rx_tail GND NMOS_3P3 W=10u L=1u
+M_RX_TAIL n_rx_tail n_rx_bias GND GND NMOS_3P3 W=5u L=2u
+
+* Midpoint threshold with hysteresis feedback
+R_HYS_1 n_th_h n_th_mid 100k
+R_HYS_2 n_th_mid n_th_l 100k
+
+* Positive feedback for hysteresis (~100mV)
+M_HYS n_th_mid n_rx2 GND GND NMOS_3P3 W=1u L=2u
+
+* Receiver bias
+M_RX_BIAS n_rx_bias n_rx_bias GND GND NMOS_3P3 W=3u L=4u
+R_RX_BIAS n_rx_bias VDD 300k
+
+* Output inverter buffer (RXD output)
+M_RXD_P RXD n_rx2 VDD VDD PMOS_3P3 W=8u L=0.5u
+M_RXD_N RXD n_rx2 GND GND NMOS_3P3 W=4u L=0.5u
+
+* =====================================================
+* SLEEP MODE CONTROL
+* =====================================================
+* SLP_N = 0: sleep mode, disable TX/RX, low power
+* SLP_N = 1: normal operation
+M_SLP_TX n_txd_buf SLP_N GND GND NMOS_3P3 W=2u L=0.5u
+M_SLP_RX n_rx_bias SLP_N GND GND NMOS_3P3 W=2u L=0.5u
+
+* Wake-up detector (monitors LIN bus during sleep)
+R_WAKE LIN_BUS n_wake 1MEG
+M_WAKE_DET n_wake_out n_wake GND GND NMOS_3P3 W=2u L=1u
+
+.ENDS LIN_TRANSCEIVER

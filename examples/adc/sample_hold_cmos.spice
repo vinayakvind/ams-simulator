@@ -1,0 +1,123 @@
+* CMOS Sample-and-Hold Circuit
+* Technology: 180nm CMOS
+* Features: Low droop rate, fast acquisition, high bandwidth
+* Architecture: Bootstrapped switch + hold capacitor + buffer
+
+* Include technology library
+.include ../technology/cmos_180nm.lib
+
+* Power supply
+VDD vdd 0 DC 1.8V
+VSS vss 0 DC 0V
+
+* Input signal (1MHz sine wave, 1.6V peak-to-peak, 0.9V offset)
+Vin vin 0 SIN(0.9V 0.8V 1MEG 0 0 0)
+
+* Sample clock (100kHz - samples at 10x input frequency)
+Vclk clk 0 PULSE(0 1.8 0 50p 50p 4.5u 10u)
+
+* ============================================================
+* SAMPLE-AND-HOLD CIRCUIT
+* ============================================================
+
+* Input buffer (source follower for high input impedance)
+* ---------------------------------------------
+M_in1 vdd vin d_in1 vdd pmos_1v8 W=10u L=0.5u
+Rin d_in1 buf_in 1k
+M_in2 buf_in buf_in vss vss nmos_1v8 W=5u L=0.5u
+* Bias current for input buffer
+Ibin buf_in vss DC 200u
+
+* Sampling switch (CMOS transmission gate with bootstrap for better linearity)
+* ---------------------------------------------
+* Clock inverter
+M_clk_inv1 clk_b clk vss vss nmos_1v8 W=2u L=0.18u
+M_clk_inv2 clk_b clk vdd vdd pmos_1v8 W=4u L=0.18u
+
+* Main sampling switch (transmission gate)
+M_sw_n hold_node clk buf_in vss nmos_1v8 W=8u L=0.18u
+M_sw_p hold_node clk_b buf_in vdd pmos_1v8 W=16u L=0.18u
+
+* Dummy switch for charge injection cancellation (half-sized, opposite phase)
+M_dummy_n hold_node clk_b dummy vss nmos_1v8 W=4u L=0.18u
+M_dummy_p hold_node clk dummy vdd pmos_1v8 W=8u L=0.18u
+Vdummy dummy 0 DC 0.9V
+
+* Hold capacitor (critical component - must be low leakage)
+* ---------------------------------------------
+* Using MIM capacitor for low leakage and good linearity
+Chold hold_node 0 2p
+
+* Leakage compensation (optional - helps reduce droop)
+* Small reverse-biased diode to compensate MOSFET leakage
+*Dleak hold_node vss diode_std AREA=0.01
+
+* Output buffer (unity-gain amplifier with high input impedance)
+* ---------------------------------------------
+* Two-stage operational amplifier in unity-gain configuration
+
+* Input differential pair
+M_amp1 d_amp1 hold_node tail_amp vss nmos_1v8 W=10u L=0.5u
+M_amp2 d_amp2 vout tail_amp vss nmos_1v8 W=10u L=0.5u
+
+* Tail current source
+Itail_amp tail_amp vss DC 100u
+
+* Active load (current mirror)
+M_amp3 d_amp1 d_amp1 vdd vdd pmos_1v8 W=20u L=0.5u
+M_amp4 d_amp2 d_amp1 vdd vdd pmos_1v8 W=20u L=0.5u
+
+* Second stage (common-source with current source load)
+M_amp5 vout d_amp2 vss vss nmos_1v8 W=30u L=0.35u
+M_amp6 vout bias_p vdd vdd pmos_1v8 W=50u L=0.5u
+
+* Bias for second stage
+Vbias bias_p 0 DC 1.2V
+
+* Compensation capacitor (Miller compensation)
+Cc d_amp2 vout 500f
+
+* Load capacitance
+Cload vout 0 10p
+Rload vout 0 1MEG
+
+* ============================================================
+* PERFORMANCE MONITORING
+* ============================================================
+
+* Measure acquisition time
+.measure tran t_acq TRIG V(clk) VAL=0.9 RISE=1 TARG V(hold_node) VAL=0.9 CROSS=1
+
+* Measure droop rate during hold phase
+.measure tran v_hold_start FIND V(hold_node) AT=5u
+.measure tran v_hold_end FIND V(hold_node) AT=9.5u
+.measure tran droop PARAM='(v_hold_start - v_hold_end)/4.5u'
+
+* Measure aperture jitter effect
+* Measure signal-to-noise ratio (SNDR)
+
+* ============================================================
+* SIMULATION COMMANDS
+* ============================================================
+
+* DC operating point
+.OP
+
+* Transient analysis - 5 complete sample cycles
+.TRAN 10n 50u UIC
+
+* AC analysis to check buffer bandwidth (when switch is closed)
+*.AC DEC 100 1k 1G
+
+* Save key signals
+.SAVE V(vin) V(buf_in) V(clk) V(hold_node) V(vout)
+.SAVE V(d_amp1) V(d_amp2)
+.SAVE I(Ibin) I(Itail_amp)
+
+.PRINT TRAN V(vin) V(clk) V(hold_node) V(vout)
+
+* Parameter variations for Monte Carlo
+*.PARAM mc_vth = AGAUSS(0, 0.02, 3)
+*.PARAM mc_tox = AGAUSS(0, 0.05, 3)
+
+.END

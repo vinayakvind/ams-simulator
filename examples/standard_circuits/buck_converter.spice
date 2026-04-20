@@ -1,0 +1,50 @@
+* Buck Converter - Step-Down DC-DC Converter
+* Converts 12V input to 5V output
+* Switching frequency: 100kHz
+* Output power: up to 10W
+
+* Power Supply
+Vin input 0 DC 12V
+
+* MOSFET Switch (simplified as voltage-controlled switch)
+* In real simulation, use NMOS model
+* Use a PMOS as the high-side device (source+bulk tied to Vin)
+M1 sw_node gate input input PMOS W=20u L=0.18u
+
+* Gate drive signal (PWM at 100kHz, 42% duty cycle for 5V output)
+* Increased amplitude so high-side NMOS can be driven (peak ~16V)
+Vgate gate 0 PULSE(0 16 0 10n 10n 3.274u 10u)
+
+* Freewheeling diode (anode at switch node, cathode at ground)
+D1 sw_node 0 DFAST
+
+* Output inductor (100uH)
+L1 sw_node output 100u IC=0.5
+
+* Output capacitor (100uF)
+C1 output 0 100u IC=5
+
+* Load resistor (5 ohm = 1A at 5V)
+Rload output 0 5
+
+* MOSFET Model
+.MODEL NMOS NMOS (VTO=0.7 KP=110u LAMBDA=0.04)
+.MODEL PMOS PMOS (VTO=-0.7 KP=80u LAMBDA=0.02)
+
+* Diode Model  
+.MODEL DFAST D (IS=1e-14 RS=0.01 BV=30)
+
+* Transient Analysis - Run for 500us to see steady state
+.TRAN 100n 500u
+
+* Measurements
+.MEASURE TRAN Vout_avg AVG V(output) FROM=400u TO=500u
+.MEASURE TRAN Vout_ripple PP V(output) FROM=400u TO=500u
+.MEASURE TRAN IL_avg AVG I(L1) FROM=400u TO=500u
+
+* Expected Results:
+* - Output voltage: ~5V average
+* - Output ripple: ~50mV peak-to-peak
+* - Inductor current: ~1A average with triangular ripple
+
+.END

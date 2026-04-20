@@ -1,0 +1,63 @@
+* LDO - Low Dropout Regulator
+* Converts 5V input to regulated 3.3V output
+* Uses PMOS pass transistor for low dropout
+* Dropout voltage: ~200mV
+
+* Power Supply (5V input with some noise/ripple)
+Vin input 0 DC 5V AC 100mV
+
+* Reference voltage (1.25V bandgap reference)
+Vref ref 0 DC 1.25V
+
+* Error Amplifier (simplified op-amp model)
+* When V(fb) < V(ref): output goes negative -> turns PMOS on
+* When V(fb) > V(ref): output goes positive -> turns PMOS off
+* VCVS: V(gate) = gain * (V(fb) - V(ref))
+Eamp gate 0 VCVS fb ref 1000
+
+* PMOS Pass Transistor
+* Large W/L for low RDS(on)
+* Mname nd ng ns nb model: drain=output, gate=err_amp, source=Vin, bulk=Vin
+M_pass output gate input input PMOS W=5000u L=0.35u
+
+* Feedback resistor network
+* Sets output to 3.3V: Vout = Vref * (1 + R1/R2)
+* 3.3V = 1.25V * (1 + R1/R2) -> R1/R2 = 1.64
+R_fb1 output fb 16.4k
+R_fb2 fb 0 10k
+
+* Output capacitor (10uF with ESR)
+C_out output out_esr 10u IC=3.3
+R_esr out_esr 0 50m
+
+* Load resistor (10 ohm = 330mA at 3.3V)
+Rload output 0 10
+
+* Current limit resistor (sense)
+R_sense input input_s 0.1
+
+* PMOS Model (low Vth for low dropout)
+.MODEL PMOS PMOS (VTO=-0.5 KP=50u LAMBDA=0.05)
+
+* DC Analysis - Check regulation
+.DC Vin 3 6 0.1
+
+* Transient Analysis - Load step response
+.TRAN 1u 1m
+
+* AC Analysis - PSRR and loop stability
+.AC DEC 20 1 10MEG
+
+* Measurements
+.MEASURE DC Vout_at_5V FIND V(output) AT Vin=5
+.MEASURE DC Dropout FIND V(input)-V(output) WHEN V(output)=3.2
+.MEASURE AC PSRR MIN VDB(output)/VDB(input)
+
+* Expected Results:
+* - Output voltage: 3.3V regulated
+* - Dropout voltage: ~200mV
+* - Line regulation: <1%
+* - Load regulation: <2%
+* - PSRR: >40dB at low frequency
+
+.END

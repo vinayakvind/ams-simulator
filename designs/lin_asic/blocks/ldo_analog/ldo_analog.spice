@@ -1,0 +1,39 @@
+* LDO Regulator - Analog Supply
+* Input: 12.0V (VBAT), Output: 3.3V
+* Load current: 50mA max
+.SUBCKT LDO_ANALOG VIN VOUT GND VREF EN
+
+* Error amplifier (folded-cascode OTA)
+* Non-inverting: VREF, Inverting: feedback from VOUT divider
+M_D1 n_d1 n_d1 VIN VIN PMOS_3P3 W=10u L=1u
+M_D2 n_d2 n_d1 VIN VIN PMOS_3P3 W=10u L=1u
+M_D3 n_d1 VREF n_tail GND NMOS_3P3 W=20u L=1u
+M_D4 n_d2 n_fb n_tail GND NMOS_3P3 W=20u L=1u
+M_TAIL n_tail n_bias GND GND NMOS_3P3 W=10u L=2u
+
+* Bias current generation
+M_BIAS n_bias n_bias GND GND NMOS_3P3 W=5u L=4u
+R_BIAS n_bias VIN 200k
+
+* Pass transistor (PMOS - low dropout)
+M_PASS VOUT n_d2 VIN VIN PMOS_3P3 W=5000u L=0.5u
+
+* Output capacitor (external, modeled)
+C_OUT VOUT GND 1u
+R_ESR VOUT n_esr 50m
+C_INT n_esr GND 100p
+
+* Feedback resistor divider: VOUT * R2/(R1+R2) = VREF
+* For VREF=1.2V, VOUT=3.3V: R1/R2 = (VOUT/VREF - 1)
+R_FB1 VOUT n_fb 175000
+R_FB2 n_fb GND 100k
+
+* Miller compensation
+C_COMP n_d2 VOUT 5p
+R_COMP n_d2 n_comp_int 10k
+C_COMP2 n_comp_int VOUT 2p
+
+* Enable switch
+M_EN_SW n_bias EN GND GND NMOS_3P3 W=2u L=0.5u
+
+.ENDS LDO_ANALOG

@@ -1,0 +1,10 @@
+* Voltage Divider
+* Output voltage: Vin * R2/(R1+R2) = 10V * 10k/(10k+10k) = 5V
+
+V1 in 0 DC 10V
+R1 in mid 10k
+R2 mid 0 10k
+
+* DC Analysis
+.DC V1 0 10 0.1
+.END

@@ -1,0 +1,71 @@
+{
+  "circuits": [
+    {
+      "category": "Power Electronics",
+      "filename": "buck_converter.spice",
+      "name": "Buck Converter",
+      "description": "Step-down DC-DC converter (12V to 5V)"
+    },
+    {
+      "category": "Power Electronics",
+      "filename": "boost_converter.spice",
+      "name": "Boost Converter",
+      "description": "Step-up DC-DC converter (5V to 12V)"
+    },
+    {
+      "category": "Power Electronics",
+      "filename": "buck_boost_converter.spice",
+      "name": "Buck-Boost Converter",
+      "description": "Inverting DC-DC converter"
+    },
+    {
+      "category": "Power Electronics",
+      "filename": "flyback_converter.spice",
+      "name": "Flyback Converter",
+      "description": "Isolated DC-DC converter"
+    },
+    {
+      "category": "Power Electronics",
+      "filename": "ldo_regulator.spice",
+      "name": "LDO Regulator",
+      "description": "Low dropout linear regulator (3.3V output)"
+    },
+    {
+      "category": "Analog Circuits",
+      "filename": "bandgap_reference.spice",
+      "name": "Bandgap Reference",
+      "description": "Temperature-stable 1.25V reference"
+    },
+    {
+      "category": "Analog Circuits",
+      "filename": "differential_amplifier.spice",
+      "name": "Differential Amplifier",
+      "description": "Classic long-tail pair (~40dB gain)"
+    },
+    {
+      "category": "Analog Circuits",
+      "filename": "rc_highpass.spice",
+      "name": "RC High-Pass Filter",
+      "description": "First order high-pass (1kHz cutoff)"
+    },
+    {
+      "category": "Data Converters",
+      "filename": "sar_adc.spice",
+      "name": "SAR ADC",
+      "description": "8-bit Successive Approximation ADC"
+    },
+    {
+      "category": "Data Converters",
+      "filename": "sigma_delta_adc.spice",
+      "name": "Sigma-Delta ADC",
+      "description": "First order sigma-delta modulator"
+    },
+    {
+      "category": "Data Converters",
+      "filename": "r2r_dac.spice",
+      "name": "R-2R DAC",
+      "description": "8-bit R-2R ladder DAC"
+    }
+  ],
+  "count": 11
+}

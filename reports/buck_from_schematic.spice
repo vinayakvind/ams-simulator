@@ -1,0 +1,16 @@
+* AMS Simulator Netlist
+* Generated automatically
+
+V1 input 0 DC 12.0 AC 1.0 0.0
+M1 sw_node gate input input PMOS_BUCK W=2e-05 L=1.8e-07 M=1
+V2 gate 0 PULSE(0 16 0 1e-08 1e-08 3.274e-06 1e-05)
+D1 sw_node 0 DFAST
+L1 sw_node output 0.0001 IC=0.5
+C1 output 0 0.0001 IC=5.0
+R1 output 0 5.0
+
+* Model definitions
+.MODEL DFAST D (IS=1e-14 N=1.0 BV=100 RS=0.1)
+.MODEL PMOS_BUCK PMOS (VTO=-0.7 KP=80u LAMBDA=0.02)
+
+.END

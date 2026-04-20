@@ -1,0 +1,47 @@
+* RC High-Pass Filter
+* Cutoff frequency: 1kHz
+* First order filter: 20dB/decade rolloff
+
+* Input signal - pulse for transient analysis
+Vin input 0 PULSE(0 1 1m 1u 1u 5m 10m)
+
+* High-pass RC filter
+* fc = 1/(2*pi*R*C)
+* For fc = 1kHz: RC = 1/(2*pi*1000) = 159.15us
+* Choose C = 100nF, R = 1.59k
+
+C1 input output 100n
+R1 output 0 1.59k
+
+* Load (high impedance)
+R_load output 0 1MEG
+
+* DC Analysis
+.DC Vin -1 1 0.1
+
+* AC Analysis (frequency response)
+.AC DEC 20 10 100k
+
+* Transient Analysis (step response)
+.TRAN 10u 20m
+
+* Measurements
+.MEASURE AC fc FIND FREQ WHEN VDB(output)=-3
+.MEASURE AC Gain_10Hz VDB(output) AT=10
+.MEASURE AC Gain_10kHz VDB(output) AT=10k
+.MEASURE TRAN Tau TRIG V(output) VAL=0.5 RISE=1 TARG V(output) VAL=0.316 FALL=1
+
+* Expected Results:
+* - Cutoff frequency (fc): 1kHz
+* - Gain at 10Hz: ~-40dB (attenuated)
+* - Gain at 10kHz: ~0dB (passed)
+* - Phase at fc: +45 degrees
+* - Time constant (tau): ~159us
+
+* Transfer Function:
+* H(s) = sRC / (1 + sRC)
+* H(jw) = jwRC / (1 + jwRC)
+* |H| = wRC / sqrt(1 + (wRC)^2)
+* At w = 1/RC: |H| = 1/sqrt(2) = -3dB
+
+.END

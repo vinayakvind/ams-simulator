@@ -1,0 +1,64 @@
+* Flyback Converter - Isolated DC-DC Converter
+* Converts 48V input to isolated 12V output
+* Uses transformer for isolation
+* Switching frequency: 100kHz
+
+* Primary Side Power Supply
+Vin input_p 0 DC 48V
+
+* Input capacitor (primary side)
+Cin input_p 0 22u
+
+* Primary MOSFET Switch
+M1 input_p pri_sw gate 0 NMOS W=10u L=0.35u
+
+* Gate drive signal (25% duty cycle)
+* For flyback: Vout = Vin * (N2/N1) * D/(1-D)
+* With N2/N1=0.25, D=0.25: Vout = 48 * 0.25 * 0.25/0.75 = 4V
+* Adjusted for 12V output
+Vgate gate 0 PULSE(0 10 0 10n 10n 3.3u 10u)
+
+* Coupled Inductors (Transformer model)
+* Primary inductance: 500uH
+* Turns ratio: 1:0.25 (4:1 step down)
+* Coupling coefficient: 0.98
+L_pri pri_sw 0 500u IC=0
+L_sec sec_p output_raw 31.25u IC=0
+K_trans L_pri L_sec 0.98
+
+* Secondary side ground reference (isolated)
+Viso sec_p 0 DC 0V
+
+* Secondary rectifier diode
+D_sec output_raw output DFAST
+
+* Output capacitor
+Cout output 0 100u IC=12
+
+* Load resistor (12 ohm = 1A at 12V)
+Rload output 0 12
+
+* Snubber on primary (RCD snubber for leakage spike)
+R_snub input_p snub_node 100
+C_snub snub_node pri_sw 1n
+D_snub pri_sw snub_node DFAST
+
+* MOSFET Model
+.MODEL NMOS NMOS (VTO=0.7 KP=110u LAMBDA=0.04)
+
+* Diode Model
+.MODEL DFAST D (IS=1e-14 RS=0.01 BV=100)
+
+* Transient Analysis
+.TRAN 100n 1m
+
+* Measurements
+.MEASURE TRAN Vout_avg AVG V(output) FROM=800u TO=1m
+.MEASURE TRAN Vout_ripple PP V(output) FROM=800u TO=1m
+
+* Expected Results:
+* - Output voltage: ~12V average
+* - Isolated from input (galvanic isolation)
+* - Output ripple: ~200mV peak-to-peak
+
+.END

@@ -1,0 +1,79 @@
+* SAR ADC - 8-bit Successive Approximation Register ADC
+* Conversion time: 8 clock cycles
+* Sample rate: up to 1 MSPS
+* Input range: 0 to Vref (2.5V)
+
+* Power Supplies
+Vdd vdd 0 DC 3.3V
+Vref vref 0 DC 2.5V
+
+* Analog input signal (100Hz sine wave, 0-2.5V range)
+Vin analog_in 0 SIN(1.25 1.25 100 0 0)
+
+* Sample and Hold capacitor
+C_sh sh_out 0 10p IC=0
+S_sample analog_in sh_out sample 0 SW_IDEAL
+R_sample sample 0 1MEG
+
+* Sample control signal (sample for 100ns, then hold)
+V_sample sample 0 PULSE(3.3 0 0 1n 1n 100n 10u)
+
+* Comparator (simplified as voltage-controlled switch)
+* Compares S/H output to DAC output
+E_comp comp_out 0 VCVS sh_out dac_out 10000
+
+* DAC output (controlled by SAR logic)
+* 8-bit R-2R ladder DAC
+* Simplified as voltage source controlled by digital word
+* In full implementation, this would be the R-2R ladder
+
+* Bit weights: 128, 64, 32, 16, 8, 4, 2, 1 (out of 256)
+* MSB = Vref/2, MSB-1 = Vref/4, etc.
+
+* SAR Logic State Machine (behavioral model)
+* Clock signal (1MHz for 1MSPS with 10 cycles per sample)
+V_clk clk 0 PULSE(0 3.3 0 1n 1n 500n 1u)
+
+* Bit decisions (simplified - in real SAR, these are sequential)
+* B7 (MSB)
+E_b7 b7 0 TABLE {V(sh_out)} (0,0) (1.25,0) (1.251,3.3) (2.5,3.3)
+
+* B6
+E_b6 b6 0 TABLE {V(sh_out)-V(b7)*1.25/3.3} (0,0) (0.625,0) (0.626,3.3) (2.5,3.3)
+
+* B5
+E_b5 b5 0 TABLE {V(sh_out)-V(b7)*1.25/3.3-V(b6)*0.625/3.3} (0,0) (0.3125,0) (0.3126,3.3) (2.5,3.3)
+
+* Continue for remaining bits...
+* (Simplified for demonstration)
+
+* DAC reconstruction from bits
+E_dac dac_out 0 POLY(3) b7 0 b6 0 b5 0 0 0.379 0.189 0.095
+
+* Output register (digital output)
+* In real implementation: 8-bit parallel output
+
+* Switch Model
+.MODEL SW_IDEAL SW (RON=10 ROFF=1G VT=1.65)
+
+* Transient Analysis
+.TRAN 100n 100u
+
+* Measurements
+.MEASURE TRAN Sample1 FIND V(sh_out) AT=500n
+.MEASURE TRAN DAC_out1 FIND V(dac_out) AT=9.5u
+
+* Expected Results:
+* - 8-bit resolution (256 levels)
+* - DNL < 0.5 LSB
+* - INL < 1 LSB
+* - Conversion time: 8us at 1MHz clock
+
+* SAR Algorithm:
+* 1. Sample input, hold on C_sh
+* 2. Set MSB=1, compare to DAC
+* 3. If DAC > input, clear MSB; else keep MSB
+* 4. Repeat for each bit (MSB to LSB)
+* 5. After 8 cycles, digital word represents input
+
+.END

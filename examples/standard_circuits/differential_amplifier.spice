@@ -1,0 +1,62 @@
+* Differential Amplifier - Classic Long-Tail Pair
+* Gain: ~40dB (100 V/V)
+* Bandwidth: ~1MHz
+* CMRR: >60dB
+
+* Power Supplies
+Vdd vdd 0 DC 5V
+Vss vss 0 DC -5V
+
+* Differential input signals
+V_inp inp 0 SIN(0 10m 10k 0 0)
+V_inn inn 0 SIN(0 10m 10k 0 0 180)
+
+* Tail current source (1mA)
+I_tail tail vss DC 1m
+
+* Input differential pair (NPN)
+Q1 col1 inp tail NPN AREA=1
+Q2 col2 inn tail NPN AREA=1
+
+* Active load (current mirror)
+M_p1 col1 col1 vdd vdd PMOS W=50u L=1u
+M_p2 col2 col1 vdd vdd PMOS W=50u L=1u
+
+* Output taken from col2 (single-ended)
+* Differential output = col1 - col2
+
+* Output buffer
+Q_out output col2 emitter_out NPN AREA=2
+R_emitter emitter_out vss 1k
+I_bias_out output vdd 100u
+
+* Load capacitor
+C_load output 0 10p
+
+* Models
+.MODEL NPN NPN (IS=1e-15 BF=200 VA=100 TF=0.5n CJC=1p CJE=2p)
+.MODEL PMOS PMOS (VTO=-0.8 KP=50u LAMBDA=0.04)
+
+* DC Analysis
+.DC V_inp -100m 100m 1m
+
+* AC Analysis
+.AC DEC 20 100 100MEG
+
+* Transient Analysis
+.TRAN 1u 500u
+
+* Measurements
+.MEASURE AC Gain MAX VDB(output)
+.MEASURE AC BW TRIG VDB(output) VAL='Gain-3' RISE=1 TARG VDB(output) VAL='Gain-3' FALL=1
+.MEASURE AC GBW FIND FREQ WHEN VDB(output)=0
+.MEASURE DC Vout_swing PP V(output)
+
+* Expected Results:
+* - Differential gain: ~100 V/V (40dB)
+* - Unity gain bandwidth: ~100MHz
+* - CMRR: >60dB
+* - Output swing: ~+/-3V
+* - Slew rate: ~10V/us
+
+.END

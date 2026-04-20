@@ -1,0 +1,162 @@
+* CMOS 180nm Technology Library
+* Generic PDK models for analog/mixed-signal design
+* VDD = 1.8V nominal, can be used up to 3.3V for I/O
+
+* ============================================================
+* NMOS Transistor Models
+* ============================================================
+
+* Core NMOS (1.8V, thin oxide)
+.MODEL nmos_1v8 NMOS (
++ LEVEL = 49
++ VERSION = 3.1
++ TOX = 4.1E-9         ; Gate oxide thickness (nm)
++ VTH0 = 0.45          ; Threshold voltage (V)
++ KP = 2.8E-4          ; Transconductance parameter (A/V^2)
++ U0 = 350             ; Low-field mobility (cm^2/V-s)
++ LAMBDA = 0.08        ; Channel-length modulation
++ VSAT = 1.2E5         ; Saturation velocity (m/s)
++ XJ = 1.5E-7          ; Junction depth (m)
++ NGATE = 1E20         ; Poly gate doping
++ NSUB = 5E16          ; Substrate doping
++ LD = 1.8E-8          ; Lateral diffusion
++ RSH = 7              ; Sheet resistance (ohm/sq)
++ JS = 1E-6            ; Bulk junction saturation current
++ CGSO = 2.5E-10       ; Gate-source overlap capacitance
++ CGDO = 2.5E-10       ; Gate-drain overlap capacitance
++ CGBO = 1E-10         ; Gate-bulk overlap capacitance
++ CJ = 1.2E-3          ; Bottom junction capacitance
++ PB = 0.9             ; Built-in potential
++ MJ = 0.45            ; Grading coefficient
++ CJSW = 2.5E-10       ; Sidewall capacitance
+)
+
+* I/O NMOS (3.3V, thick oxide)
+.MODEL nmos_3v3 NMOS (
++ LEVEL = 49
++ VERSION = 3.1
++ TOX = 7.5E-9
++ VTH0 = 0.55
++ KP = 2.0E-4
++ U0 = 300
++ LAMBDA = 0.05
++ VSAT = 1.0E5
++ XJ = 2E-7
++ NGATE = 1E20
++ NSUB = 4E16
++ LD = 2E-8
+)
+
+* Low-threshold NMOS (analog switches, pass gates)
+.MODEL nmos_lvt NMOS (
++ LEVEL = 49
++ VERSION = 3.1
++ TOX = 4.1E-9
++ VTH0 = 0.30          ; Low threshold
++ KP = 2.8E-4
++ U0 = 370
++ LAMBDA = 0.08
+)
+
+* ============================================================
+* PMOS Transistor Models
+* ============================================================
+
+* Core PMOS (1.8V, thin oxide)
+.MODEL pmos_1v8 PMOS (
++ LEVEL = 49
++ VERSION = 3.1
++ TOX = 4.1E-9
++ VTH0 = -0.45
++ KP = 9.5E-5          ; Lower than NMOS (hole mobility)
++ U0 = 120
++ LAMBDA = 0.10
++ VSAT = 8E4
++ XJ = 1.5E-7
++ NGATE = 1E20
++ NSUB = 4E16
++ LD = 1.8E-8
++ RSH = 12             ; Higher sheet resistance
++ JS = 5E-7
++ CGSO = 2.5E-10
++ CGDO = 2.5E-10
++ CGBO = 1E-10
++ CJ = 8E-4
++ PB = 0.85
++ MJ = 0.42
++ CJSW = 2E-10
+)
+
+* I/O PMOS (3.3V, thick oxide)
+.MODEL pmos_3v3 PMOS (
++ LEVEL = 49
++ VERSION = 3.1
++ TOX = 7.5E-9
++ VTH0 = -0.60
++ KP = 7E-5
++ U0 = 100
++ LAMBDA = 0.06
++ VSAT = 7E4
+)
+
+* Low-threshold PMOS
+.MODEL pmos_lvt PMOS (
++ LEVEL = 49
++ VERSION = 3.1
++ TOX = 4.1E-9
++ VTH0 = -0.30
++ KP = 9.5E-5
++ U0 = 130
++ LAMBDA = 0.10
+)
+
+* ============================================================
+* Passive Components
+* ============================================================
+
+* Poly resistor
+.MODEL rpoly RES (
++ RSH = 50             ; Sheet resistance (ohm/sq)
++ TC1 = 1.5E-3         ; Temperature coefficient
++ TC2 = 5E-6
+)
+
+* Metal resistor
+.MODEL rmetal RES (
++ RSH = 0.08
++ TC1 = 3.8E-3
++ TC2 = 1E-6
+)
+
+* MIM capacitor (Metal-Insulator-Metal)
+.MODEL cmim CAP (
++ CJ = 2E-3            ; Capacitance per unit area (F/m^2)
++ TC1 = 50E-6          ; Low temp coefficient
++ TC2 = 1E-7
+)
+
+* PN Junction Diode
+.MODEL diode_std D (
++ IS = 1E-14           ; Saturation current
++ N = 1.0              ; Emission coefficient
++ RS = 10              ; Series resistance
++ BV = 5.0             ; Breakdown voltage
++ IBV = 1E-4
++ CJ0 = 1E-12          ; Zero-bias junction capacitance
++ VJ = 0.7
++ M = 0.4
++ TT = 1E-9            ; Transit time
+)
+
+* ============================================================
+* Technology Parameters for Layout
+* ============================================================
+
+* Minimum feature sizes
+* L_min = 180nm
+* W_min = 220nm
+* Contact size = 200nm x 200nm
+* Metal 1-6 available
+* Poly pitch = 400nm
+
+.END

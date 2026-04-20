@@ -1,0 +1,50 @@
+* Boost Converter - Step-Up DC-DC Converter
+* Converts 5V input to 12V output
+* Switching frequency: 100kHz
+* Output power: up to 6W
+
+* Power Supply
+Vin input 0 DC 5V
+
+* Input capacitor
+Cin input 0 10u
+
+* Boost inductor (47uH)
+L1 input sw_node 47u IC=1
+
+* MOSFET Switch
+M1 sw_node 0 gate 0 NMOS W=20u L=0.18u
+
+* Gate drive signal (PWM at 100kHz, 58% duty cycle for 12V output)
+* D = 1 - Vin/Vout = 1 - 5/12 = 0.583
+Vgate gate 0 PULSE(0 10 0 10n 10n 5.8u 10u)
+
+* Boost diode
+D1 sw_node output DFAST
+
+* Output capacitor (47uF)
+Cout output 0 47u IC=12
+
+* Load resistor (24 ohm = 0.5A at 12V = 6W)
+Rload output 0 24
+
+* MOSFET Model
+.MODEL NMOS NMOS (VTO=0.7 KP=110u LAMBDA=0.04)
+
+* Diode Model
+.MODEL DFAST D (IS=1e-14 RS=0.01 BV=30)
+
+* Transient Analysis
+.TRAN 100n 1m
+
+* Measurements
+.MEASURE TRAN Vout_avg AVG V(output) FROM=800u TO=1m
+.MEASURE TRAN Vout_ripple PP V(output) FROM=800u TO=1m
+.MEASURE TRAN IL_avg AVG I(L1) FROM=800u TO=1m
+
+* Expected Results:
+* - Output voltage: ~12V average
+* - Output ripple: ~100mV peak-to-peak
+* - Inductor current: ~1.2A average (Iin > Iout due to boost)
+
+.END

@@ -1,0 +1,21 @@
+block:
+  name: ldo_digital
+  type: analog
+  generator: ldo_digital
+  description: ldo_digital block
+ports:
+- name: VIN
+  direction: inout
+- name: VOUT
+  direction: inout
+- name: GND
+  direction: inout
+- name: VREF
+  direction: inout
+- name: EN
+  direction: inout
+specs: {}
+testbench:
+  dc_op:
+    description: DC operating point
+    pass_criteria: TBD

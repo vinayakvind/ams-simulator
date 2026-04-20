@@ -1,0 +1,48 @@
+# Block Specification Template
+# Copy this file to your block directory and fill in the details.
+
+block:
+  name: "<block_name>"
+  type: analog          # analog | digital | mixed
+  generator: ""         # BlockBuilder generator name (optional)
+  description: ""
+
+ports:
+  - name: VDD
+    direction: input
+    type: power
+  - name: GND
+    direction: input
+    type: ground
+  - name: VOUT
+    direction: output
+    type: analog
+  - name: EN
+    direction: input
+    type: digital
+
+specs:
+  output_voltage:
+    value: 1.2
+    unit: V
+    tolerance: "2%"
+    condition: "nominal"
+  supply_current:
+    value: 50
+    unit: uA
+    condition: "max"
+  startup_time:
+    value: 10
+    unit: us
+    condition: "max"
+
+testbench:
+  dc_op:
+    description: "DC operating point verification"
+    pass_criteria: "Output voltage within tolerance"
+  ac_analysis:
+    description: "Frequency response"
+    pass_criteria: "Gain and bandwidth meet spec"
+  transient:
+    description: "Startup and load transient"
+    pass_criteria: "Settling within specified time"

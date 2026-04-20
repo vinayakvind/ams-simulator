@@ -1,0 +1,150 @@
+* 4-Bit R-2R Ladder DAC
+* Technology: 180nm CMOS
+* Resolution: 4 bits (16 levels)
+* Output range: 0V to Vref
+* Architecture: Current-steering R-2R ladder
+
+* Include technology library
+.include ../technology/cmos_180nm.lib
+
+* Power and reference voltages
+VDD vdd 0 DC 1.8V
+Vref vref 0 DC 1.6V
+
+* Digital control bits (MSB to LSB: b3, b2, b1, b0)
+* Test with digital code 1010 (binary) = 10 (decimal) = 10/16 * Vref = 1.0V
+Vb3 b3 0 PULSE(0 1.8 0 1n 1n 500n 1u)   ; MSB
+Vb2 b2 0 DC 0V
+Vb1 b1 0 PULSE(0 1.8 0 1n 1n 500n 1u)
+Vb0 b0 0 DC 0V                           ; LSB
+
+* ============================================================
+* R-2R LADDER NETWORK
+* ============================================================
+
+* Reference resistor to Vref
+Rref vref n3 10k
+
+* R-2R ladder structure
+* MSB branch (bit 3)
+R3a n3 n2 10k
+R3b sw3 0 20k
+
+* Bit 2 branch
+R2a n2 n1 10k
+R2b sw2 0 20k
+
+* Bit 1 branch  
+R1a n1 n0 10k
+R1b sw1 0 20k
+
+* LSB branch (bit 0)
+R0a n0 vout_raw 10k
+R0b sw0 0 20k
+
+* ============================================================
+* CMOS SWITCHES (Transmission Gates)
+* ============================================================
+
+* Each bit controls a CMOS transmission gate
+* When bit = 1: switch connects to ladder node
+* When bit = 0: switch connects to ground
+
+* Bit 3 switch (MSB)
+.subckt tg_switch in out ctrl vdd vss
+Mn out ctrl in vss nmos_1v8 W=2u L=0.18u
+* Inverter for complementary control
+Minv ctrl_b ctrl vss vss nmos_1v8 W=1u L=0.18u
+Mpinv ctrl_b ctrl vdd vdd pmos_1v8 W=2u L=0.18u
+Mp out ctrl_b in vdd pmos_1v8 W=4u L=0.18u
+.ends
+
+* Instantiate switches for each bit
+Xtg3 n3 sw3 b3 vdd 0 tg_switch
+Xtg2 n2 sw2 b2 vdd 0 tg_switch
+Xtg1 n1 sw1 b1 vdd 0 tg_switch
+Xtg0 n0 sw0 b0 vdd 0 tg_switch
+
+* ============================================================
+* OUTPUT BUFFER (Unity-gain voltage follower)
+* ============================================================
+
+* Simple source follower buffer to drive external load
+* Input stage (differential pair)
+M_buf1 d_buf vout_raw vss vss nmos_1v8 W=5u L=0.5u
+M_buf2 d_buf vout d_buf vss nmos_1v8 W=5u L=0.5u
+Ibuf d_buf vss DC 100u
+
+* Load (PMOS current mirror)
+M_buf3 vout vout vdd vdd pmos_1v8 W=10u L=0.5u
+
+* External load
+Rload vout 0 100k
+Cload vout 0 10p
+
+* ============================================================
+* ALTERNATIVE: Simple Resistive Divider DAC
+* (Commented out - can be used for comparison)
+* ============================================================
+
+* This section shows a simpler resistor-string DAC
+* Uncomment to compare with R-2R ladder
+
+*.subckt res_dac_4bit b3 b2 b1 b0 vref vout
+*  * 16 resistors in series from Vref to ground
+*  Rd0  vref  tap15 1k
+*  Rd1  tap15 tap14 1k
+*  Rd2  tap14 tap13 1k
+*  Rd3  tap13 tap12 1k
+*  Rd4  tap12 tap11 1k
+*  Rd5  tap11 tap10 1k
+*  Rd6  tap10 tap9  1k
+*  Rd7  tap9  tap8  1k
+*  Rd8  tap8  tap7  1k
+*  Rd9  tap7  tap6  1k
+*  Rd10 tap6  tap5  1k
+*  Rd11 tap5  tap4  1k
+*  Rd12 tap4  tap3  1k
+*  Rd13 tap3  tap2  1k
+*  Rd14 tap2  tap1  1k
+*  Rd15 tap1  0     1k
+*  
+*  * 16:1 multiplexer (using switches)
+*  * Decoder logic would select appropriate tap
+*.ends
+
+* ============================================================
+* MEASUREMENTS
+* ============================================================
+
+* Measure DAC output for different codes
+* Measure settling time
+* Measure INL and DNL (Integral/Differential Non-Linearity)
+
+* ============================================================
+* SIMULATION COMMANDS
+* ============================================================
+
+* DC operating point
+.OP
+
+* Transient analysis - verify code transitions
+.TRAN 1n 5u UIC
+
+* DC sweep of one bit to check linearity
+*.DC Vb3 0 1.8 0.1
+
+* Parameter sweep - test all 16 codes
+*.STEP param code 0 15 1
+*.param bit3 = int(code/8)
+*.param bit2 = int((code-bit3*8)/4)
+*.param bit1 = int((code-bit3*8-bit2*4)/2)
+*.param bit0 = mod(code,2)
+
+* Save important signals
+.SAVE V(b3) V(b2) V(b1) V(b0) V(vout) V(vout_raw) V(vref)
+.SAVE V(n3) V(n2) V(n1) V(n0)
+
+.PRINT TRAN V(b3) V(b2) V(b1) V(b0) V(vout)
+
+.END

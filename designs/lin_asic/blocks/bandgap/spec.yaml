@@ -1,0 +1,19 @@
+block:
+  name: bandgap
+  type: analog
+  generator: bandgap_ref
+  description: bandgap block
+ports:
+- name: VDD
+  direction: inout
+- name: VREF
+  direction: inout
+- name: GND
+  direction: inout
+- name: EN
+  direction: inout
+specs: {}
+testbench:
+  dc_op:
+    description: DC operating point
+    pass_criteria: TBD

@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ams-simulator"
+version = "1.0.0"
+description = "Analog Mixed Signal Simulator with GUI Editor"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "AMS Simulator Team"}
+]
+keywords = ["analog", "digital", "mixed-signal", "simulator", "SPICE", "Verilog", "Verilog-AMS"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+]
+
+dependencies = [
+    "PyQt6>=6.5.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "matplotlib>=3.7.0",
+    "ply>=3.11",
+    "pyyaml>=6.0",
+    "jinja2>=3.1.0",
+    "pandas>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-qt>=4.2.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.0.260",
+]
+
+[project.scripts]
+ams-gui = "simulator.main:main"
+ams-sim = "simulator.cli.runner:main"
+ams-batch = "simulator.cli.batch:main"
+ams-run = "simulator.dsl.cli:main"
+
+[project.urls]
+"Homepage" = "https://github.com/ams-simulator/ams-simulator"
+"Documentation" = "https://github.com/ams-simulator/ams-simulator#readme"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["simulator*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "N", "D", "UP", "B", "C4"]
+ignore = ["D100", "D104"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"

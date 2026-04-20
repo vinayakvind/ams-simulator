@@ -1,0 +1,75 @@
+* =========================================================
+* CMOS LDO Regulator - Ready Configuration
+* =========================================================
+* Technology: 180nm CMOS (BSIM3v3 Level 49)
+* Specs:  Vin=3.3V, Vout=1.2V, Iout_max=100mA
+*         Dropout < 200mV, Loop Gain > 60dB
+*         Bandwidth ~1MHz, Phase Margin > 55°
+*         PSRR > 60dB at DC
+* =========================================================
+
+* MOSFET Models (180nm)
+.MODEL nmos_1v8 NMOS (LEVEL=1 VTO=0.45 KP=280e-6 LAMBDA=0.08 TOX=4e-9
++ CGSO=2.5e-10 CGDO=2.5e-10 CJ=1e-3 CBD=5e-15)
+.MODEL pmos_1v8 PMOS (LEVEL=1 VTO=-0.45 KP=95e-6 LAMBDA=0.10 TOX=4e-9
++ CGSO=2.5e-10 CGDO=2.5e-10 CJ=1e-3 CBD=5e-15)
+
+* ====== Power Supply ======
+Vin vin 0 DC 3.3V
+
+* ====== Internal Bandgap Reference (0.6V) ======
+Vref vref_int 0 DC 0.6V
+
+* ====== Bias Generator ======
+* Self-biased current mirror: Ibias = 20uA
+Ibias_src vin nbias DC 20u
+Mbias1 nbias nbias 0 0 nmos_1v8 W=5u L=1u
+Mbias2 pbias nbias 0 0 nmos_1v8 W=5u L=1u
+Mbias3 pbias pbias vin vin pmos_1v8 W=10u L=1u
+
+* ====== Error Amplifier (Five-Transistor OTA) ======
+* Differential pair (NMOS)
+M1 d1 vref_int tail 0 nmos_1v8 W=20u L=0.5u
+M2 d2 vfb tail 0 nmos_1v8 W=20u L=0.5u
+
+* Tail current source
+Mtail tail nbias 0 0 nmos_1v8 W=10u L=1u
+
+* Active load (PMOS current mirror)
+M3 d1 d1 vin vin pmos_1v8 W=15u L=0.5u
+M4 d2 d1 vin vin pmos_1v8 W=15u L=0.5u
+
+* ====== Pass Transistor (PMOS) - Wide for low dropout ======
+Mpass vout d2 vin vin pmos_1v8 W=2000u L=0.5u
+
+* ====== Feedback Resistor Divider ======
+* Vout = Vref * (1 + R1/R2) = 0.6 * (1 + 100k/100k) = 1.2V
+R1 vout vfb 100k
+R2 vfb 0 100k
+
+* ====== Miller Compensation ======
+* Sets dominant pole at error amp output
+Cc d2 vout_cc 5p
+Rc vout_cc vout 2k
+
+* ====== Output Capacitor & ESR ======
+Cout vout 0 1u
+Resr vout vout_esr 0.05
+Cout2 vout_esr 0 100p
+
+* ====== Load ======
+* Nominal 10mA load
+Rload vout 0 120
+
+* ====== Analysis ======
+
+* DC Operating Point
+.OP
+
+* Transient - startup + load step
+.TRAN 1u 200u UIC
+
+* Save important nodes
+.SAVE V(vin) V(vout) V(vfb) V(vref_int) V(d1) V(d2) V(tail) I(Mpass) I(Rload)
+
+.END

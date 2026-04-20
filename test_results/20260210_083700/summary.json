@@ -1,0 +1,292 @@
+{
+  "run_id": "20260210_083700",
+  "timestamp": "2026-02-10T08:37:03.326507",
+  "elapsed_seconds": 2.65,
+  "total": 40,
+  "passed": 39,
+  "failed": 1,
+  "pass_rate": "97.5%",
+  "all_passed": false,
+  "tests": [
+    {
+      "name": "api.reachable",
+      "passed": true,
+      "detail": "API responded",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "api.status_running",
+      "passed": true,
+      "detail": "status=running",
+      "expected": "running",
+      "actual": "running"
+    },
+    {
+      "name": "api.version",
+      "passed": true,
+      "detail": "version=1.0.0",
+      "expected": "1.0.0",
+      "actual": "1.0.0"
+    },
+    {
+      "name": "circuits.available",
+      "passed": true,
+      "detail": "11 circuits found",
+      "expected": ">0",
+      "actual": 11
+    },
+    {
+      "name": "circuits.has_rc",
+      "passed": true,
+      "detail": "RC circuit in library: True",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "errors.clear",
+      "passed": true,
+      "detail": "count after clear = 0",
+      "expected": 0,
+      "actual": 0
+    },
+    {
+      "name": "ac.completed",
+      "passed": true,
+      "detail": "status=completed",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "ac.has_frequency",
+      "passed": true,
+      "detail": "120 frequency points",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "ac.freq_range",
+      "passed": true,
+      "detail": "[1.0 .. 1.0e+06]",
+      "expected": "[\u22642 .. \u22659e5]",
+      "actual": "[1.0 .. 1.0e+06]"
+    },
+    {
+      "name": "ac.has_magnitude",
+      "passed": true,
+      "detail": "magnitude key = mag(out)",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "ac.low_freq_gain",
+      "passed": true,
+      "detail": "-0.00 dB",
+      "expected": "\u2248 0 dB",
+      "actual": "-0.00 dB"
+    },
+    {
+      "name": "ac.cutoff_freq",
+      "passed": true,
+      "detail": "fc=165.4 Hz (err 3.9%)",
+      "expected": "\u2248159.2 Hz",
+      "actual": "165.4 Hz"
+    },
+    {
+      "name": "ac.gain_at_cutoff",
+      "passed": true,
+      "detail": "-3.18 dB",
+      "expected": "\u2248 -3 dB",
+      "actual": "-3.18 dB"
+    },
+    {
+      "name": "ac.high_freq_atten",
+      "passed": true,
+      "detail": "-76.0 dB",
+      "expected": "< -40 dB",
+      "actual": "-76.0 dB"
+    },
+    {
+      "name": "ac.rolloff_slope",
+      "passed": true,
+      "detail": "17.4 dB/dec",
+      "expected": "\u2248 20 dB/dec",
+      "actual": "17.4 dB/dec"
+    },
+    {
+      "name": "ac.monotonic_decrease",
+      "passed": true,
+      "detail": "magnitude is monotonically decreasing",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "ac.data_valid",
+      "passed": true,
+      "detail": "no NaN or Inf in magnitude",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "ac.has_phase",
+      "passed": true,
+      "detail": "phase key = phase(out)",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "ac.phase_at_cutoff",
+      "passed": true,
+      "detail": "-46.1\u00b0",
+      "expected": "\u2248 -45\u00b0",
+      "actual": "-46.1\u00b0"
+    },
+    {
+      "name": "ac.phase_high_freq",
+      "passed": true,
+      "detail": "-90.0\u00b0",
+      "expected": "\u2248 -90\u00b0",
+      "actual": "-90.0\u00b0"
+    },
+    {
+      "name": "tran.completed",
+      "passed": true,
+      "detail": "status=completed",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "tran.has_time",
+      "passed": true,
+      "detail": "1000 time points",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "tran.has_vout",
+      "passed": true,
+      "detail": "output key = V(out)",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "tran.steady_state",
+      "passed": true,
+      "detail": "V(out) at 5\u03c4 = 0.9170",
+      "expected": "\u2248 1.0 V",
+      "actual": "0.9170 V"
+    },
+    {
+      "name": "tran.time_constant",
+      "passed": false,
+      "detail": "V(out) at \u03c4 = 0.3927",
+      "expected": "\u2248 0.632 V",
+      "actual": "0.3927 V"
+    },
+    {
+      "name": "tran.data_valid",
+      "passed": true,
+      "detail": "no NaN in output",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "wf_info.has_signals",
+      "passed": true,
+      "detail": "4 signals",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "wf_info.signal.V(0).finite",
+      "passed": true,
+      "detail": "min=0  max=0",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "wf_info.signal.V(GND).finite",
+      "passed": true,
+      "detail": "min=0  max=0",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "wf_info.signal.V(in).finite",
+      "passed": true,
+      "detail": "min=0  max=1",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "wf_info.signal.V(out).finite",
+      "passed": true,
+      "detail": "min=0  max=0.917",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "export.ac_image",
+      "passed": true,
+      "detail": "file exists: True, signals=2",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "export.ac_image_size",
+      "passed": true,
+      "detail": "57,105 bytes",
+      "expected": "> 1000 bytes",
+      "actual": "57,105 bytes"
+    },
+    {
+      "name": "export.tran_image",
+      "passed": true,
+      "detail": "file exists: True",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "export.csv_created",
+      "passed": true,
+      "detail": "file exists: True",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "export.csv_has_header",
+      "passed": true,
+      "detail": "header + 1000 data rows",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "export.csv_has_columns",
+      "passed": true,
+      "detail": "columns: ['time', 'V(0)', 'V(GND)', 'V(in)', 'V(out)']",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "results.available",
+      "passed": true,
+      "detail": "results returned",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "results.has_xaxis",
+      "passed": true,
+      "detail": "x-axis keys present: True",
+      "expected": null,
+      "actual": null
+    },
+    {
+      "name": "errors.none_accumulated",
+      "passed": true,
+      "detail": "0 errors logged",
+      "expected": 0,
+      "actual": 0
+    }
+  ]
+}

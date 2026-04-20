@@ -1,0 +1,9 @@
+* RC Circuit Transient Response
+* Charging capacitor with pulse source
+
+R1 in out 1k
+C1 out 0 1u
+V1 in 0 PULSE(0 5 0 1n 1n 50u 100u)
+
+.TRAN 1n 200u
+.END

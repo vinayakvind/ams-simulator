@@ -1,0 +1,154 @@
+{
+  "components": {
+    "Vin_1": {
+      "type": "VoltageSource",
+      "id": "Vin_1",
+      "reference": "V1",
+      "x": 100,
+      "y": 200,
+      "rotation": 0,
+      "mirror_h": false,
+      "mirror_v": false,
+      "properties": {
+        "voltage": 12.0,
+        "ac_magnitude": 1.0,
+        "ac_phase": 0.0
+      },
+      "pin_connections": {
+        "+": "input",
+        "-": "0"
+      }
+    },
+    "M1_1": {
+      "type": "PMOS",
+      "id": "M1_1",
+      "reference": "M1",
+      "x": 300,
+      "y": 150,
+      "rotation": 0,
+      "mirror_h": false,
+      "mirror_v": false,
+      "properties": {
+        "model": "PMOS_BUCK",
+        "w": 2e-05,
+        "l": 1.8e-07,
+        "vth0": -0.4,
+        "kp": 4e-05,
+        "lambda": 0.01,
+        "multiplier": 1
+      },
+      "pin_connections": {
+        "G": "gate",
+        "D": "sw_node",
+        "S": "input",
+        "B": "input"
+      }
+    },
+    "Vgate_1": {
+      "type": "PulseSource",
+      "id": "Vgate_1",
+      "reference": "V2",
+      "x": 200,
+      "y": 100,
+      "rotation": 0,
+      "mirror_h": false,
+      "mirror_v": false,
+      "properties": {
+        "v_low": 0,
+        "v_high": 16,
+        "delay": 0,
+        "rise_time": 1e-08,
+        "fall_time": 1e-08,
+        "pulse_width": 3.274e-06,
+        "period": 1e-05
+      },
+      "pin_connections": {
+        "+": "gate",
+        "-": "0"
+      }
+    },
+    "D1_1": {
+      "type": "Diode",
+      "id": "D1_1",
+      "reference": "D1",
+      "x": 400,
+      "y": 250,
+      "rotation": 0,
+      "mirror_h": false,
+      "mirror_v": false,
+      "properties": {
+        "model": "DFAST",
+        "is": 1e-14,
+        "n": 1.0,
+        "bv": 100.0,
+        "rs": 0.1,
+        "cjo": 1e-12
+      },
+      "pin_connections": {
+        "A": "sw_node",
+        "K": "0"
+      }
+    },
+    "L1_1": {
+      "type": "Inductor",
+      "id": "L1_1",
+      "reference": "L1",
+      "x": 450,
+      "y": 150,
+      "rotation": 0,
+      "mirror_h": false,
+      "mirror_v": false,
+      "properties": {
+        "inductance": 0.0001,
+        "initial_current": 0.5,
+        "dcr": 0.1,
+        "saturation_current": 1.0
+      },
+      "pin_connections": {
+        "1": "sw_node",
+        "2": "output"
+      }
+    },
+    "C1_1": {
+      "type": "Capacitor",
+      "id": "C1_1",
+      "reference": "C1",
+      "x": 600,
+      "y": 250,
+      "rotation": 0,
+      "mirror_h": false,
+      "mirror_v": false,
+      "properties": {
+        "capacitance": 0.0001,
+        "voltage_rating": 50.0,
+        "initial_voltage": 5.0,
+        "esr": 0.01
+      },
+      "pin_connections": {
+        "1": "output",
+        "2": "0"
+      }
+    },
+    "Rload_1": {
+      "type": "Resistor",
+      "id": "Rload_1",
+      "reference": "R1",
+      "x": 650,
+      "y": 250,
+      "rotation": 0,
+      "mirror_h": false,
+      "mirror_v": false,
+      "properties": {
+        "resistance": 5.0,
+        "tolerance": 5.0,
+        "power_rating": 0.25,
+        "temp_coeff": 100.0
+      },
+      "pin_connections": {
+        "1": "output",
+        "2": "0"
+      }
+    }
+  },
+  "wires": {}
+}
