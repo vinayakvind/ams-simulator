@@ -24,7 +24,10 @@ API Endpoints:
     POST /api/export/csv          - Export waveform data as CSV
     GET  /api/waveform/info       - Waveform signals and measurements
     GET  /api/errors              - Accumulated error log
+    GET  /api/errors/monitor      - Error-monitor state and recent corrections
     POST /api/errors/clear        - Clear the error log
+    POST /api/errors/scan         - Scan current error log and attempt corrections
+    POST /api/errors/monitor      - Enable/disable monitor and adjust scan interval
 """
 
 import json
@@ -42,16 +45,253 @@ from urllib.parse import urlparse
 _main_window = None
 _last_results: Optional[dict] = None
 _error_log: list = []
+_error_log_lock = threading.Lock()
+_last_simulation_request: Optional[dict] = None
+_last_loaded_netlist: Optional[str] = None
+_last_loaded_circuit: Optional[dict] = None
+_auto_corrections: list = []
+_monitor_thread: Optional[threading.Thread] = None
+_monitor_stop_event = threading.Event()
+_monitor_state = {
+    "enabled": False,
+    "interval_seconds": 2.0,
+    "last_scan_timestamp": None,
+    "last_processed_error_index": 0,
+}
+
+
+def _append_auto_correction(action: str, status: str, detail: str, source: str):
+    """Record a corrective action attempt/result."""
+    _auto_corrections.append({
+        "timestamp": _time.time(),
+        "action": action,
+        "status": status,
+        "detail": detail,
+        "source": source,
+    })
+    if len(_auto_corrections) > 100:
+        del _auto_corrections[:-100]
 
 
 def _record_error(source: str, message: str, detail: str = ""):
     """Append an error entry to the global log."""
-    _error_log.append({
-        "timestamp": _time.time(),
-        "source": source,
-        "message": message,
-        "detail": detail,
-    })
+    with _error_log_lock:
+        _error_log.append({
+            "timestamp": _time.time(),
+            "source": source,
+            "message": message,
+            "detail": detail,
+            "handled": False,
+            "correction_attempted": False,
+            "correction_status": "pending",
+        })
+
+
+def _classify_error(entry: dict) -> dict:
+    """Classify an error to decide whether an automatic correction is possible."""
+    source = entry.get("source", "")
+    message = entry.get("message", "")
+    lowered = f"{source} {message}".lower()
+
+    if "no simulation results" in lowered or "no results available" in lowered:
+        return {
+            "category": "missing-results",
+            "action": "rerun_last_simulation",
+            "recoverable": _last_simulation_request is not None,
+        }
+    if source == "simulate":
+        return {
+            "category": "simulation-failure",
+            "action": "rerun_last_simulation",
+            "recoverable": _last_simulation_request is not None,
+        }
+    if source == "load_netlist":
+        return {
+            "category": "netlist-load-failure",
+            "action": "reload_last_netlist",
+            "recoverable": _main_window is not None and bool(_last_loaded_netlist),
+        }
+    if source == "clear_schematic":
+        return {
+            "category": "schematic-clear-failure",
+            "action": "retry_clear_schematic",
+            "recoverable": _main_window is not None,
+        }
+    if source == "api.GET" and "unknown get endpoint" in lowered:
+        return {
+            "category": "client-route-error",
+            "action": "none",
+            "recoverable": False,
+        }
+    if source == "api.POST" and "unknown post endpoint" in lowered:
+        return {
+            "category": "client-route-error",
+            "action": "none",
+            "recoverable": False,
+        }
+    if "no gui available" in lowered:
+        return {
+            "category": "gui-required",
+            "action": "none",
+            "recoverable": False,
+        }
+    return {
+        "category": "unknown",
+        "action": "none",
+        "recoverable": False,
+    }
+
+
+def _retry_last_simulation() -> tuple[bool, str]:
+    """Retry the last simulation request using stored API context."""
+    global _last_results
+    if not _last_simulation_request:
+        return False, "no prior simulation request recorded"
+
+    from simulator.engine.analog_engine import (
+        AnalogEngine, DCAnalysis, ACAnalysis, TransientAnalysis,
+    )
+
+    request = dict(_last_simulation_request)
+    netlist = request.get("netlist")
+    analysis_type = request.get("type", "Transient")
+    settings = request.get("settings", {})
+    if not netlist:
+        return False, "last simulation request had no netlist"
+
+    engine = AnalogEngine()
+    engine.load_netlist(netlist)
+    at = analysis_type.upper()
+    if at == "DC":
+        results = DCAnalysis(engine).run(settings)
+    elif at == "AC":
+        results = ACAnalysis(engine).run(settings or {
+            "variation": "decade", "points": 10, "fstart": 1, "fstop": 1e6,
+        })
+    elif at in ("TRANSIENT", "TRAN"):
+        results = TransientAnalysis(engine).run(settings or {
+            "tstop": 1e-3, "tstep": 1e-6,
+        })
+    else:
+        return False, f"unsupported analysis type for retry: {analysis_type}"
+
+    _last_results = results
+    return True, f"reran {analysis_type} simulation successfully"
+
+
+def _retry_last_netlist_load() -> tuple[bool, str]:
+    """Retry loading the last netlist into the GUI."""
+    if _main_window is None:
+        return False, "no GUI available for netlist reload"
+    if not _last_loaded_netlist:
+        return False, "no prior netlist recorded"
+
+    from PyQt6.QtCore import QTimer
+
+    def _load():
+        _main_window.netlist_viewer.set_netlist(_last_loaded_netlist)
+        _main_window.schematic_editor.load_from_netlist(_last_loaded_netlist)
+
+    QTimer.singleShot(0, _load)
+    return True, "scheduled last netlist reload on GUI thread"
+
+
+def _retry_clear_schematic() -> tuple[bool, str]:
+    """Retry clearing the schematic through the GUI thread."""
+    if _main_window is None:
+        return False, "no GUI available for schematic clear"
+
+    from PyQt6.QtCore import QTimer
+
+    def _clear():
+        _main_window.schematic_editor.select_all()
+        _main_window.schematic_editor.delete_selected()
+
+    QTimer.singleShot(0, _clear)
+    return True, "scheduled schematic clear retry on GUI thread"
+
+
+def _attempt_auto_correction(entry: dict) -> dict:
+    """Attempt to correct a logged error based on known heuristics."""
+    classification = _classify_error(entry)
+    action = classification["action"]
+    result = {
+        "category": classification["category"],
+        "action": action,
+        "recoverable": classification["recoverable"],
+        "success": False,
+        "detail": "no automatic correction available",
+    }
+
+    if not classification["recoverable"]:
+        _append_auto_correction(action, "skipped", result["detail"], entry.get("source", ""))
+        return result
+
+    try:
+        if action == "rerun_last_simulation":
+            ok, detail = _retry_last_simulation()
+        elif action == "reload_last_netlist":
+            ok, detail = _retry_last_netlist_load()
+        elif action == "retry_clear_schematic":
+            ok, detail = _retry_clear_schematic()
+        else:
+            ok, detail = False, "unsupported automatic correction action"
+
+        result["success"] = ok
+        result["detail"] = detail
+        _append_auto_correction(action, "success" if ok else "failed", detail, entry.get("source", ""))
+        return result
+    except Exception as exc:
+        detail = str(exc)
+        result["detail"] = detail
+        _append_auto_correction(action, "failed", detail, entry.get("source", ""))
+        return result
+
+
+def _scan_and_correct_errors() -> dict:
+    """Scan unprocessed errors and attempt automatic correction where possible."""
+    processed = 0
+    corrected = 0
+    with _error_log_lock:
+        start = int(_monitor_state.get("last_processed_error_index", 0))
+        entries = list(enumerate(_error_log[start:], start=start))
+
+    for index, entry in entries:
+        if entry.get("handled"):
+            processed += 1
+            continue
+
+        correction = _attempt_auto_correction(entry)
+        with _error_log_lock:
+            if index < len(_error_log):
+                _error_log[index]["handled"] = True
+                _error_log[index]["correction_attempted"] = True
+                _error_log[index]["correction_status"] = (
+                    "success" if correction["success"] else "failed"
+                )
+                _error_log[index]["correction_detail"] = correction["detail"]
+        processed += 1
+        if correction["success"]:
+            corrected += 1
+
+    _monitor_state["last_processed_error_index"] = len(_error_log)
+    _monitor_state["last_scan_timestamp"] = _time.time()
+    return {
+        "processed": processed,
+        "corrected": corrected,
+        "pending": max(0, len(_error_log) - _monitor_state["last_processed_error_index"]),
+    }
+
+
+def _error_monitor_loop():
+    """Background loop that monitors the error log and attempts corrections."""
+    while not _monitor_stop_event.wait(float(_monitor_state["interval_seconds"])):
+        if not _monitor_state.get("enabled"):
+            continue
+        try:
+            _scan_and_correct_errors()
+        except Exception as exc:
+            _append_auto_correction("monitor-loop", "failed", str(exc), "monitor")
 
 
 def _serialize_results(results: dict) -> dict:
@@ -156,6 +396,8 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             "has_gui": _main_window is not None,
             "has_results": _last_results is not None,
             "error_count": len(_error_log),
+            "error_monitor_enabled": _monitor_state.get("enabled", False),
+            "error_monitor_interval_seconds": _monitor_state.get("interval_seconds"),
         }
         if _main_window:
             try:
@@ -250,10 +492,18 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
     def _handle_get_errors(self):
         self._send_json({"errors": list(_error_log), "count": len(_error_log)})
 
+    def _handle_error_monitor_status(self):
+        self._send_json({
+            "monitor": dict(_monitor_state),
+            "error_count": len(_error_log),
+            "recent_corrections": list(_auto_corrections[-20:]),
+        })
+
     # ================================================================
     #  POST handlers
     # ================================================================
     def _handle_load_circuit(self, body: dict):
+        global _last_loaded_circuit
         filename = body.get("filename")
         simulate = body.get("simulate", False)
         if not filename:
@@ -262,6 +512,7 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         if not _main_window:
             self._send_json({"error": "No GUI available"}, 503)
             return
+        _last_loaded_circuit = {"filename": filename, "simulate": simulate}
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(0, lambda: _main_window._load_standard_circuit(
             filename, simulate=simulate))
@@ -270,7 +521,7 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
 
     def _handle_simulate(self, body: dict):
         """Run simulation — always uses the engine directly."""
-        global _last_results
+        global _last_results, _last_simulation_request
         analysis_type = body.get("type", "Transient")
         netlist = body.get("netlist")
         settings = body.get("settings", {})
@@ -282,6 +533,11 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "netlist is required"}, 400)
             return
         try:
+            _last_simulation_request = {
+                "type": analysis_type,
+                "netlist": netlist,
+                "settings": settings,
+            }
             engine = AnalogEngine()
             engine.load_netlist(netlist)
             at = analysis_type.upper()
@@ -352,6 +608,7 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         self._send_json({"status": "clearing"})
 
     def _handle_load_netlist(self, body: dict):
+        global _last_loaded_netlist
         if not _main_window:
             self._send_json({"error": "No GUI available"}, 503)
             return
@@ -359,6 +616,7 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         if not netlist:
             self._send_json({"error": "netlist is required"}, 400)
             return
+        _last_loaded_netlist = netlist
         from PyQt6.QtCore import QTimer
         def _load():
             try:
@@ -491,8 +749,44 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"error": str(e)}, 500)
 
     def _handle_clear_errors(self, body: dict = None):
-        _error_log.clear()
+        with _error_log_lock:
+            _error_log.clear()
+        _auto_corrections.clear()
+        _monitor_state["last_processed_error_index"] = 0
         self._send_json({"status": "cleared"})
+
+    def _handle_scan_errors(self, body: dict = None):
+        summary = _scan_and_correct_errors()
+        self._send_json({
+            "status": "scanned",
+            "summary": summary,
+            "recent_corrections": list(_auto_corrections[-20:]),
+        })
+
+    def _handle_error_monitor_control(self, body: dict):
+        enabled = body.get("enabled")
+        interval = body.get("interval_seconds")
+        scan_now = body.get("scan_now", False)
+
+        if enabled is not None:
+            _monitor_state["enabled"] = bool(enabled)
+        if interval is not None:
+            try:
+                _monitor_state["interval_seconds"] = max(0.5, float(interval))
+            except (TypeError, ValueError):
+                self._send_json({"error": "interval_seconds must be numeric"}, 400)
+                return
+
+        summary = None
+        if scan_now:
+            summary = _scan_and_correct_errors()
+
+        self._send_json({
+            "status": "updated",
+            "monitor": dict(_monitor_state),
+            "scan_summary": summary,
+            "recent_corrections": list(_auto_corrections[-20:]),
+        })
 
     # ── Auto-Design endpoint ──────────────────────────────────────
     def _handle_auto_design(self, body: dict):
@@ -577,6 +871,7 @@ SimulatorAPIHandler._GET_ROUTES = {
     "/api/netlist":        SimulatorAPIHandler._handle_get_netlist,
     "/api/waveform/info":  SimulatorAPIHandler._handle_waveform_info,
     "/api/errors":         SimulatorAPIHandler._handle_get_errors,
+    "/api/errors/monitor": SimulatorAPIHandler._handle_error_monitor_status,
     "/api/auto-design/blocks": SimulatorAPIHandler._handle_list_blocks,
 }
 SimulatorAPIHandler._POST_ROUTES = {
@@ -589,6 +884,8 @@ SimulatorAPIHandler._POST_ROUTES = {
     "/api/export/waveform":     SimulatorAPIHandler._handle_export_waveform,
     "/api/export/csv":          SimulatorAPIHandler._handle_export_csv,
     "/api/errors/clear":        SimulatorAPIHandler._handle_clear_errors,
+    "/api/errors/scan":         SimulatorAPIHandler._handle_scan_errors,
+    "/api/errors/monitor":      SimulatorAPIHandler._handle_error_monitor_control,
     "/api/auto-design":         SimulatorAPIHandler._handle_auto_design,
 }
 
@@ -596,12 +893,18 @@ SimulatorAPIHandler._POST_ROUTES = {
 # ────────────────────────────────────────────────────────────────────
 def start_api_server(main_window=None, port: int = 5100) -> HTTPServer:
     """Start the API server in a background thread."""
-    global _main_window
+    global _main_window, _monitor_thread
     _main_window = main_window
 
     server = HTTPServer(("127.0.0.1", port), SimulatorAPIHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
+
+    if _monitor_thread is None or not _monitor_thread.is_alive():
+        _monitor_stop_event.clear()
+        _monitor_state["enabled"] = True
+        _monitor_thread = threading.Thread(target=_error_monitor_loop, daemon=True)
+        _monitor_thread.start()
 
     print(f"AMS Simulator API server running on http://127.0.0.1:{port}")
     for method, routes in [("GET", SimulatorAPIHandler._GET_ROUTES),
