@@ -23,6 +23,7 @@ from PyQt6.QtGui import (
 )
 
 from simulator.components.base import Component, Pin, Point
+from simulator.components.hierarchy import HierarchicalBlock
 
 
 class EditorMode(Enum):
@@ -1107,7 +1108,7 @@ class SchematicEditor(QGraphicsView):
             state = json.load(f)
         self._restore_state(state)
     
-    def load_from_netlist(self, netlist_text: str):
+    def load_from_netlist(self, netlist_text: str, preserve_hierarchy: bool = False):
         """Parse a SPICE netlist and create visual schematic components.
         
         Maps SPICE element prefixes to component classes and places them
@@ -1116,9 +1117,10 @@ class SchematicEditor(QGraphicsView):
         
         Args:
             netlist_text: SPICE netlist content as a string.
+            preserve_hierarchy: When True, keep X-subcircuit instances as
+                symbolic hierarchical blocks instead of flattening them.
         """
         import re
-        import uuid
         from simulator.components.passive import Resistor, Capacitor, Inductor
         from simulator.components.transistors import NMOS, PMOS, NPN, PNP
         from simulator.components.sources import (
@@ -1197,6 +1199,26 @@ class SchematicEditor(QGraphicsView):
         if not element_lines and subcircuits:
             _, first_body = next(iter(subcircuits.values()))
             element_lines = [ln for ln in first_body if not ln.strip().startswith('.')]
+
+        # ── Phase 1.6: Preserve hierarchy for top-level ASIC views ──
+        if preserve_hierarchy:
+            symbolic_instances = []
+            for eline in element_lines:
+                toks = eline.split()
+                if not toks or toks[0][0].upper() != 'X' or len(toks) < 3:
+                    continue
+                subckt_ref = toks[-1]
+                ports = subcircuits.get(subckt_ref, (toks[1:-1], []))[0]
+                symbolic_instances.append({
+                    'instance_name': toks[0],
+                    'block_name': subckt_ref,
+                    'ports': ports or [f'P{i + 1}' for i in range(len(toks) - 2)],
+                    'nets': toks[1:-1],
+                    'domain': self._guess_block_domain(subckt_ref),
+                })
+            if symbolic_instances:
+                self._render_symbolic_blocks(symbolic_instances, grouped_layout=True)
+                return
 
         # ── Phase 2: Expand X_ subcircuit instances inline ──
         expanded_lines: list[str] = []
@@ -1321,28 +1343,39 @@ class SchematicEditor(QGraphicsView):
                 net_connections[net_name].append((elem_idx, pin_idx))
         
         if not parsed_elements:
+            if subcircuits:
+                subckt_name, (ports, _) = next(iter(subcircuits.items()))
+                self._render_symbolic_blocks([
+                    {
+                        'instance_name': subckt_name,
+                        'block_name': subckt_name,
+                        'ports': ports,
+                        'nets': ports,
+                        'domain': self._guess_block_domain(subckt_name),
+                    }
+                ])
             return
         
-        # Auto-layout: place components in a grid
+        self._render_parsed_elements(parsed_elements, net_connections)
+
+    def _render_parsed_elements(self, parsed_elements: list[dict], net_connections: dict):
+        """Render parsed primitive elements using the existing grid layout."""
+        from simulator.components.sources import Ground
+
         grid_spacing_x = 200
         grid_spacing_y = 180
         cols = max(3, int(len(parsed_elements) ** 0.5) + 1)
         start_x = -((cols - 1) * grid_spacing_x) / 2
         start_y = -((len(parsed_elements) // cols) * grid_spacing_y) / 2
-        
+
         created_components = []
-        
         for i, elem in enumerate(parsed_elements):
             comp = elem['comp_class']()
-            
-            # Set reference designator
             comp.reference = elem['ref']
-            
-            # Set value property if available
+
             if elem['value_str'] is not None:
                 val = self._parse_spice_value(elem['value_str'])
                 if val is not None:
-                    # Find the primary value property and set it
                     prop_map = {
                         'Resistor': 'resistance',
                         'Capacitor': 'capacitance',
@@ -1355,85 +1388,143 @@ class SchematicEditor(QGraphicsView):
                     prop_name = prop_map.get(comp.__class__.__name__)
                     if prop_name and prop_name in comp.properties:
                         comp.set_property(prop_name, val)
-            
-            # Position in grid
+
             row = i // cols
             col = i % cols
             comp.x = start_x + col * grid_spacing_x
             comp.y = start_y + row * grid_spacing_y
-            
-            # Connect pins to nets
+
             for pin_idx, net_name in enumerate(elem['nets']):
                 if pin_idx < len(comp.pins):
                     comp.pins[pin_idx].connect(net_name)
-            
-            # Add to schematic
+
             item = ComponentGraphicsItem(comp)
             item.setPos(comp.x, comp.y)
             self.scene.addItem(item)
             self._components[comp.id] = comp
             self._component_items[comp.id] = item
-            
             created_components.append(comp)
-        
-        # Create wires for shared nets
-        for net_name, connections in net_connections.items():
-            if net_name == '0':
-                continue  # Skip ground net for cleaner display
-            if len(connections) < 2:
-                continue
-            
-            # Wire from first pin to each subsequent pin in the net
-            first_elem_idx, first_pin_idx = connections[0]
-            first_comp = created_components[first_elem_idx]
-            if first_pin_idx < len(first_comp.pins):
-                first_pin = first_comp.pins[first_pin_idx]
-                start_pos = QPointF(
-                    first_comp.x + first_pin.x_offset,
-                    first_comp.y + first_pin.y_offset
-                )
-                
-                for conn_elem_idx, conn_pin_idx in connections[1:]:
-                    other_comp = created_components[conn_elem_idx]
-                    if conn_pin_idx < len(other_comp.pins):
-                        other_pin = other_comp.pins[conn_pin_idx]
-                        end_pos = QPointF(
-                            other_comp.x + other_pin.x_offset,
-                            other_comp.y + other_pin.y_offset
-                        )
-                        
-                        # Create wire with orthogonal routing
-                        wire = Wire(id=str(uuid.uuid4())[:8])
-                        wire.net_name = net_name
-                        wire.points.append(start_pos)
-                        
-                        # Orthogonal routing: horizontal then vertical
-                        mid_point = QPointF(end_pos.x(), start_pos.y())
-                        if mid_point != start_pos:
-                            wire.points.append(mid_point)
-                        wire.points.append(end_pos)
-                        
-                        wire_item = WireGraphicsItem(wire)
-                        self.scene.addItem(wire_item)
-                        self._wires[wire.id] = wire
-                        self._wire_items[wire.id] = wire_item
-        
-        # Add a ground symbol for net '0' if present
+
+        self._render_net_wires(created_components, net_connections)
+
         if '0' in net_connections:
             gnd = Ground()
             gnd.x = 0
             gnd.y = start_y + ((len(parsed_elements) // cols) + 1) * grid_spacing_y
             gnd.pins[0].connect('0')
-            
+
             gnd_item = ComponentGraphicsItem(gnd)
             gnd_item.setPos(gnd.x, gnd.y)
             self.scene.addItem(gnd_item)
             self._components[gnd.id] = gnd
             self._component_items[gnd.id] = gnd_item
-        
-        # Fit view to show all placed components
+
         self.zoom_fit()
         self.schematic_modified.emit()
+
+    def _render_symbolic_blocks(self, symbolic_instances: list[dict], grouped_layout: bool = False):
+        """Render hierarchical instances as symbolic block components."""
+        domain_columns = {'ANALOG': -320, 'MIXED': 0, 'DIGITAL': 320}
+        domain_counters = {'ANALOG': 0, 'MIXED': 0, 'DIGITAL': 0}
+        created_components = []
+        net_connections: dict[str, list[tuple[int, int]]] = {}
+
+        for i, inst in enumerate(symbolic_instances):
+            domain = (inst.get('domain') or 'MIXED').upper()
+            if grouped_layout:
+                x_pos = domain_columns.get(domain, 0)
+                y_pos = -220 + domain_counters.get(domain, 0) * 150
+                domain_counters[domain] = domain_counters.get(domain, 0) + 1
+            else:
+                cols = max(1, int(len(symbolic_instances) ** 0.5) + 1)
+                row = i // cols
+                col = i % cols
+                x_pos = -((cols - 1) * 240) / 2 + col * 240
+                y_pos = -((len(symbolic_instances) // cols) * 160) / 2 + row * 160
+
+            display_name = inst['block_name'].replace('_', ' ').title()
+            comp = HierarchicalBlock(
+                block_name=display_name,
+                ports=inst['ports'],
+                domain=domain,
+                instance_name=inst.get('instance_name', inst['block_name']),
+                model_name=inst['block_name'],
+            )
+            comp.x = x_pos
+            comp.y = y_pos
+
+            for pin_idx, net_name in enumerate(inst.get('nets', [])):
+                if pin_idx < len(comp.pins):
+                    comp.pins[pin_idx].connect(net_name)
+                    if net_name not in net_connections:
+                        net_connections[net_name] = []
+                    net_connections[net_name].append((len(created_components), pin_idx))
+
+            item = ComponentGraphicsItem(comp)
+            item.setPos(comp.x, comp.y)
+            self.scene.addItem(item)
+            self._components[comp.id] = comp
+            self._component_items[comp.id] = item
+            created_components.append(comp)
+
+        self._render_net_wires(created_components, net_connections)
+        self.zoom_fit()
+        self.schematic_modified.emit()
+
+    def _render_net_wires(self, created_components: list[Component], net_connections: dict):
+        """Render orthogonal wires between components sharing the same net."""
+        import uuid
+
+        for net_name, connections in net_connections.items():
+            if net_name == '0' or len(connections) < 2:
+                continue
+
+            first_elem_idx, first_pin_idx = connections[0]
+            first_comp = created_components[first_elem_idx]
+            if first_pin_idx >= len(first_comp.pins):
+                continue
+
+            first_pin = first_comp.pins[first_pin_idx]
+            start_pos = QPointF(
+                first_comp.x + first_pin.x_offset,
+                first_comp.y + first_pin.y_offset,
+            )
+
+            for conn_elem_idx, conn_pin_idx in connections[1:]:
+                other_comp = created_components[conn_elem_idx]
+                if conn_pin_idx >= len(other_comp.pins):
+                    continue
+
+                other_pin = other_comp.pins[conn_pin_idx]
+                end_pos = QPointF(
+                    other_comp.x + other_pin.x_offset,
+                    other_comp.y + other_pin.y_offset,
+                )
+
+                wire = Wire(id=str(uuid.uuid4())[:8])
+                wire.net_name = net_name
+                wire.points.append(start_pos)
+                mid_point = QPointF(end_pos.x(), start_pos.y())
+                if mid_point != start_pos:
+                    wire.points.append(mid_point)
+                wire.points.append(end_pos)
+
+                wire_item = WireGraphicsItem(wire)
+                self.scene.addItem(wire_item)
+                self._wires[wire.id] = wire
+                self._wire_items[wire.id] = wire_item
+
+    @staticmethod
+    def _guess_block_domain(name: str) -> str:
+        """Best-effort analog/digital/mixed classification from block name."""
+        upper = name.upper()
+        if any(token in upper for token in ('SPI', 'REGISTER', 'CONTROLLER', 'LOGIC')):
+            return 'DIGITAL'
+        if any(token in upper for token in ('LDO', 'BANDGAP', 'REF')):
+            return 'ANALOG'
+        if 'TRANSCEIVER' in upper:
+            return 'MIXED'
+        return 'MIXED'
     
     @staticmethod
     def _parse_spice_value(value_str: str) -> float | None:

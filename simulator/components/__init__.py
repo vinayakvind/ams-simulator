@@ -21,6 +21,7 @@ from simulator.components.analog_blocks import (
     LDORegulator, BandgapReference, CurrentMirror, OTA,
     VoltageBuffer, LevelShifter
 )
+from simulator.components.hierarchy import HierarchicalBlock
 
 __all__ = [
     # Base
@@ -42,4 +43,6 @@ __all__ = [
     # Analog Blocks
     "LDORegulator", "BandgapReference", "CurrentMirror",
     "OTA", "VoltageBuffer", "LevelShifter",
+    # Hierarchy
+    "HierarchicalBlock",
 ]

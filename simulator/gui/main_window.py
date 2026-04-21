@@ -9,9 +9,9 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
     QToolBar, QStatusBar, QMenuBar, QMenu, QFileDialog, QMessageBox,
     QDockWidget, QTabWidget, QLabel, QDialog, QListWidget, QListWidgetItem,
-    QPushButton, QTextEdit, QDialogButtonBox, QApplication
+    QPushButton, QTextEdit, QDialogButtonBox, QApplication, QLineEdit
 )
-from PyQt6.QtCore import Qt, QSettings, QSize
+from PyQt6.QtCore import Qt, QSettings, QSize, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon, QKeySequence
 
 from simulator.gui.schematic_editor import SchematicEditor
@@ -275,6 +275,8 @@ class AutoDesignDialog(QDialog):
 
 class MainWindow(QMainWindow):
     """Main application window for the AMS Simulator."""
+
+    gui_call_requested = pyqtSignal(object)
     
     def __init__(self):
         super().__init__()
@@ -288,6 +290,9 @@ class MainWindow(QMainWindow):
         # Current project state
         self.current_file = None
         self.modified = False
+        self.api_session_guid = "waiting-for-server"
+        self.api_base_url = "http://127.0.0.1:5100"
+        self.gui_call_requested.connect(self._execute_gui_call)
         
         # Initialize UI
         self._setup_ui()
@@ -361,6 +366,127 @@ class MainWindow(QMainWindow):
         self.main_splitter.addWidget(center_splitter)
         self.main_splitter.addWidget(right_splitter)
         self.main_splitter.setSizes([250, 700, 300])
+
+        self._create_api_session_monitor()
+
+    def _create_api_session_monitor(self):
+        """Create a live dock that shows API session GUID and call flow."""
+        dock = QDockWidget("API Session Monitor", self)
+        dock.setObjectName("api_session_monitor_dock")
+        dock.setAllowedAreas(
+            Qt.DockWidgetArea.BottomDockWidgetArea |
+            Qt.DockWidgetArea.RightDockWidgetArea
+        )
+
+        content = QWidget()
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(8, 8, 8, 8)
+
+        self.api_session_label = QLabel()
+        self.api_session_label.setWordWrap(True)
+        self.api_session_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+
+        self.api_handshake_label = QLabel()
+        self.api_handshake_label.setWordWrap(True)
+        self.api_handshake_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+
+        self.api_session_log = QTextEdit()
+        self.api_session_log.setReadOnly(True)
+        self.api_session_log.setMinimumHeight(170)
+        self.api_session_log.setPlaceholderText(
+            "Live API calls, request payloads, and schematic handshake will appear here."
+        )
+
+        layout.addWidget(self.api_session_label)
+        layout.addWidget(self.api_handshake_label)
+        layout.addWidget(self.api_session_log)
+
+        dock.setWidget(content)
+        self.api_session_dock = dock
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, dock)
+        self._refresh_api_session_monitor()
+
+    def _refresh_api_session_monitor(self):
+        """Refresh the session GUID + schematic handshake summary."""
+        current_tab = "No tab"
+        component_count = 0
+        wire_count = 0
+        tab_count = self.schematic_tabs.count()
+
+        try:
+            current_index = self.schematic_tabs.currentIndex()
+            if current_index >= 0:
+                current_tab = self.schematic_tabs.tabText(current_index)
+            if self.schematic_editor is not None:
+                component_count = len(self.schematic_editor._components)
+                wire_count = len(self.schematic_editor._wires)
+        except Exception:
+            pass
+
+        self.api_session_label.setText(
+            f"Session GUID: {self.api_session_guid}    API: {self.api_base_url}"
+        )
+        self.api_handshake_label.setText(
+            "Handshake: "
+            f"tab='{current_tab}'  |  components={component_count}  |  "
+            f"wires={wire_count}  |  open_tabs={tab_count}"
+        )
+
+    def set_api_session_info(self, session_guid: str, api_base: str) -> None:
+        """Called by the API server when a session is started or restarted."""
+        self.api_session_guid = session_guid
+        self.api_base_url = api_base
+        self._refresh_api_session_monitor()
+        self.api_session_dock.show()
+
+    def run_on_gui(self, func) -> None:
+        """Queue arbitrary callable work onto the Qt GUI thread."""
+        self.gui_call_requested.emit(func)
+
+    def _execute_gui_call(self, func) -> None:
+        """Execute a callable that was queued from a worker thread."""
+        try:
+            func()
+        except Exception as exc:
+            if hasattr(self, "statusbar"):
+                self.statusbar.showMessage(f"GUI dispatch failed: {exc}")
+
+    def append_api_session_event(self, entry: dict) -> None:
+        """Append a single API call entry to the visible monitor dock."""
+        gui_state = entry.get("gui_state", {})
+        body = entry.get("request_body", "")
+        response = entry.get("response_summary", "")
+        line = (
+            f"[{entry.get('timestamp_iso', '?')}] "
+            f"#{entry.get('request_id', '?')} "
+            f"{entry.get('method', '?')} {entry.get('path', '?')} -> "
+            f"{entry.get('status', '?')}  |  "
+            f"tab={gui_state.get('current_tab', '?')}  "
+            f"components={gui_state.get('component_count', '?')}  "
+            f"wires={gui_state.get('wire_count', '?')}"
+        )
+        if body:
+            line += f"  |  body={body}"
+        if response:
+            line += f"  |  response={response}"
+
+        self.api_session_log.insertPlainText(line + "\n")
+        self.api_session_log.verticalScrollBar().setValue(
+            self.api_session_log.verticalScrollBar().maximum()
+        )
+        self._refresh_api_session_monitor()
+        self.api_session_dock.show()
+
+    def _on_schematic_tab_changed(self, index: int):
+        """Track the active tab so API handshakes reflect the real schematic."""
+        editor = self.schematic_tabs.widget(index)
+        if isinstance(editor, SchematicEditor):
+            self.schematic_editor = editor
+            self._refresh_api_session_monitor()
     
     def _create_menus(self):
         """Create the menu bar."""
@@ -503,6 +629,8 @@ class MainWindow(QMainWindow):
         grid_action.setChecked(True)
         grid_action.triggered.connect(self._toggle_grid)
         view_menu.addAction(grid_action)
+        view_menu.addSeparator()
+        view_menu.addAction(self.api_session_dock.toggleViewAction())
         
         # Component menu
         component_menu = menubar.addMenu("&Component")
@@ -792,15 +920,7 @@ class MainWindow(QMainWindow):
             self.schematic_editor.start_component_placement
         )
         
-        # Schematic editor -> Property editor
-        self.schematic_editor.selection_changed.connect(
-            self.property_editor.set_component
-        )
-        
-        # Schematic editor -> Status bar
-        self.schematic_editor.cursor_moved.connect(self._update_coordinates)
-        self.schematic_editor.zoom_changed.connect(self._update_zoom)
-        self.schematic_editor.mode_changed.connect(self._update_mode)
+        self._connect_editor_signals(self.schematic_editor)
         
         # Property editor -> Schematic editor (update component)
         self.property_editor.property_changed.connect(
@@ -809,6 +929,7 @@ class MainWindow(QMainWindow):
         
         # Schematic tabs
         self.schematic_tabs.tabCloseRequested.connect(self._close_tab)
+        self.schematic_tabs.currentChanged.connect(self._on_schematic_tab_changed)
     
     def _restore_state(self):
         """Restore window state from settings."""
@@ -948,6 +1069,7 @@ class MainWindow(QMainWindow):
         if self.schematic_tabs.count() > 1:
             self.schematic_tabs.removeTab(index)
             self.schematic_editor = self.schematic_tabs.currentWidget()
+            self._refresh_api_session_monitor()
     
     def _connect_editor_signals(self, editor: SchematicEditor):
         """Connect signals for a new editor."""
@@ -955,6 +1077,7 @@ class MainWindow(QMainWindow):
         editor.cursor_moved.connect(self._update_coordinates)
         editor.zoom_changed.connect(self._update_zoom)
         editor.mode_changed.connect(self._update_mode)
+        editor.schematic_modified.connect(self._refresh_api_session_monitor)
     
     # Edit operations
     def _undo(self):
@@ -1406,7 +1529,12 @@ class MainWindow(QMainWindow):
     #  via QTimer.singleShot so they always run on the GUI thread)
     # ──────────────────────────────────────────────────────────────
 
-    def load_block_tab(self, tab_name: str, netlist: str) -> None:
+    def load_block_tab(
+        self,
+        tab_name: str,
+        netlist: str,
+        hierarchical: bool = False,
+    ) -> None:
         """Open a new schematic tab and load *netlist* into it.
 
         Used by the API server to populate one tab per LIN ASIC block so
@@ -1418,7 +1546,7 @@ class MainWindow(QMainWindow):
         self.schematic_editor = editor
         self._connect_editor_signals(editor)
         if netlist:
-            editor.load_from_netlist(netlist)
+            editor.load_from_netlist(netlist, preserve_hierarchy=hierarchical)
         self.statusbar.showMessage(f"Loaded: {tab_name}")
 
     def run_netlist_in_window(self, results: dict, title: str) -> None:
@@ -1430,8 +1558,11 @@ class MainWindow(QMainWindow):
         from simulator.gui.waveform_viewer import WaveformWindow
         win = WaveformWindow(title)
         win.display_results(results)
+        win.showNormal()
         win.show()
         win.raise_()
+        win.activateWindow()
+        QApplication.processEvents()
 
     @staticmethod
     def _parse_spice_num(s: str) -> float:

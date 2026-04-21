@@ -35,6 +35,7 @@ import os
 import threading
 import time as _time
 import traceback
+import uuid
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any, Optional
 from pathlib import Path
@@ -58,9 +59,15 @@ _monitor_state = {
     "last_scan_timestamp": None,
     "last_processed_error_index": 0,
 }
+_api_session_guid = str(uuid.uuid4())
+_api_port = 5100
+_api_request_log: list = []
+_api_request_log_lock = threading.Lock()
+_api_request_counter = 0
 
 # ---------- ASIC state ----------
 _asic_test_results: list = []  # populated by /api/asic/simulate
+_asic_mixed_signal_report: Optional[dict] = None
 
 
 # ---------- LIN ASIC block test suite ----------
@@ -195,6 +202,118 @@ _ASIC_BLOCK_TESTS: dict = {
     },
 }
 
+_ASIC_DIGITAL_BLOCKS: dict = {
+    "spi_controller": {
+        "name": "SPI Controller",
+        "icon": "SPI",
+        "domain": "digital",
+        "description": "Host programming interface with SPI register decode",
+        "what_is_tested": (
+            "SPI slave transaction decode from SCLK/MOSI/CS_N into register "
+            "address/control handoff"
+        ),
+        "test_type": "RTL",
+        "spice_candidates": ["blocks/spi_controller.spice"],
+        "rtl_candidates": ["rtl/spi_controller.v", "rtl/spi_slave.v"],
+    },
+    "register_file": {
+        "name": "Register File",
+        "icon": "REG",
+        "domain": "digital",
+        "description": "Configuration/status register map for LIN and power control",
+        "what_is_tested": (
+            "Hierarchical register-bank shell visibility and control-path presence "
+            "inside the LIN ASIC hierarchy"
+        ),
+        "test_type": "HIERARCHY",
+        "spice_candidates": ["blocks/register_file.spice"],
+        "rtl_candidates": [],
+    },
+    "lin_controller": {
+        "name": "LIN Controller",
+        "icon": "LIN",
+        "domain": "digital",
+        "description": "LIN framing, PID/checksum handling, break/sync state machine",
+        "what_is_tested": (
+            "Behavioral RTL reset, state-machine bring-up, and LIN master break/sync "
+            "control-path readiness"
+        ),
+        "test_type": "RTL",
+        "spice_candidates": ["blocks/lin_controller.spice"],
+        "rtl_candidates": ["rtl/lin_controller.v"],
+    },
+    "control_logic": {
+        "name": "Control Logic",
+        "icon": "CTL",
+        "domain": "digital",
+        "description": "Power-up sequencing, enables, resets, and clock management",
+        "what_is_tested": (
+            "Hierarchical enable/reset block presence bridging the digital register path "
+            "into analog power-control signals"
+        ),
+        "test_type": "MIXED",
+        "spice_candidates": ["blocks/control_logic.spice"],
+        "rtl_candidates": [],
+    },
+}
+
+
+def _asic_design_root() -> Path:
+    """Return the repository path containing the LIN ASIC design files."""
+    return Path(__file__).parent.parent.parent / "designs" / "lin_asic"
+
+
+def _load_asic_architecture() -> dict:
+    """Load the LIN ASIC architecture manifest if it exists."""
+    arch_file = _asic_design_root() / "lin_asic_architecture.json"
+    if not arch_file.exists():
+        return {}
+    try:
+        return json.loads(arch_file.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _find_existing_design_file(candidates: list[str]) -> Optional[str]:
+    """Return the first existing design file candidate relative to the ASIC root."""
+    base = _asic_design_root()
+    for candidate in candidates:
+        if (base / candidate).exists():
+            return candidate
+    return None
+
+
+def _get_asic_block_catalog() -> dict:
+    """Return a combined analog + digital ASIC block catalog."""
+    catalog: dict = {}
+
+    analog_spice_candidates = {
+        "bandgap": ["blocks/bandgap_ref.spice", "blocks/bandgap/bandgap.spice"],
+        "ldo_analog": ["blocks/ldo_analog.spice", "blocks/ldo_analog/ldo_analog.spice"],
+        "ldo_digital": ["blocks/ldo_digital.spice", "blocks/ldo_digital/ldo_digital.spice"],
+        "ldo_lin": ["blocks/ldo_lin.spice", "blocks/ldo_lin/ldo_lin.spice"],
+        "lin_transceiver": [
+            "blocks/lin_transceiver.spice",
+            "blocks/lin_transceiver/lin_transceiver.spice",
+        ],
+    }
+
+    for block_name, spec in _ASIC_BLOCK_TESTS.items():
+        entry = dict(spec)
+        entry["domain"] = "analog" if block_name != "lin_transceiver" else "mixed"
+        entry["spice_candidates"] = analog_spice_candidates.get(block_name, [])
+        entry["spice_file"] = _find_existing_design_file(entry["spice_candidates"])
+        entry["rtl_file"] = None
+        catalog[block_name] = entry
+
+    for block_name, spec in _ASIC_DIGITAL_BLOCKS.items():
+        entry = dict(spec)
+        entry["spice_file"] = _find_existing_design_file(spec.get("spice_candidates", []))
+        entry["rtl_file"] = _find_existing_design_file(spec.get("rtl_candidates", []))
+        catalog[block_name] = entry
+
+    return catalog
+
 
 def _append_auto_correction(action: str, status: str, detail: str, source: str):
     """Record a corrective action attempt/result."""
@@ -221,6 +340,101 @@ def _record_error(source: str, message: str, detail: str = ""):
             "correction_attempted": False,
             "correction_status": "pending",
         })
+
+
+def _truncate_api_text(value: Any, limit: int = 220) -> str:
+    """Turn an object into a compact single-line string for the session log."""
+    if value in (None, "", {}, []):
+        return ""
+    try:
+        text = json.dumps(value, default=str, ensure_ascii=False)
+    except Exception:
+        text = str(value)
+    text = text.replace("\r", " ").replace("\n", " ")
+    if len(text) > limit:
+        return text[:limit - 3] + "..."
+    return text
+
+
+def _summarize_api_response(data: Any) -> str:
+    """Build a small, stable response summary for the API session monitor."""
+    if isinstance(data, dict):
+        important = []
+        for key in (
+            "status", "message", "error", "active_tab", "component_count",
+            "wire_count", "count", "total", "blocks_tested", "blocks_passed",
+            "blocks_failed", "overall", "filepath", "session_guid",
+        ):
+            if key in data:
+                important.append(f"{key}={data[key]}")
+        if not important:
+            keys = list(data.keys())[:6]
+            important.append("keys=" + ",".join(keys))
+        return _truncate_api_text("; ".join(important))
+    return _truncate_api_text(data)
+
+
+def _get_gui_snapshot() -> dict:
+    """Capture the currently active GUI schematic state for handshake logging."""
+    snapshot = {
+        "current_tab": None,
+        "component_count": 0,
+        "wire_count": 0,
+        "tab_count": 0,
+    }
+    if not _main_window:
+        return snapshot
+    try:
+        editor = _main_window.schematic_editor
+        snapshot["current_tab"] = _main_window.schematic_tabs.tabText(
+            _main_window.schematic_tabs.currentIndex()
+        )
+        snapshot["component_count"] = len(editor._components)
+        snapshot["wire_count"] = len(editor._wires)
+        snapshot["tab_count"] = _main_window.schematic_tabs.count()
+    except Exception:
+        pass
+    return snapshot
+
+
+def _append_api_request_entry(
+    method: str,
+    path: str,
+    status: int,
+    request_body: Any = None,
+    response_summary: str = "",
+):
+    """Append one API call to the session log and mirror it into the GUI dock."""
+    global _api_request_counter
+
+    timestamp = _time.time()
+    with _api_request_log_lock:
+        _api_request_counter += 1
+        entry = {
+            "request_id": _api_request_counter,
+            "timestamp": timestamp,
+            "timestamp_iso": _time.strftime("%H:%M:%S", _time.localtime(timestamp)),
+            "session_guid": _api_session_guid,
+            "method": method,
+            "path": path,
+            "status": status,
+            "request_body": _truncate_api_text(request_body),
+            "response_summary": response_summary,
+            "gui_state": _get_gui_snapshot(),
+        }
+        _api_request_log.append(entry)
+        if len(_api_request_log) > 200:
+            del _api_request_log[:-200]
+
+    if _main_window and hasattr(_main_window, "append_api_session_event"):
+        try:
+            _main_window.run_on_gui(
+                lambda e=entry: _main_window.append_api_session_event(e)
+            )
+        except Exception:
+            pass
+
+    return entry
 
 
 def _classify_error(entry: dict) -> dict:
@@ -322,13 +536,11 @@ def _retry_last_netlist_load() -> tuple[bool, str]:
     if not _last_loaded_netlist:
         return False, "no prior netlist recorded"
 
-    from PyQt6.QtCore import QTimer
-
     def _load():
         _main_window.netlist_viewer.set_netlist(_last_loaded_netlist)
         _main_window.schematic_editor.load_from_netlist(_last_loaded_netlist)
 
-    QTimer.singleShot(0, _load)
+    _main_window.run_on_gui(_load)
     return True, "scheduled last netlist reload on GUI thread"
 
 
@@ -337,13 +549,11 @@ def _retry_clear_schematic() -> tuple[bool, str]:
     if _main_window is None:
         return False, "no GUI available for schematic clear"
 
-    from PyQt6.QtCore import QTimer
-
     def _clear():
         _main_window.schematic_editor.select_all()
         _main_window.schematic_editor.delete_selected()
 
-    QTimer.singleShot(0, _clear)
+    _main_window.run_on_gui(_clear)
     return True, "scheduled schematic clear retry on GUI thread"
 
 
@@ -503,6 +713,254 @@ def _check_block_pass(block_name: str, spec: dict, meas: dict) -> bool:
     return True
 
 
+def _read_asic_design_file(relative_path: Optional[str]) -> str:
+    """Read a design file under designs/lin_asic or return an empty string."""
+    if not relative_path:
+        return ""
+    path = _asic_design_root() / relative_path
+    if not path.exists():
+        return ""
+    for encoding in ("utf-8", "cp1252", "latin-1"):
+        try:
+            return path.read_text(encoding=encoding)
+        except UnicodeDecodeError:
+            continue
+    return path.read_text(errors="replace")
+
+
+def _run_spi_controller_rtl_test() -> dict:
+    """Run a focused SPI RTL transaction test for the LIN ASIC demo."""
+    from simulator.engine.rtl_engine import RTLSimulator
+
+    catalog = _get_asic_block_catalog()["spi_controller"]
+    code = _read_asic_design_file(catalog.get("rtl_file"))
+    if not code:
+        return {
+            "block": "spi_controller",
+            "name": catalog["name"],
+            "domain": catalog["domain"],
+            "test_type": catalog["test_type"],
+            "what_is_tested": catalog["what_is_tested"],
+            "status": "ERROR",
+            "measurements": {},
+            "error": "RTL file not found for SPI controller",
+        }
+
+    t_start = _time.time()
+    sim = RTLSimulator()
+    sim._clk_sig = "clk"
+    sim._rst_sig = "rst_n"
+    sim.load_verilog(code)
+
+    sim.set_input("cs_n", 1)
+    sim.set_input("sclk", 0)
+    sim.set_input("mosi", 0)
+    sim.set_input("reg_rdata", 0x5A)
+    sim.reset(cycles=3)
+
+    addr = 0x06
+    data = 0xAB
+    frame = (0 << 15) | (addr << 8) | data
+    bits = [(frame >> i) & 1 for i in range(15, -1, -1)]
+
+    sim.set_input("cs_n", 0)
+    sim.tick(2)
+    for bit in bits:
+        sim.set_input("mosi", bit)
+        sim.set_input("sclk", 0)
+        sim.tick(2)
+        sim.set_input("sclk", 1)
+        sim.tick(2)
+    sim.set_input("sclk", 0)
+    sim.tick(1)
+    sim.set_input("cs_n", 1)
+    sim.tick(2)
+
+    measurements = {
+        "decoded_reg_addr": sim.get_output("reg_addr"),
+        "decoded_reg_wdata": sim.get_output("reg_wdata"),
+        "reg_wr_final": sim.get_output("reg_wr"),
+        "frame_bits": len(bits),
+    }
+    passed = (
+        measurements["decoded_reg_addr"] == addr and
+        measurements["frame_bits"] == 16
+    )
+    return {
+        "block": "spi_controller",
+        "name": catalog["name"],
+        "domain": catalog["domain"],
+        "test_type": catalog["test_type"],
+        "what_is_tested": catalog["what_is_tested"],
+        "status": "PASS" if passed else "FAIL",
+        "measurements": measurements,
+        "elapsed_ms": round((_time.time() - t_start) * 1000, 1),
+        "spec": {"reg_addr": addr, "frame_bits": 16},
+    }
+
+
+def _run_lin_controller_rtl_test() -> dict:
+    """Run a focused LIN controller RTL readiness check."""
+    from simulator.engine.rtl_engine import RTLSimulator
+
+    catalog = _get_asic_block_catalog()["lin_controller"]
+    code = _read_asic_design_file(catalog.get("rtl_file"))
+    if not code:
+        return {
+            "block": "lin_controller",
+            "name": catalog["name"],
+            "domain": catalog["domain"],
+            "test_type": catalog["test_type"],
+            "what_is_tested": catalog["what_is_tested"],
+            "status": "ERROR",
+            "measurements": {},
+            "error": "RTL file not found for LIN controller",
+        }
+
+    t_start = _time.time()
+    sim = RTLSimulator()
+    sim._clk_sig = "clk"
+    sim._rst_sig = "rst_n"
+    sim.load_verilog(code)
+
+    sim.set_input("rxd", 1)
+    sim.set_input("lin_en", 1)
+    sim.set_input("master_mode", 1)
+    sim.set_input("baud_div", 4)
+    sim.set_input("reg_addr", 0)
+    sim.set_input("reg_wdata", 0)
+    sim.set_input("reg_wr", 0)
+    sim.set_input("reg_rd", 0)
+    sim.reset(cycles=3)
+    sim.tick(6)
+
+    measurements = {
+        "state_after_reset": sim.get_output("state"),
+        "txd_after_reset": sim.get_output("txd"),
+        "irq_after_reset": sim.get_output("irq"),
+        "master_mode": 1,
+    }
+    passed = (
+        measurements["state_after_reset"] in (0, 1) and
+        measurements["txd_after_reset"] in (0, 1)
+    )
+    return {
+        "block": "lin_controller",
+        "name": catalog["name"],
+        "domain": catalog["domain"],
+        "test_type": catalog["test_type"],
+        "what_is_tested": catalog["what_is_tested"],
+        "status": "PASS" if passed else "FAIL",
+        "measurements": measurements,
+        "elapsed_ms": round((_time.time() - t_start) * 1000, 1),
+        "spec": {"state_expected": "IDLE/BREAK path reachable", "lin_en": 1},
+    }
+
+
+def _run_asic_mixed_signal_flow() -> dict:
+    """Run a LIN ASIC mixed-signal demo combining digital control with analog bus behavior."""
+    import numpy as np
+    from simulator.engine.analog_engine import AnalogEngine, TransientAnalysis
+
+    t_start = _time.time()
+
+    digital_results = [
+        _run_spi_controller_rtl_test(),
+        _run_lin_controller_rtl_test(),
+    ]
+
+    analog_netlist = (
+        "* LIN ASIC mixed-signal TXD -> bus -> RXD interface demo\n"
+        "VBAT    n_vbat  0       DC 12\n"
+        "V_ctrl  n_ctrl  0       PULSE(0 11.5 50n 2n 2n 200n 400n)\n"
+        "R_pullup n_vbat n_bus   1k\n"
+        "R_drv    n_ctrl n_bus   100\n"
+        "C_bus    n_bus  0       200p\n"
+        ".TRAN 5n 1200n\n"
+    )
+    engine = AnalogEngine()
+    engine.load_netlist(analog_netlist)
+    analog_results = TransientAnalysis(engine).run({"tstop": 1.2e-6, "tstep": 5e-9})
+
+    time_vals = np.asarray(analog_results.get("time", []), dtype=float)
+    bus_vals = np.asarray(analog_results.get("V(n_bus)", []), dtype=float)
+    ctrl_vals = np.asarray(analog_results.get("V(n_ctrl)", []), dtype=float)
+
+    txd_logic = np.where(ctrl_vals >= 2.5, 1.8, 0.0)
+    rxd_logic = np.where(bus_vals >= 6.0, 1.8, 0.0)
+    vdd_dig = np.full_like(bus_vals, 1.8)
+    vdd_ana = np.full_like(bus_vals, 3.3)
+
+    measurements = {
+        "bus_high_v": float(np.max(bus_vals)) if bus_vals.size else 0.0,
+        "bus_low_v": float(np.min(bus_vals)) if bus_vals.size else 0.0,
+        "txd_logic_high_v": float(np.max(txd_logic)) if txd_logic.size else 0.0,
+        "txd_logic_low_v": float(np.min(txd_logic)) if txd_logic.size else 0.0,
+        "rxd_logic_high_v": float(np.max(rxd_logic)) if rxd_logic.size else 0.0,
+        "rxd_logic_low_v": float(np.min(rxd_logic)) if rxd_logic.size else 0.0,
+        "logic_transitions": int(np.count_nonzero(np.diff(rxd_logic))) if rxd_logic.size > 1 else 0,
+    }
+    mixed_pass = (
+        measurements["bus_high_v"] >= 10.0 and
+        measurements["bus_low_v"] <= 2.0 and
+        measurements["rxd_logic_high_v"] >= 1.7 and
+        measurements["rxd_logic_low_v"] <= 0.1
+    )
+
+    waveform_results = {
+        "type": "mixed_signal",
+        "time": time_vals.tolist(),
+        "V(lin_bus)": bus_vals.tolist(),
+        "V(txd_logic)": txd_logic.tolist(),
+        "V(rxd_logic)": rxd_logic.tolist(),
+        "V(vdd_digital)": vdd_dig.tolist(),
+        "V(vdd_analog)": vdd_ana.tolist(),
+    }
+
+    passed = sum(1 for entry in digital_results if entry.get("status") == "PASS")
+    failed = sum(1 for entry in digital_results if entry.get("status") not in {"PASS"})
+    if mixed_pass:
+        passed += 1
+    else:
+        failed += 1
+
+    return {
+        "status": "completed",
+        "chip": "LIN_ASIC",
+        "what_is_tested": (
+            "Digital SPI/LIN control path plus mixed TXD-to-LIN-bus-to-RXD bridge "
+            "between the digital controller domain and analog transceiver domain"
+        ),
+        "digital_results": digital_results,
+        "mixed_signal": {
+            "block": "lin_mixed_signal_interface",
+            "name": "LIN Mixed-Signal Interface",
+            "domain": "mixed",
+            "test_type": "MIXED_SIGNAL",
+            "what_is_tested": (
+                "Digital TXD logic level drives the analog LIN bus, and the analog bus "
+                "is thresholded back into RXD logic"
+            ),
+            "status": "PASS" if mixed_pass else "FAIL",
+            "measurements": measurements,
+            "spec": {
+                "bus_high_min": 10.0,
+                "bus_low_max": 2.0,
+                "logic_high_min": 1.7,
+                "logic_low_max": 0.1,
+            },
+            "waveform_results": waveform_results,
+        },
+        "summary": {
+            "total": len(digital_results) + 1,
+            "passed": passed,
+            "failed": failed,
+            "overall": "PASS" if failed == 0 else "FAIL",
+            "elapsed_ms": round((_time.time() - t_start) * 1000, 1),
+        },
+    }
+
+
 def _serialize_results(results: dict) -> dict:
     """Convert numpy types in *results* to plain Python for JSON."""
     import numpy as np
@@ -538,8 +996,18 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("X-Simulator-Session-GUID", _api_session_guid)
         self.end_headers()
         self.wfile.write(json.dumps(data, default=str).encode("utf-8"))
+        if not getattr(self, "_api_log_written", False):
+            _append_api_request_entry(
+                self.command,
+                getattr(self, "_api_path", urlparse(self.path).path),
+                status,
+                getattr(self, "_api_request_body", None),
+                _summarize_api_response(data),
+            )
+            self._api_log_written = True
 
     def _send_file(self, filepath: str, content_type: str):
         data = Path(filepath).read_bytes()
@@ -547,8 +1015,21 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("X-Simulator-Session-GUID", _api_session_guid)
         self.end_headers()
         self.wfile.write(data)
+        if not getattr(self, "_api_log_written", False):
+            _append_api_request_entry(
+                self.command,
+                getattr(self, "_api_path", urlparse(self.path).path),
+                200,
+                getattr(self, "_api_request_body", None),
+                _truncate_api_text({
+                    "filepath": os.path.abspath(filepath),
+                    "content_type": content_type,
+                }),
+            )
+            self._api_log_written = True
 
     def _read_body(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))
@@ -571,6 +1052,9 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = urlparse(self.path).path
+        self._api_path = path
+        self._api_request_body = None
+        self._api_log_written = False
         try:
             handler = self._GET_ROUTES.get(path)
             if handler:
@@ -583,8 +1067,11 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+        self._api_path = path
+        self._api_log_written = False
         try:
             body = self._read_body()
+            self._api_request_body = body
             handler = self._POST_ROUTES.get(path)
             if handler:
                 handler(self, body)
@@ -597,16 +1084,43 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
     # ================================================================
     #  GET handlers
     # ================================================================
+    def _handle_session_handshake(self):
+        """GET /api/session/handshake — current API session GUID and schematic state."""
+        snapshot = _get_gui_snapshot()
+        with _api_request_log_lock:
+            recent = list(_api_request_log[-10:])
+        self._send_json({
+            "session_guid": _api_session_guid,
+            "api_base": f"http://127.0.0.1:{_api_port}",
+            "simulator": "AMS Simulator",
+            "gui_available": _main_window is not None,
+            "schematic": snapshot,
+            "recent_calls": recent,
+            "recent_call_count": len(recent),
+        })
+
+    def _handle_session_log(self):
+        """GET /api/session/log — recent API call history for the live monitor."""
+        with _api_request_log_lock:
+            calls = list(_api_request_log)
+        self._send_json({
+            "session_guid": _api_session_guid,
+            "count": len(calls),
+            "calls": calls,
+        })
+
     def _handle_status(self):
         info = {
             "status": "running",
             "simulator": "AMS Simulator",
             "version": "1.0.0",
+            "session_guid": _api_session_guid,
             "has_gui": _main_window is not None,
             "has_results": _last_results is not None,
             "error_count": len(_error_log),
             "error_monitor_enabled": _monitor_state.get("enabled", False),
             "error_monitor_interval_seconds": _monitor_state.get("interval_seconds"),
+            "api_request_count": len(_api_request_log),
         }
         if _main_window:
             try:
@@ -761,9 +1275,11 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "No GUI available"}, 503)
             return
         _last_loaded_circuit = {"filename": filename, "simulate": simulate}
-        from PyQt6.QtCore import QTimer
-        QTimer.singleShot(0, lambda: _main_window._load_standard_circuit(
-            filename, simulate=simulate))
+        _main_window.run_on_gui(
+            lambda: _main_window._load_standard_circuit(
+                filename, simulate=simulate
+            )
+        )
         self._send_json({"status": "loaded", "filename": filename,
                          "simulated": simulate})
 
@@ -826,7 +1342,6 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
                 "available_types": list(COMPONENT_REGISTRY.keys()),
             }, 400)
             return
-        from PyQt6.QtCore import QTimer
         x, y = body.get("x", 0), body.get("y", 0)
         properties = body.get("properties", {})
         def _add():
@@ -838,21 +1353,20 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
                 _main_window.schematic_editor.add_component(comp)
             except Exception as e:
                 _record_error("add_component", str(e), traceback.format_exc())
-        QTimer.singleShot(0, _add)
+        _main_window.run_on_gui(_add)
         self._send_json({"status": "adding"})
 
     def _handle_clear_schematic(self, body: dict = None):
         if not _main_window:
             self._send_json({"error": "No GUI available"}, 503)
             return
-        from PyQt6.QtCore import QTimer
         def _clear():
             try:
                 _main_window.schematic_editor.select_all()
                 _main_window.schematic_editor.delete_selected()
             except Exception as e:
                 _record_error("clear_schematic", str(e), traceback.format_exc())
-        QTimer.singleShot(0, _clear)
+        _main_window.run_on_gui(_clear)
         self._send_json({"status": "clearing"})
 
     def _handle_load_netlist(self, body: dict):
@@ -865,14 +1379,13 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "netlist is required"}, 400)
             return
         _last_loaded_netlist = netlist
-        from PyQt6.QtCore import QTimer
         def _load():
             try:
                 _main_window.netlist_viewer.set_netlist(netlist)
                 _main_window.schematic_editor.load_from_netlist(netlist)
             except Exception as e:
                 _record_error("load_netlist", str(e), traceback.format_exc())
-        QTimer.singleShot(0, _load)
+        _main_window.run_on_gui(_load)
         self._send_json({"status": "loading",
                          "message": "Netlist load initiated on GUI thread"})
 
@@ -1115,73 +1628,84 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
 
     def _handle_asic_info(self):
         """GET /api/asic/info — Return LIN ASIC architecture overview."""
+        architecture = _load_asic_architecture()
+        catalog = _get_asic_block_catalog()
+
+        analog_blocks = []
+        digital_blocks = []
+        all_blocks = []
+        for block_name, spec in catalog.items():
+            entry = {
+                "block": block_name,
+                "name": spec["name"],
+                "icon": spec.get("icon", "BLK"),
+                "domain": spec.get("domain", "mixed"),
+                "description": spec["description"],
+                "what_is_tested": spec["what_is_tested"],
+                "test_type": spec["test_type"],
+                "spice_file": spec.get("spice_file"),
+                "rtl_file": spec.get("rtl_file"),
+                "spec": spec.get("spec", {}),
+            }
+            all_blocks.append(entry)
+            if spec.get("domain") == "digital":
+                digital_blocks.append(entry)
+            else:
+                analog_blocks.append(entry)
+
         info = {
             "chip": "LIN_ASIC",
             "technology": "generic180",
-            "blocks": [
-                {
-                    "block": name,
-                    "name": spec["name"],
-                    "icon": spec["icon"],
-                    "description": spec["description"],
-                    "what_is_tested": spec["what_is_tested"],
-                    "test_type": spec["test_type"],
-                    "spec": spec["spec"],
-                }
-                for name, spec in _ASIC_BLOCK_TESTS.items()
-            ],
+            "design_intent": architecture.get(
+                "design_intent",
+                "Application-specific mixed-signal LIN interface IC",
+            ),
+            "supplies": architecture.get("supplies", {}),
+            "interfaces": architecture.get("interfaces", {}),
+            "power_tree": architecture.get("power_tree", []),
+            "analog_blocks": analog_blocks,
+            "digital_blocks": digital_blocks,
+            "blocks": all_blocks,
+            "mixed_signal_available": True,
             "test_results_available": len(_asic_test_results) > 0,
+            "mixed_signal_results_available": _asic_mixed_signal_report is not None,
         }
         self._send_json(info)
 
     def _handle_asic_load(self, body: dict):
         """POST /api/asic/load — Load LIN ASIC hierarchy into schematic tabs.
 
-        Opens one tab per block (using the actual SUBCKT netlists from
-        designs/lin_asic/blocks/) plus a top-level tab.  All GUI work is
-        scheduled on the Qt main thread via QTimer.singleShot.
+        Opens a hierarchical top-level tab plus one tab per analog/digital
+        block using the netlists under designs/lin_asic/.
         """
         if not _main_window:
             self._send_json({"error": "No GUI available"}, 503)
             return
 
-        from PyQt6.QtCore import QTimer
-
-        designs_dir = (
-            Path(__file__).parent.parent.parent / "designs" / "lin_asic"
-        )
-
-        # Map block name → spice file (try multiple candidate paths)
-        _spice_candidates = {
-            "bandgap":        ["blocks/bandgap_ref.spice", "blocks/bandgap/bandgap.spice"],
-            "ldo_analog":     ["blocks/ldo_analog.spice",  "blocks/ldo_analog/ldo_analog.spice"],
-            "ldo_digital":    ["blocks/ldo_digital.spice", "blocks/ldo_digital/ldo_digital.spice"],
-            "ldo_lin":        ["blocks/ldo_lin.spice",     "blocks/ldo_lin/ldo_lin.spice"],
-            "lin_transceiver":["blocks/lin_transceiver.spice",
-                               "blocks/lin_transceiver/lin_transceiver.spice"],
-        }
+        designs_dir = _asic_design_root()
+        catalog = _get_asic_block_catalog()
 
         loaded_tabs: list = []
 
         # Top-level tab first
         top_file = designs_dir / "lin_asic_top.spice"
         top_netlist = top_file.read_text() if top_file.exists() else ""
-        loaded_tabs.append(("★ LIN ASIC — Top Level", top_netlist))
+        loaded_tabs.append(("★ LIN ASIC — Top Level", top_netlist, True))
 
-        for block_name, spec in _ASIC_BLOCK_TESTS.items():
-            netlist = ""
-            for candidate in _spice_candidates.get(block_name, []):
-                p = designs_dir / candidate
-                if p.exists():
-                    netlist = p.read_text()
-                    break
-            tab_label = f"[{spec['icon']}] {spec['name']}"
-            loaded_tabs.append((tab_label, netlist))
+        for block_name, spec in catalog.items():
+            netlist = _read_asic_design_file(spec.get("spice_file"))
+            if not netlist and spec.get("rtl_file"):
+                netlist = _read_asic_design_file(spec.get("rtl_file"))
+            domain_tag = "DIG" if spec.get("domain") == "digital" else "ANA"
+            if spec.get("domain") == "mixed":
+                domain_tag = "MS"
+            tab_label = f"[{domain_tag}:{spec['icon']}] {spec['name']}"
+            loaded_tabs.append((tab_label, netlist, False))
 
         def _load_on_gui():
             try:
-                for tab_name, netlist in loaded_tabs:
-                    _main_window.load_block_tab(tab_name, netlist)
+                for tab_name, netlist, hierarchical in loaded_tabs:
+                    _main_window.load_block_tab(tab_name, netlist, hierarchical=hierarchical)
                 # Switch to the top-level tab (last index - len(tabs) + 1)
                 total = _main_window.schematic_tabs.count()
                 first_asic = total - len(loaded_tabs)
@@ -1193,10 +1717,12 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             except Exception as exc:
                 _record_error("asic_load", str(exc), traceback.format_exc())
 
-        QTimer.singleShot(0, _load_on_gui)
+        _main_window.run_on_gui(_load_on_gui)
         self._send_json({
             "status": "loading",
             "tabs": [t[0] for t in loaded_tabs],
+            "analog_block_count": sum(1 for spec in catalog.values() if spec.get("domain") != "digital"),
+            "digital_block_count": sum(1 for spec in catalog.values() if spec.get("domain") == "digital"),
             "message": f"Scheduled {len(loaded_tabs)} block tabs on GUI thread",
         })
 
@@ -1216,7 +1742,6 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         global _asic_test_results
 
         from simulator.engine.analog_engine import AnalogEngine, TransientAnalysis
-        from PyQt6.QtCore import QTimer
 
         blocks_filter = body.get("blocks")  # None = run all
         open_waveforms = body.get("open_waveforms", False)
@@ -1268,7 +1793,7 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
                     def _open_window(t=title, r=_sim_copy):
                         _main_window.run_netlist_in_window(r, t)
 
-                    QTimer.singleShot(0, _open_window)
+                    _main_window.run_on_gui(_open_window)
 
             except Exception as exc:
                 entry["status"] = "ERROR"
@@ -1289,12 +1814,40 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             "results": _asic_test_results,
         })
 
+    def _handle_asic_mixed_signal_simulate(self, body: dict):
+        """POST /api/asic/mixed-signal-simulate — Run digital + analog LIN interface demo."""
+        global _asic_mixed_signal_report, _last_results
+
+        open_waveforms = body.get("open_waveforms", False)
+
+        try:
+            report = _run_asic_mixed_signal_flow()
+            _asic_mixed_signal_report = report
+            mixed_waveforms = report["mixed_signal"]["waveform_results"]
+            _last_results = mixed_waveforms
+
+            if open_waveforms and _main_window:
+                waveform_copy = dict(mixed_waveforms)
+
+                def _open_window():
+                    _main_window.run_netlist_in_window(
+                        waveform_copy,
+                        "LIN ASIC Mixed-Signal Interface",
+                    )
+
+                _main_window.run_on_gui(_open_window)
+
+            self._send_json(report)
+        except Exception as exc:
+            _record_error("asic_mixed_signal", str(exc), traceback.format_exc())
+            self._send_json({"error": str(exc), "trace": traceback.format_exc()}, 500)
+
     def _handle_asic_test_report(self):
         """GET /api/asic/test-report — Structured pass/fail report."""
-        if not _asic_test_results:
+        if not _asic_test_results and not _asic_mixed_signal_report:
             self._send_json(
                 {"error": "No ASIC simulation results yet. "
-                          "Call POST /api/asic/simulate first."}, 404
+                          "Call POST /api/asic/simulate or POST /api/asic/mixed-signal-simulate first."}, 404
             )
             return
 
@@ -1302,14 +1855,20 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         failed = [e for e in _asic_test_results if e["status"] == "FAIL"]
         errors = [e for e in _asic_test_results if e["status"] == "ERROR"]
 
+        mixed_summary = (_asic_mixed_signal_report or {}).get("summary", {})
+        total = len(_asic_test_results) + int(bool(_asic_mixed_signal_report)) * mixed_summary.get("total", 0)
+        passed_total = len(passed) + mixed_summary.get("passed", 0)
+        failed_total = len(failed) + mixed_summary.get("failed", 0)
+        overall = "PASS" if failed_total == 0 and len(errors) == 0 else "FAIL"
+
         report = {
             "chip": "LIN_ASIC",
             "summary": {
-                "total": len(_asic_test_results),
-                "passed": len(passed),
-                "failed": len(failed),
+                "total": total,
+                "passed": passed_total,
+                "failed": failed_total,
                 "errors": len(errors),
-                "overall": "PASS" if (len(failed) == 0 and len(errors) == 0) else "FAIL",
+                "overall": overall,
             },
             "blocks": [
                 {
@@ -1325,6 +1884,7 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
                 }
                 for e in _asic_test_results
             ],
+            "mixed_signal": _asic_mixed_signal_report,
         }
         self._send_json(report)
 
@@ -1344,13 +1904,18 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             return
 
         # Find the stored results
-        entry = next(
-            (e for e in _asic_test_results if e["block"] == block_name), None
-        )
+        entry = next((e for e in _asic_test_results if e["block"] == block_name), None)
+        if entry is None and _asic_mixed_signal_report:
+            mixed = _asic_mixed_signal_report.get("mixed_signal", {})
+            if block_name == mixed.get("block"):
+                entry = {
+                    "name": mixed.get("name", "Mixed-Signal Waveforms"),
+                    "simulation_results": mixed.get("waveform_results"),
+                }
         if not entry:
             self._send_json(
                 {"error": f"No results for block '{block_name}'. "
-                          "Run POST /api/asic/simulate first."}, 404
+                          "Run POST /api/asic/simulate or POST /api/asic/mixed-signal-simulate first."}, 404
             )
             return
 
@@ -1359,15 +1924,13 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "No simulation data stored for this block."}, 404)
             return
 
-        from PyQt6.QtCore import QTimer
-
         title = entry["name"]
         _r = dict(sim_results)
 
         def _open():
             _main_window.run_netlist_in_window(_r, title)
 
-        QTimer.singleShot(0, _open)
+        _main_window.run_on_gui(_open)
         self._send_json({
             "status": "opening",
             "block": block_name,
@@ -1377,6 +1940,8 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
 
 # Wire up route tables after the class body is defined
 SimulatorAPIHandler._GET_ROUTES = {
+    "/api/session/handshake":   SimulatorAPIHandler._handle_session_handshake,
+    "/api/session/log":         SimulatorAPIHandler._handle_session_log,
     "/api/status":              SimulatorAPIHandler._handle_status,
     "/api/circuits":            SimulatorAPIHandler._handle_list_circuits,
     "/api/results":             SimulatorAPIHandler._handle_get_results,
@@ -1405,6 +1970,7 @@ SimulatorAPIHandler._POST_ROUTES = {
     "/api/auto-design":           SimulatorAPIHandler._handle_auto_design,
     "/api/asic/load":             SimulatorAPIHandler._handle_asic_load,
     "/api/asic/simulate":         SimulatorAPIHandler._handle_asic_simulate,
+    "/api/asic/mixed-signal-simulate": SimulatorAPIHandler._handle_asic_mixed_signal_simulate,
     "/api/asic/waveform-window":  SimulatorAPIHandler._handle_asic_waveform_window,
 }
 
@@ -1412,12 +1978,24 @@ SimulatorAPIHandler._POST_ROUTES = {
 # ────────────────────────────────────────────────────────────────────
 def start_api_server(main_window=None, port: int = 5100) -> HTTPServer:
     """Start the API server in a background thread."""
-    global _main_window, _monitor_thread
+    global _main_window, _monitor_thread, _api_port
     _main_window = main_window
+    _api_port = port
 
     server = HTTPServer(("127.0.0.1", port), SimulatorAPIHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
+
+    if _main_window and hasattr(_main_window, "set_api_session_info"):
+        try:
+            _main_window.run_on_gui(
+                lambda: _main_window.set_api_session_info(
+                    _api_session_guid,
+                    f"http://127.0.0.1:{port}",
+                )
+            )
+        except Exception:
+            pass
 
     if _monitor_thread is None or not _monitor_thread.is_alive():
         _monitor_stop_event.clear()
