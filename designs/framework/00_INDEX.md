@@ -24,6 +24,13 @@ Each design follows an indexed, step-by-step flow from architecture to signoff.
 | `scripts/verify_block.py` | Verify block results against spec |
 | `scripts/run_regression.py` | Run full regression across all blocks |
 
+## Operational Automation
+
+| Script | Purpose |
+|--------|---------|
+| `../../scripts/copilot_cli_watchdog.py` | Supervise long-running Copilot CLI or agent commands, restart on stop/stall, gate on premium threshold |
+| `../../scripts/repo_backup_guard.py` | Detect major repository changes and auto-commit/push backup snapshots |
+
 ## Templates
 
 | Template | Purpose |

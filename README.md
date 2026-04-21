@@ -160,6 +160,29 @@ ams-agent lin-asic --tech generic180 --output designs
 ams-agent design my_chip --spec my_chip_spec.json --tech generic180
 ```
 
+### Automation - Copilot CLI Supervision And Backup
+
+```bash
+# Report current repo change size
+python scripts/repo_backup_guard.py --report
+
+# Auto-push only when the repo has major changes
+python scripts/repo_backup_guard.py --push --major-files 10 --major-lines 500
+
+# Watch a Copilot/agent command, restart on exit, and stop below 30% premium budget
+python scripts/copilot_cli_watchdog.py \
+  --command "python -m simulator.agents.cli lin-asic --output designs" \
+  --continue-on-exit \
+  --stall-seconds 300 \
+  --premium-file scripts/copilot_usage.example.json \
+  --min-premium-percent 30 \
+  --backup-cmd "python scripts/repo_backup_guard.py --push"
+```
+
+`copilot_cli_watchdog.py` can monitor premium budget from either a JSON file or a custom command.
+There is no stable Copilot premium API exposed in this repository, so the script is designed to accept
+your own usage source while still handling restart, pause, and backup logic automatically.
+
 ### Batch Configuration File (JSON)
 
 ```json
