@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QSplitter, QToolBar,
     QLabel, QComboBox, QCheckBox, QTreeWidget, QTreeWidgetItem,
-    QPushButton, QLineEdit, QGroupBox, QFormLayout
+    QPushButton, QLineEdit, QGroupBox, QFormLayout, QMainWindow
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 
@@ -362,3 +362,49 @@ class WaveformViewer(QWidget):
                 for waveform in self._waveforms.values():
                     row.append(str(waveform.values[i]))
                 f.write(','.join(row) + '\n')
+
+
+class WaveformWindow(QMainWindow):
+    """Standalone waveform viewer shown in its own top-level window.
+
+    One instance is created per LIN ASIC block simulation so that each
+    block's waveforms appear in a dedicated, independently resizable
+    window rather than the embedded panel inside the main window.
+
+    All instances are stored in the class-level ``_instances`` list so
+    that Python's garbage collector cannot reclaim them while the user
+    still has the window open.
+    """
+
+    _instances: list = []  # Prevent GC of open windows
+
+    def __init__(self, title: str = "Waveform Viewer"):
+        super().__init__()
+        self.setWindowTitle(f"Waveforms \u2014 {title}")
+        self.setMinimumSize(900, 550)
+        self.resize(1050, 600)
+
+        self.viewer = WaveformViewer()
+        self.setCentralWidget(self.viewer)
+
+        self.statusBar().showMessage(
+            f"Block: {title}  |  Waiting for simulation results\u2026"
+        )
+
+        WaveformWindow._instances.append(self)
+
+    def display_results(self, results: dict) -> None:
+        """Push simulation results into the embedded WaveformViewer."""
+        self.viewer.display_results(results)
+        n = len(self.viewer._waveforms)
+        block = self.windowTitle().replace("Waveforms \u2014 ", "")
+        self.statusBar().showMessage(
+            f"Block: {block}  |  {n} signal(s) plotted"
+        )
+
+    def closeEvent(self, event):
+        try:
+            WaveformWindow._instances.remove(self)
+        except ValueError:
+            pass
+        super().closeEvent(event)

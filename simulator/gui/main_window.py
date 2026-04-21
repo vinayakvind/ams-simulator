@@ -1401,6 +1401,38 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Auto-Design Error", f"Failed:\n{e}")
 
+    # ──────────────────────────────────────────────────────────────
+    #  ASIC hierarchy helpers  (called from the API server thread
+    #  via QTimer.singleShot so they always run on the GUI thread)
+    # ──────────────────────────────────────────────────────────────
+
+    def load_block_tab(self, tab_name: str, netlist: str) -> None:
+        """Open a new schematic tab and load *netlist* into it.
+
+        Used by the API server to populate one tab per LIN ASIC block so
+        the schematic editor shows the full chip hierarchy.
+        """
+        editor = SchematicEditor()
+        index = self.schematic_tabs.addTab(editor, tab_name)
+        self.schematic_tabs.setCurrentIndex(index)
+        self.schematic_editor = editor
+        self._connect_editor_signals(editor)
+        if netlist:
+            editor.load_from_netlist(netlist)
+        self.statusbar.showMessage(f"Loaded: {tab_name}")
+
+    def run_netlist_in_window(self, results: dict, title: str) -> None:
+        """Display simulation results in a new standalone waveform window.
+
+        Opens a separate WaveformWindow (not the embedded panel) so that
+        each block's waveform is shown in its own resizable window.
+        """
+        from simulator.gui.waveform_viewer import WaveformWindow
+        win = WaveformWindow(title)
+        win.display_results(results)
+        win.show()
+        win.raise_()
+
     @staticmethod
     def _parse_spice_num(s: str) -> float:
         """Parse a SPICE number with engineering suffix.

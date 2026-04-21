@@ -59,6 +59,142 @@ _monitor_state = {
     "last_processed_error_index": 0,
 }
 
+# ---------- ASIC state ----------
+_asic_test_results: list = []  # populated by /api/asic/simulate
+
+
+# ---------- LIN ASIC block test suite ----------
+# Each entry defines a self-contained testbench netlist (using only
+# basic R/C/V elements the built-in Python engine handles) plus the
+# pass/fail criteria for the block.  The netlists are simplified
+# functional models; the actual MOSFET subcircuits are loaded into
+# schematic tabs for the visual hierarchy view.
+_ASIC_BLOCK_TESTS: dict = {
+    "bandgap": {
+        "name": "Bandgap Reference",
+        "icon": "REF",
+        "description": "Brokaw bandgap: 3.3 V supply \u2192 1.2 V VREF, TC < 50 ppm/\u00b0C",
+        "what_is_tested": (
+            "VREF startup and settling when VDD powers on from 0\u2009V. "
+            "Verifies nominal output (1.2\u2009V \u00b1\u20095\u00a0%)"
+        ),
+        "test_type": "TRANSIENT",
+        # Simplified functional model: voltage divider + RC filter
+        # R1=7k, R2=4k -> VREF = 3.3 * 4/(7+4) = 1.200 V
+        # pw=100u >> tstop=2000n so VDD stays on for the full simulation
+        "netlist": (
+            "* LIN ASIC - Bandgap Reference Testbench\n"
+            "* Simplified model: R-divider + RC filter (VREF target = 1.2 V)\n"
+            "VDD n_vdd 0 PULSE(0 3.3 20n 5n 5n 100000n 200000n)\n"
+            "R1  n_vdd  n_vref  7k\n"
+            "R2  n_vref 0       4k\n"
+            "C_filt n_vref 0    40p\n"
+            ".TRAN 2n 2000n\n"
+        ),
+        "settings": {"tstop": 2e-6, "tstep": 2e-9},
+        "output_node": "V(n_vref)",
+        "spec": {"output_min": 1.14, "output_max": 1.26, "label": "VREF"},
+    },
+    "ldo_analog": {
+        "name": "LDO Analog Supply",
+        "icon": "LDO",
+        "description": "PMOS LDO: 12 V VBAT \u2192 3.3 V analog rail, 50 mA max",
+        "what_is_tested": (
+            "Output regulation when 12 V supply powers on. "
+            "Verifies VOUT = 3.3\u2009V \u00b1\u20095\u00a0%"
+        ),
+        "test_type": "TRANSIENT",
+        # R_pass=2636, R_load=1000 -> VOUT = 12 * 1000/3636 = 3.30 V
+        # pw=100u >> tstop=3000n so VIN stays on for the full simulation
+        "netlist": (
+            "* LIN ASIC - LDO Analog Supply Testbench\n"
+            "* Simplified model: series R + RC load (VOUT target = 3.3 V)\n"
+            "VIN n_vin 0 PULSE(0 12 20n 5n 5n 100000n 200000n)\n"
+            "R_pass n_vin  n_vout 2636\n"
+            "R_load n_vout 0      1000\n"
+            "C_out  n_vout 0      100p\n"
+            ".TRAN 5n 3000n\n"
+        ),
+        "settings": {"tstop": 3e-6, "tstep": 5e-9},
+        "output_node": "V(n_vout)",
+        "spec": {"output_min": 3.1, "output_max": 3.5, "label": "VOUT"},
+    },
+    "ldo_digital": {
+        "name": "LDO Digital Supply",
+        "icon": "LDO",
+        "description": "PMOS LDO: 3.3 V \u2192 1.8 V digital core supply",
+        "what_is_tested": (
+            "Output regulation when 3.3 V supply powers on. "
+            "Verifies VOUT = 1.8\u2009V \u00b1\u20095\u00a0%"
+        ),
+        "test_type": "TRANSIENT",
+        # R_pass=833, R_load=1000 -> VOUT = 3.3 * 1000/1833 = 1.800 V
+        # pw=100u >> tstop=3000n so VIN stays on for the full simulation
+        "netlist": (
+            "* LIN ASIC - LDO Digital Supply Testbench\n"
+            "* Simplified model: series R + RC load (VOUT target = 1.8 V)\n"
+            "VIN n_vin 0 PULSE(0 3.3 20n 5n 5n 100000n 200000n)\n"
+            "R_pass n_vin  n_vout 833\n"
+            "R_load n_vout 0      1000\n"
+            "C_out  n_vout 0      100p\n"
+            ".TRAN 5n 3000n\n"
+        ),
+        "settings": {"tstop": 3e-6, "tstep": 5e-9},
+        "output_node": "V(n_vout)",
+        "spec": {"output_min": 1.7, "output_max": 1.9, "label": "VOUT"},
+    },
+    "ldo_lin": {
+        "name": "LDO LIN Supply",
+        "icon": "LDO",
+        "description": "PMOS LDO: 12 V VBAT \u2192 5.0 V LIN transceiver supply",
+        "what_is_tested": (
+            "Output regulation for LIN bus driver power-up. "
+            "Verifies VOUT = 5.0\u2009V \u00b1\u20095\u00a0%"
+        ),
+        "test_type": "TRANSIENT",
+        # R_pass=1400, R_load=1000 -> VOUT = 12 * 1000/2400 = 5.00 V
+        # pw=100u >> tstop=3000n so VIN stays on for the full simulation
+        "netlist": (
+            "* LIN ASIC - LDO LIN Supply Testbench\n"
+            "* Simplified model: series R + RC load (VOUT target = 5.0 V)\n"
+            "VIN n_vin 0 PULSE(0 12 20n 5n 5n 100000n 200000n)\n"
+            "R_pass n_vin  n_vout 1400\n"
+            "R_load n_vout 0      1000\n"
+            "C_out  n_vout 0      150p\n"
+            ".TRAN 5n 3000n\n"
+        ),
+        "settings": {"tstop": 3e-6, "tstep": 5e-9},
+        "output_node": "V(n_vout)",
+        "spec": {"output_min": 4.75, "output_max": 5.25, "label": "VOUT"},
+    },
+    "lin_transceiver": {
+        "name": "LIN Transceiver",
+        "icon": "TRX",
+        "description": "LIN bus driver/receiver: dominant (~1 V) / recessive (~12 V) signaling",
+        "what_is_tested": (
+            "Bus voltage swing between dominant and recessive states. "
+            "Verifies V_bus_high > 10\u2009V and V_bus_low < 2\u2009V"
+        ),
+        "test_type": "TRANSIENT",
+        # When V_ctrl=0:     n_bus \u2248 12*(100/1100) = 1.09 V  (dominant)
+        # When V_ctrl=11.5:  n_bus \u2248 11.55 V               (recessive)
+        "netlist": (
+            "* LIN ASIC - LIN Transceiver Bus Testbench\n"
+            "* LIN bus dominant (~1 V) / recessive (~12 V) signaling\n"
+            "VBAT    n_vbat  0       DC 12\n"
+            "V_ctrl  n_ctrl  0       PULSE(0 11.5 50n 2n 2n 200n 400n)\n"
+            "R_pullup n_vbat n_bus   1k\n"
+            "R_drv    n_ctrl n_bus   100\n"
+            "C_bus    n_bus  0       200p\n"
+            ".TRAN 5n 1200n\n"
+        ),
+        "settings": {"tstop": 1.2e-6, "tstep": 5e-9},
+        "output_node": "V(n_bus)",
+        # Special: check peak AND valley rather than steady mean
+        "spec": {"bus_high_min": 10.0, "bus_low_max": 2.0, "label": "V_bus"},
+    },
+}
+
 
 def _append_auto_correction(action: str, status: str, detail: str, source: str):
     """Record a corrective action attempt/result."""
@@ -292,6 +428,79 @@ def _error_monitor_loop():
             _scan_and_correct_errors()
         except Exception as exc:
             _append_auto_correction("monitor-loop", "failed", str(exc), "monitor")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  ASIC simulation helpers
+# ──────────────────────────────────────────────────────────────────────────────
+
+def _evaluate_block(block_name: str, spec: dict, results: dict) -> dict:
+    """Measure key quantities from a block transient simulation result."""
+    import numpy as np
+
+    output_node = spec.get("output_node", "")
+    measurements: dict = {}
+
+    values_raw = results.get(output_node)
+    if values_raw is None:
+        return measurements
+
+    values = np.asarray(values_raw, dtype=float)
+    time_raw = results.get("time")
+    time = np.asarray(time_raw, dtype=float) if time_raw is not None else np.array([])
+
+    if values.size == 0:
+        return measurements
+
+    measurements["output_peak"] = float(np.max(values))
+    measurements["output_valley"] = float(np.min(values))
+    measurements["output_final"] = float(values[-1])
+
+    # Steady-state mean: last 30 % of time window
+    n_ss = max(1, int(len(values) * 0.30))
+    ss = values[-n_ss:]
+    measurements["output_steady_mean"] = float(np.mean(ss))
+    measurements["output_steady_std"] = float(np.std(ss))
+
+    # Settling time: first index where signal stays within ±5 % of final mean
+    target = float(np.mean(ss))
+    if abs(target) > 1e-9:
+        band = 0.05 * abs(target)
+        settled = np.abs(values - target) <= band
+        idxs = np.where(settled)[0]
+        if idxs.size > 0:
+            candidate = idxs[0]
+            # confirm it stays settled for the rest of the window
+            remaining = values[candidate:]
+            if np.sum(np.abs(remaining - target) > band) / len(remaining) < 0.05:
+                if time.size > candidate:
+                    measurements["settling_time_ns"] = float(time[candidate] * 1e9)
+
+    return measurements
+
+
+def _check_block_pass(block_name: str, spec: dict, meas: dict) -> bool:
+    """Return True if block measurements satisfy the spec."""
+    block_spec = spec.get("spec", {})
+
+    # LIN transceiver: check peak and valley
+    if block_name == "lin_transceiver":
+        high_min = block_spec.get("bus_high_min", 10.0)
+        low_max = block_spec.get("bus_low_max", 2.0)
+        return (meas.get("output_peak", 0) >= high_min and
+                meas.get("output_valley", 999) <= low_max)
+
+    # All LDO / bandgap blocks: check steady-state mean
+    out_min = block_spec.get("output_min")
+    out_max = block_spec.get("output_max")
+    mean = meas.get("output_steady_mean")
+    if mean is None:
+        return False
+    if out_min is not None and mean < out_min:
+        return False
+    if out_max is not None and mean > out_max:
+        return False
+    return True
 
 
 def _serialize_results(results: dict) -> dict:
@@ -861,32 +1070,302 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         }
         self._send_json({"blocks": blocks})
 
+    # ================================================================
+    #  ASIC-specific endpoints
+    # ================================================================
+
+    def _handle_asic_info(self):
+        """GET /api/asic/info — Return LIN ASIC architecture overview."""
+        info = {
+            "chip": "LIN_ASIC",
+            "technology": "generic180",
+            "blocks": [
+                {
+                    "block": name,
+                    "name": spec["name"],
+                    "icon": spec["icon"],
+                    "description": spec["description"],
+                    "what_is_tested": spec["what_is_tested"],
+                    "test_type": spec["test_type"],
+                    "spec": spec["spec"],
+                }
+                for name, spec in _ASIC_BLOCK_TESTS.items()
+            ],
+            "test_results_available": len(_asic_test_results) > 0,
+        }
+        self._send_json(info)
+
+    def _handle_asic_load(self, body: dict):
+        """POST /api/asic/load — Load LIN ASIC hierarchy into schematic tabs.
+
+        Opens one tab per block (using the actual SUBCKT netlists from
+        designs/lin_asic/blocks/) plus a top-level tab.  All GUI work is
+        scheduled on the Qt main thread via QTimer.singleShot.
+        """
+        if not _main_window:
+            self._send_json({"error": "No GUI available"}, 503)
+            return
+
+        from PyQt6.QtCore import QTimer
+
+        designs_dir = (
+            Path(__file__).parent.parent.parent / "designs" / "lin_asic"
+        )
+
+        # Map block name → spice file (try multiple candidate paths)
+        _spice_candidates = {
+            "bandgap":        ["blocks/bandgap_ref.spice", "blocks/bandgap/bandgap.spice"],
+            "ldo_analog":     ["blocks/ldo_analog.spice",  "blocks/ldo_analog/ldo_analog.spice"],
+            "ldo_digital":    ["blocks/ldo_digital.spice", "blocks/ldo_digital/ldo_digital.spice"],
+            "ldo_lin":        ["blocks/ldo_lin.spice",     "blocks/ldo_lin/ldo_lin.spice"],
+            "lin_transceiver":["blocks/lin_transceiver.spice",
+                               "blocks/lin_transceiver/lin_transceiver.spice"],
+        }
+
+        loaded_tabs: list = []
+
+        # Top-level tab first
+        top_file = designs_dir / "lin_asic_top.spice"
+        top_netlist = top_file.read_text() if top_file.exists() else ""
+        loaded_tabs.append(("★ LIN ASIC — Top Level", top_netlist))
+
+        for block_name, spec in _ASIC_BLOCK_TESTS.items():
+            netlist = ""
+            for candidate in _spice_candidates.get(block_name, []):
+                p = designs_dir / candidate
+                if p.exists():
+                    netlist = p.read_text()
+                    break
+            tab_label = f"[{spec['icon']}] {spec['name']}"
+            loaded_tabs.append((tab_label, netlist))
+
+        def _load_on_gui():
+            try:
+                for tab_name, netlist in loaded_tabs:
+                    _main_window.load_block_tab(tab_name, netlist)
+                # Switch to the top-level tab (last index - len(tabs) + 1)
+                total = _main_window.schematic_tabs.count()
+                first_asic = total - len(loaded_tabs)
+                if first_asic >= 0:
+                    _main_window.schematic_tabs.setCurrentIndex(first_asic)
+                _main_window.statusbar.showMessage(
+                    f"LIN ASIC loaded: {len(loaded_tabs)} tabs opened"
+                )
+            except Exception as exc:
+                _record_error("asic_load", str(exc), traceback.format_exc())
+
+        QTimer.singleShot(0, _load_on_gui)
+        self._send_json({
+            "status": "loading",
+            "tabs": [t[0] for t in loaded_tabs],
+            "message": f"Scheduled {len(loaded_tabs)} block tabs on GUI thread",
+        })
+
+    def _handle_asic_simulate(self, body: dict):
+        """POST /api/asic/simulate — Run all LIN ASIC block simulations.
+
+        Runs a TRANSIENT analysis for each block using a self-contained
+        functional testbench netlist.  Results are stored in
+        ``_asic_test_results`` and, if *open_waveforms* is True and a GUI
+        window is available, each block's waveform is displayed in its own
+        standalone window.
+
+        Body (all optional):
+            blocks (list[str]) – run only these blocks (default: all)
+            open_waveforms (bool) – open a separate waveform window per block
+        """
+        global _asic_test_results
+
+        from simulator.engine.analog_engine import AnalogEngine, TransientAnalysis
+        from PyQt6.QtCore import QTimer
+
+        blocks_filter = body.get("blocks")  # None = run all
+        open_waveforms = body.get("open_waveforms", False)
+
+        _asic_test_results = []
+
+        for block_name, spec in _ASIC_BLOCK_TESTS.items():
+            if blocks_filter and block_name not in blocks_filter:
+                continue
+
+            t_start = _time.time()
+            entry: dict = {
+                "block": block_name,
+                "name": spec["name"],
+                "description": spec["description"],
+                "what_is_tested": spec["what_is_tested"],
+                "test_type": spec["test_type"],
+                "spec": spec["spec"],
+                "status": "ERROR",
+                "measurements": {},
+                "waveform_signals": [],
+                "error": None,
+                "elapsed_ms": 0.0,
+                "timestamp": _time.time(),
+            }
+
+            try:
+                engine = AnalogEngine()
+                engine.load_netlist(spec["netlist"])
+                analysis = TransientAnalysis(engine)
+                sim_results = analysis.run(spec["settings"])
+
+                meas = _evaluate_block(block_name, spec, sim_results)
+                passed = _check_block_pass(block_name, spec, meas)
+
+                entry["status"] = "PASS" if passed else "FAIL"
+                entry["measurements"] = meas
+                entry["waveform_signals"] = [
+                    k for k in sim_results if k not in {"type", "time"}
+                ]
+                # Include serialisable copy of results for waveform display
+                entry["simulation_results"] = _serialize_results(sim_results)
+
+                # Open waveform window on GUI thread if requested
+                if open_waveforms and _main_window:
+                    title = spec["name"]
+                    _sim_copy = dict(sim_results)
+
+                    def _open_window(t=title, r=_sim_copy):
+                        _main_window.run_netlist_in_window(r, t)
+
+                    QTimer.singleShot(0, _open_window)
+
+            except Exception as exc:
+                entry["status"] = "ERROR"
+                entry["error"] = str(exc)
+                _record_error("asic_simulate", str(exc), traceback.format_exc())
+
+            entry["elapsed_ms"] = round((_time.time() - t_start) * 1000, 1)
+            _asic_test_results.append(entry)
+
+        passed_count = sum(1 for e in _asic_test_results if e["status"] == "PASS")
+        total_count = len(_asic_test_results)
+
+        self._send_json({
+            "status": "completed",
+            "blocks_tested": total_count,
+            "blocks_passed": passed_count,
+            "blocks_failed": total_count - passed_count,
+            "results": _asic_test_results,
+        })
+
+    def _handle_asic_test_report(self):
+        """GET /api/asic/test-report — Structured pass/fail report."""
+        if not _asic_test_results:
+            self._send_json(
+                {"error": "No ASIC simulation results yet. "
+                          "Call POST /api/asic/simulate first."}, 404
+            )
+            return
+
+        passed = [e for e in _asic_test_results if e["status"] == "PASS"]
+        failed = [e for e in _asic_test_results if e["status"] == "FAIL"]
+        errors = [e for e in _asic_test_results if e["status"] == "ERROR"]
+
+        report = {
+            "chip": "LIN_ASIC",
+            "summary": {
+                "total": len(_asic_test_results),
+                "passed": len(passed),
+                "failed": len(failed),
+                "errors": len(errors),
+                "overall": "PASS" if (len(failed) == 0 and len(errors) == 0) else "FAIL",
+            },
+            "blocks": [
+                {
+                    "block": e["block"],
+                    "name": e["name"],
+                    "what_is_tested": e["what_is_tested"],
+                    "test_type": e["test_type"],
+                    "status": e["status"],
+                    "spec": e["spec"],
+                    "measurements": e["measurements"],
+                    "elapsed_ms": e["elapsed_ms"],
+                    "error": e.get("error"),
+                }
+                for e in _asic_test_results
+            ],
+        }
+        self._send_json(report)
+
+    def _handle_asic_waveform_window(self, body: dict):
+        """POST /api/asic/waveform-window — Show a block's waveform in a new window.
+
+        Body:
+            block (str) – block name from _ASIC_BLOCK_TESTS
+        """
+        if not _main_window:
+            self._send_json({"error": "No GUI available"}, 503)
+            return
+
+        block_name = body.get("block")
+        if not block_name:
+            self._send_json({"error": "block is required"}, 400)
+            return
+
+        # Find the stored results
+        entry = next(
+            (e for e in _asic_test_results if e["block"] == block_name), None
+        )
+        if not entry:
+            self._send_json(
+                {"error": f"No results for block '{block_name}'. "
+                          "Run POST /api/asic/simulate first."}, 404
+            )
+            return
+
+        sim_results = entry.get("simulation_results")
+        if not sim_results:
+            self._send_json({"error": "No simulation data stored for this block."}, 404)
+            return
+
+        from PyQt6.QtCore import QTimer
+
+        title = entry["name"]
+        _r = dict(sim_results)
+
+        def _open():
+            _main_window.run_netlist_in_window(_r, title)
+
+        QTimer.singleShot(0, _open)
+        self._send_json({
+            "status": "opening",
+            "block": block_name,
+            "title": title,
+        })
+
 
 # Wire up route tables after the class body is defined
 SimulatorAPIHandler._GET_ROUTES = {
-    "/api/status":         SimulatorAPIHandler._handle_status,
-    "/api/circuits":       SimulatorAPIHandler._handle_list_circuits,
-    "/api/results":        SimulatorAPIHandler._handle_get_results,
-    "/api/schematic/info": SimulatorAPIHandler._handle_schematic_info,
-    "/api/netlist":        SimulatorAPIHandler._handle_get_netlist,
-    "/api/waveform/info":  SimulatorAPIHandler._handle_waveform_info,
-    "/api/errors":         SimulatorAPIHandler._handle_get_errors,
-    "/api/errors/monitor": SimulatorAPIHandler._handle_error_monitor_status,
-    "/api/auto-design/blocks": SimulatorAPIHandler._handle_list_blocks,
+    "/api/status":              SimulatorAPIHandler._handle_status,
+    "/api/circuits":            SimulatorAPIHandler._handle_list_circuits,
+    "/api/results":             SimulatorAPIHandler._handle_get_results,
+    "/api/schematic/info":      SimulatorAPIHandler._handle_schematic_info,
+    "/api/netlist":             SimulatorAPIHandler._handle_get_netlist,
+    "/api/waveform/info":       SimulatorAPIHandler._handle_waveform_info,
+    "/api/errors":              SimulatorAPIHandler._handle_get_errors,
+    "/api/errors/monitor":      SimulatorAPIHandler._handle_error_monitor_status,
+    "/api/auto-design/blocks":  SimulatorAPIHandler._handle_list_blocks,
+    "/api/asic/info":           SimulatorAPIHandler._handle_asic_info,
+    "/api/asic/test-report":    SimulatorAPIHandler._handle_asic_test_report,
 }
 SimulatorAPIHandler._POST_ROUTES = {
-    "/api/circuits/load":       SimulatorAPIHandler._handle_load_circuit,
-    "/api/simulate":            SimulatorAPIHandler._handle_simulate,
-    "/api/schematic/component": SimulatorAPIHandler._handle_add_component,
-    "/api/schematic/clear":     SimulatorAPIHandler._handle_clear_schematic,
-    "/api/netlist/load":        SimulatorAPIHandler._handle_load_netlist,
-    "/api/export/schematic":    SimulatorAPIHandler._handle_export_schematic,
-    "/api/export/waveform":     SimulatorAPIHandler._handle_export_waveform,
-    "/api/export/csv":          SimulatorAPIHandler._handle_export_csv,
-    "/api/errors/clear":        SimulatorAPIHandler._handle_clear_errors,
-    "/api/errors/scan":         SimulatorAPIHandler._handle_scan_errors,
-    "/api/errors/monitor":      SimulatorAPIHandler._handle_error_monitor_control,
-    "/api/auto-design":         SimulatorAPIHandler._handle_auto_design,
+    "/api/circuits/load":         SimulatorAPIHandler._handle_load_circuit,
+    "/api/simulate":              SimulatorAPIHandler._handle_simulate,
+    "/api/schematic/component":   SimulatorAPIHandler._handle_add_component,
+    "/api/schematic/clear":       SimulatorAPIHandler._handle_clear_schematic,
+    "/api/netlist/load":          SimulatorAPIHandler._handle_load_netlist,
+    "/api/export/schematic":      SimulatorAPIHandler._handle_export_schematic,
+    "/api/export/waveform":       SimulatorAPIHandler._handle_export_waveform,
+    "/api/export/csv":            SimulatorAPIHandler._handle_export_csv,
+    "/api/errors/clear":          SimulatorAPIHandler._handle_clear_errors,
+    "/api/errors/scan":           SimulatorAPIHandler._handle_scan_errors,
+    "/api/errors/monitor":        SimulatorAPIHandler._handle_error_monitor_control,
+    "/api/auto-design":           SimulatorAPIHandler._handle_auto_design,
+    "/api/asic/load":             SimulatorAPIHandler._handle_asic_load,
+    "/api/asic/simulate":         SimulatorAPIHandler._handle_asic_simulate,
+    "/api/asic/waveform-window":  SimulatorAPIHandler._handle_asic_waveform_window,
 }
 
 
