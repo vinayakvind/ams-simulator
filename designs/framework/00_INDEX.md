@@ -30,6 +30,7 @@ Each design follows an indexed, step-by-step flow from architecture to signoff.
 |--------|---------|
 | `../../scripts/copilot_cli_watchdog.py` | Supervise long-running Copilot CLI or agent commands, restart on stop/stall, gate on premium threshold |
 | `../../scripts/repo_backup_guard.py` | Detect major repository changes and auto-commit/push backup snapshots |
+| `../../scripts/verify_project_status.py` | Verify that key deliverables exist, repo is synced, and the API smoke test passes |
 
 ## Templates
 
