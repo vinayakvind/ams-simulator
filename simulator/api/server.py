@@ -672,8 +672,47 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         if not _main_window:
             self._send_json({"error": "No GUI available"}, 503)
             return
-        netlist = _main_window.netlist_viewer.get_netlist()
-        self._send_json({"netlist": netlist})
+        # Prefer the active schematic editor's generated netlist so callers see
+        # what is currently rendered on the canvas (any loaded block tab).
+        try:
+            active_netlist = _main_window.schematic_editor.generate_netlist()
+            tab_index = _main_window.schematic_tabs.currentIndex()
+            tab_name  = _main_window.schematic_tabs.tabText(tab_index)
+            component_count = len(_main_window.schematic_editor._components)
+        except Exception:
+            active_netlist = _main_window.netlist_viewer.get_netlist()
+            tab_name = "unknown"
+            component_count = 0
+        self._send_json({
+            "netlist": active_netlist,
+            "active_tab": tab_name,
+            "component_count": component_count,
+        })
+
+    def _handle_schematic_tabs(self):
+        """GET /api/schematic/tabs — list all open schematic tabs with component counts."""
+        if not _main_window:
+            self._send_json({"error": "No GUI available"}, 503)
+            return
+        tabs_info = []
+        try:
+            tab_widget = _main_window.schematic_tabs
+            current_idx = tab_widget.currentIndex()
+            for i in range(tab_widget.count()):
+                editor = tab_widget.widget(i)
+                comp_count = len(editor._components) if hasattr(editor, "_components") else 0
+                wire_count = len(editor._wires) if hasattr(editor, "_wires") else 0
+                tabs_info.append({
+                    "index": i,
+                    "name": tab_widget.tabText(i),
+                    "active": (i == current_idx),
+                    "component_count": comp_count,
+                    "wire_count": wire_count,
+                })
+        except Exception as exc:
+            self._send_json({"error": str(exc)}, 500)
+            return
+        self._send_json({"tabs": tabs_info, "total": len(tabs_info)})
 
     def _handle_waveform_info(self):
         """Signal list with min/max/mean from results or GUI viewer."""
@@ -1342,6 +1381,7 @@ SimulatorAPIHandler._GET_ROUTES = {
     "/api/circuits":            SimulatorAPIHandler._handle_list_circuits,
     "/api/results":             SimulatorAPIHandler._handle_get_results,
     "/api/schematic/info":      SimulatorAPIHandler._handle_schematic_info,
+    "/api/schematic/tabs":      SimulatorAPIHandler._handle_schematic_tabs,
     "/api/netlist":             SimulatorAPIHandler._handle_get_netlist,
     "/api/waveform/info":       SimulatorAPIHandler._handle_waveform_info,
     "/api/errors":              SimulatorAPIHandler._handle_get_errors,

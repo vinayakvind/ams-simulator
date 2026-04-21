@@ -1190,6 +1190,14 @@ class SchematicEditor(QGraphicsView):
                 continue
             element_lines.append(stripped)
 
+        # ── Phase 1.5: For pure-SUBCKT files (block hierarchy view) ──
+        # When the file contains only .SUBCKT/.ENDS definitions with no top-level
+        # element lines (e.g. a block cell file), flatten the first SUBCKT body so
+        # the schematic editor can render the internal circuit.
+        if not element_lines and subcircuits:
+            _, first_body = next(iter(subcircuits.values()))
+            element_lines = [ln for ln in first_body if not ln.strip().startswith('.')]
+
         # ── Phase 2: Expand X_ subcircuit instances inline ──
         expanded_lines: list[str] = []
         for eline in element_lines:
