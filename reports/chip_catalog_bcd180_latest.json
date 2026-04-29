@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-04-30T00:48:47.272355",
+  "generated_at": "2026-04-30T00:52:29.263164",
   "technology_filter": "bcd180",
   "summary": {
     "technology_count": 4,
-    "reusable_ip_count": 15,
-    "verification_ip_count": 6,
-    "digital_subsystem_count": 3,
-    "chip_profile_count": 5,
-    "compatible_ip_count": 15,
-    "compatible_digital_subsystem_count": 3,
-    "compatible_chip_profile_count": 5
+    "reusable_ip_count": 30,
+    "verification_ip_count": 13,
+    "digital_subsystem_count": 7,
+    "chip_profile_count": 10,
+    "compatible_ip_count": 30,
+    "compatible_digital_subsystem_count": 7,
+    "compatible_chip_profile_count": 10
   },
   "technologies": [
     {
@@ -38,6 +38,33 @@
     }
   ],
   "reusable_ips": [
+    {
+      "name": "Analog Multiplexer",
+      "domain": "analog",
+      "category": "interface",
+      "generator": "analog_mux",
+      "ports": [
+        "VDD",
+        "GND",
+        "SEL",
+        "IN",
+        "OUT"
+      ],
+      "aliases": [
+        "mux",
+        "analog_switch"
+      ],
+      "description": "High-speed analog switch matrix for channel selection.",
+      "role": "Routes multiple analog signals to a single converter or processing path.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "analog_multiplexer",
+      "compatible": true
+    },
     {
       "name": "Bandgap Reference",
       "domain": "analog",
@@ -82,6 +109,113 @@
         "bcd180"
       ],
       "key": "buck_converter",
+      "compatible": true
+    },
+    {
+      "name": "CAN Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "can_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "txd",
+        "rxd",
+        "int_n"
+      ],
+      "aliases": [
+        "can"
+      ],
+      "description": "CAN protocol engine for automotive messaging.",
+      "role": "Implements CAN 2.0A/B protocol state machine and frame handling.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "can_controller",
+      "compatible": true
+    },
+    {
+      "name": "CAN Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "can_transceiver",
+      "ports": [
+        "VDD",
+        "GND",
+        "TXD",
+        "RXD",
+        "CANH",
+        "CANL",
+        "EN"
+      ],
+      "aliases": [
+        "can_txrx",
+        "can_phy"
+      ],
+      "description": "CAN bus physical layer interface for automotive networking.",
+      "role": "Bridges digital CAN protocol signals to automotive CAN bus.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "can_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "Charge Pump",
+      "domain": "analog",
+      "category": "power",
+      "generator": "charge_pump",
+      "ports": [
+        "VDD",
+        "GND",
+        "VOUT",
+        "CLK",
+        "EN"
+      ],
+      "aliases": [
+        "pump",
+        "voltage_multiplier"
+      ],
+      "description": "Switched-capacitor voltage converter for high-voltage generation.",
+      "role": "Creates higher-voltage rails or negative voltages from single-supply sources.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "charge_pump",
+      "compatible": true
+    },
+    {
+      "name": "Clock Divider",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "clock_divider",
+      "ports": [
+        "clk_in",
+        "rst_n",
+        "div_ratio",
+        "clk_out"
+      ],
+      "aliases": [
+        "clkdiv"
+      ],
+      "description": "Programmable clock frequency divider for multi-rate systems.",
+      "role": "Generates slower clock domains for power-efficient processing.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "clock_divider",
       "compatible": true
     },
     {
@@ -132,6 +266,32 @@
       "compatible": true
     },
     {
+      "name": "Current Mirror",
+      "domain": "analog",
+      "category": "bias",
+      "generator": "current_mirror",
+      "ports": [
+        "VDD",
+        "GND",
+        "I_IN",
+        "I_OUT"
+      ],
+      "aliases": [
+        "current_source",
+        "bias_cell"
+      ],
+      "description": "Precision current steering circuit for analog bias and reference generation.",
+      "role": "Duplicates reference currents for distributed bias across analog blocks.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "current_mirror",
+      "compatible": true
+    },
+    {
       "name": "R-2R DAC 4-bit",
       "domain": "analog",
       "category": "converter",
@@ -149,6 +309,61 @@
         "bcd180"
       ],
       "key": "dac_r2r_4bit",
+      "compatible": true
+    },
+    {
+      "name": "I2C Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "i2c_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "scl",
+        "sda",
+        "int_n"
+      ],
+      "aliases": [
+        "i2c",
+        "iic"
+      ],
+      "description": "I2C master/slave interface for sensor and peripheral communication.",
+      "role": "Provides inter-chip communication for multi-device sensor platforms.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "i2c_controller",
+      "compatible": true
+    },
+    {
+      "name": "Interrupt Controller",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "interrupt_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "int_req",
+        "int_mask",
+        "int_stat",
+        "int_prio"
+      ],
+      "aliases": [
+        "intc",
+        "irq_controller"
+      ],
+      "description": "Prioritized interrupt dispatcher for multi-source event handling.",
+      "role": "Arbitrates and prioritizes multiple interrupt sources to CPU.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "interrupt_controller",
       "compatible": true
     },
     {
@@ -283,6 +498,114 @@
         "bcd180"
       ],
       "key": "lin_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "Low-Pass Filter",
+      "domain": "analog",
+      "category": "filter",
+      "generator": "lpf_rc",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND"
+      ],
+      "aliases": [
+        "lpf",
+        "rc_filter"
+      ],
+      "description": "RC low-pass filter for noise rejection and anti-aliasing.",
+      "role": "Attenuates high-frequency noise before ADC input or sensitive analog nodes.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "low_pass_filter",
+      "compatible": true
+    },
+    {
+      "name": "Memory Compiler",
+      "domain": "digital",
+      "category": "storage",
+      "generator": "memory_compiler",
+      "ports": [
+        "clk",
+        "rst_n",
+        "addr",
+        "din",
+        "dout",
+        "wr_en",
+        "rd_en"
+      ],
+      "aliases": [
+        "sram",
+        "memory"
+      ],
+      "description": "Embedded SRAM macro for configuration and data storage.",
+      "role": "Provides local storage for register settings, calibration, and runtime state.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "memory_compiler",
+      "compatible": true
+    },
+    {
+      "name": "Operational Amplifier",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "opamp",
+      "ports": [
+        "VDD",
+        "VSS",
+        "VIN_P",
+        "VIN_N",
+        "VOUT",
+        "VBIAS"
+      ],
+      "aliases": [
+        "opamp",
+        "op_amp"
+      ],
+      "description": "Reusable operational amplifier macro for instrumentation and filtering.",
+      "role": "Provides high-gain analog signal processing for sensor conditioning.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "operational_amplifier",
+      "compatible": true
+    },
+    {
+      "name": "Precision Voltage Reference",
+      "domain": "analog",
+      "category": "reference",
+      "generator": "precision_vref",
+      "ports": [
+        "VDD",
+        "GND",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "vref",
+        "precision_ref"
+      ],
+      "description": "High-accuracy voltage reference for data converters and comparators.",
+      "role": "Provides calibrated reference voltage for precision analog circuits.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "precision_voltage_reference",
       "compatible": true
     },
     {
@@ -470,6 +793,87 @@
       ],
       "key": "spi_controller",
       "compatible": true
+    },
+    {
+      "name": "Temperature Sensor",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "temperature_sensor",
+      "ports": [
+        "VDD",
+        "GND",
+        "TEMP_OUT",
+        "EN"
+      ],
+      "aliases": [
+        "temp_sensor",
+        "temp_mon"
+      ],
+      "description": "On-die temperature sensor for thermal monitoring and protection.",
+      "role": "Provides die temperature feedback for power sequencing and thermal shutdown.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "temperature_sensor",
+      "compatible": true
+    },
+    {
+      "name": "UART Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "uart_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "tx",
+        "rx",
+        "cts_n",
+        "rts_n"
+      ],
+      "aliases": [
+        "uart",
+        "serial"
+      ],
+      "description": "UART/serial interface for host communication.",
+      "role": "Provides serial debug and data port to external host or console.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "uart_controller",
+      "compatible": true
+    },
+    {
+      "name": "Watchdog Timer",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "watchdog_timer",
+      "ports": [
+        "clk",
+        "rst_n",
+        "wd_en",
+        "wd_kick",
+        "wd_rst_n"
+      ],
+      "aliases": [
+        "watchdog",
+        "wdt"
+      ],
+      "description": "System watchdog for fault detection and recovery.",
+      "role": "Monitors system health and forces reset on timeout for robustness.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "watchdog_timer",
+      "compatible": true
     }
   ],
   "verification_ips": [
@@ -496,6 +900,72 @@
       "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
       "description": "Turns a block verification spec into a normalized regression artifact.",
       "key": "analog_snapshot_vip"
+    },
+    {
+      "name": "CAN Verification IP",
+      "protocol": "CAN",
+      "checks": [
+        "arbitration",
+        "frame format",
+        "bit stuffing",
+        "CRC validation",
+        "acknowledgment"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates CAN 2.0 protocol compliance, messaging, and bus arbitration.",
+      "key": "can_vip"
+    },
+    {
+      "name": "Clock Monitoring VIP",
+      "protocol": "Clock/Oscillator",
+      "checks": [
+        "frequency accuracy",
+        "phase continuity",
+        "jitter metrics",
+        "duty cycle"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Monitors oscillator and clock divider performance across corners.",
+      "key": "clock_monitoring_vip"
+    },
+    {
+      "name": "Current Consumption VIP",
+      "protocol": "Power monitoring",
+      "checks": [
+        "quiescent current",
+        "dynamic current",
+        "power sequencing",
+        "inrush limiting"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Measures steady-state and transient current consumption across all rails.",
+      "key": "current_consumption_vip"
+    },
+    {
+      "name": "Digital Subsystem VIP",
+      "protocol": "Digital verification",
+      "checks": [
+        "timing compliance",
+        "reset sequencing",
+        "state machine coverage",
+        "functional correctness"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates digital logic timing, sequencing, and functional behavior.",
+      "key": "digital_subsystem_vip"
+    },
+    {
+      "name": "I2C Verification IP",
+      "protocol": "I2C",
+      "checks": [
+        "start and stop conditions",
+        "acknowledge handshake",
+        "data framing",
+        "clock stretching"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates I2C master/slave protocol compliance and timing.",
+      "key": "i2c_vip"
     },
     {
       "name": "LIN Verification IP",
@@ -544,9 +1014,54 @@
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
       "description": "Exercises the serial programming path and register map visibility.",
       "key": "spi_vip"
+    },
+    {
+      "name": "Thermal Monitoring VIP",
+      "protocol": "Temperature monitoring",
+      "checks": [
+        "temp sensor accuracy",
+        "shutdown threshold",
+        "hysteresis",
+        "rise time"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates temperature sensor linearity and thermal shutdown protection.",
+      "key": "thermal_monitoring_vip"
+    },
+    {
+      "name": "UART Verification IP",
+      "protocol": "UART",
+      "checks": [
+        "frame formation",
+        "baud rate accuracy",
+        "parity checking",
+        "flow control"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Exercises serial communication framing, timing, and error handling.",
+      "key": "uart_vip"
     }
   ],
   "digital_subsystems": [
+    {
+      "name": "CAN Node Control Plane",
+      "blocks": [
+        "can_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Automotive CAN node with messaging, configuration, and interrupt handling.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "can_node_control_plane",
+      "compatible": true
+    },
     {
       "name": "Converter Control Plane",
       "blocks": [
@@ -562,6 +1077,24 @@
         "bcd180"
       ],
       "key": "converter_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "I2C Sensor Interface",
+      "blocks": [
+        "i2c_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "I2C master/slave subsystem for multi-sensor coordination and data aggregation.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "i2c_sensor_interface",
       "compatible": true
     },
     {
@@ -598,9 +1131,203 @@
       ],
       "key": "sensor_hub_control_plane",
       "compatible": true
+    },
+    {
+      "name": "Thermal Management Plane",
+      "blocks": [
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Temperature monitoring and thermal shutdown sequencing with interrupt integration.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "thermal_management_plane",
+      "compatible": true
+    },
+    {
+      "name": "UART Debug Interface",
+      "blocks": [
+        "uart_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Serial debug and telemetry port for system diagnostics and characterization.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "uart_debug_interface",
+      "compatible": true
     }
   ],
   "chip_profiles": [
+    {
+      "name": "Analog Signal Conditioner",
+      "summary": "Mixed-signal front-end combining precision references, filters, multiplexers, and ADCs.",
+      "headline": "Reusable analog front-end macro for precision measurement and signal conditioning.",
+      "narrative": "This profile assembles precision analog infrastructure\u2014references, op-amps, filters, multiplexers, and ADCs\u2014for sensor signal conditioning in measurement and industrial applications.",
+      "standard": "Internal analog front-end architecture reference",
+      "tags": [
+        "analog",
+        "conditioning",
+        "precision",
+        "measurement",
+        "adc"
+      ],
+      "blocks": [
+        "bandgap",
+        "precision_voltage_reference",
+        "operational_amplifier",
+        "low_pass_filter",
+        "analog_multiplexer",
+        "sar_adc_top",
+        "current_mirror"
+      ],
+      "vips": [
+        "adc_transient_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "converter_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "analog_signal_conditioner",
+      "compatible": true
+    },
+    {
+      "name": "CAN Automotive Node",
+      "summary": "CAN-enabled automotive controller with transceiver, messaging, and thermal protection.",
+      "headline": "Integrated CAN node assembly with automotive-grade reliability and multi-protocol support.",
+      "narrative": "This profile combines CAN transceiver and controller with thermal monitoring, watchdog, and multi-channel analog monitoring for robust automotive embedded applications.",
+      "standard": "ISO 11898-1 CAN 2.0, ISO 26262 ASIL-B capable",
+      "tags": [
+        "automotive",
+        "can",
+        "mixed-signal",
+        "reliability",
+        "thermal-safe"
+      ],
+      "blocks": [
+        "can_transceiver",
+        "can_controller",
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "can_vip",
+        "thermal_monitoring_vip",
+        "spi_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "can_node_control_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "can_automotive_node",
+      "compatible": true
+    },
+    {
+      "name": "Debug Console Interface",
+      "summary": "UART-based debug and telemetry interface with register access and event logging.",
+      "headline": "Reusable debug interface combining UART, SPI, and control plane for system diagnostics.",
+      "narrative": "This profile provides a minimal but functional debug and telemetry framework combining serial and parallel register-access methods for lab characterization and field diagnostics.",
+      "standard": "UART 16550 compatible, SPI protocol",
+      "tags": [
+        "debug",
+        "uart",
+        "spi",
+        "telemetry",
+        "control-plane"
+      ],
+      "blocks": [
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "uart_vip",
+        "spi_vip",
+        "digital_subsystem_vip"
+      ],
+      "digital_subsystems": [
+        "uart_debug_interface"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "debug_console_interface",
+      "compatible": true
+    },
+    {
+      "name": "High-Voltage Power Supply",
+      "summary": "Automotive high-voltage supply combining buck converter, LDO, charge pump, and protection.",
+      "headline": "Reusable high-voltage PMIC assembly for automotive battery-powered systems.",
+      "narrative": "This profile starts a high-voltage PMIC from buck, charge pump, and multi-rail LDO infrastructure for automotive battery-connected applications with integrated power sequencing.",
+      "standard": "ISO 7637 transient immunity, internal PMIC spec",
+      "tags": [
+        "pmic",
+        "hv",
+        "power",
+        "automotive",
+        "protection"
+      ],
+      "blocks": [
+        "bandgap",
+        "buck_converter",
+        "charge_pump",
+        "ldo_analog",
+        "ldo_digital",
+        "watchdog_timer",
+        "temperature_sensor",
+        "control_logic",
+        "register_file"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "high_voltage_power_supply",
+      "compatible": true
+    },
     {
       "name": "LIN Node ASIC",
       "summary": "Automotive LIN node with integrated analog rails, transceiver, and digital control plane.",
@@ -682,6 +1409,53 @@
         "bcd180"
       ],
       "key": "mixed_signal_sensor_hub",
+      "compatible": true
+    },
+    {
+      "name": "Multi-Sensor Hub",
+      "summary": "I2C-based sensor aggregation platform with dual data converters and temperature monitoring.",
+      "headline": "Reusable multi-sensor platform combining I2C interface, analog monitoring, and temperature protection.",
+      "narrative": "This profile builds a sensor aggregation chip from reusable I2C controller, dual ADC macros, thermal monitoring, and analog signal conditioning IPs.",
+      "standard": "I2C 3.0, internal sensor-hub architecture reference",
+      "tags": [
+        "sensor-hub",
+        "i2c",
+        "multi-channel",
+        "thermal",
+        "mixed-signal"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "i2c_controller",
+        "temperature_sensor",
+        "sar_adc_top",
+        "sigma_delta_adc_top",
+        "register_file",
+        "interrupt_controller",
+        "control_logic",
+        "low_pass_filter",
+        "analog_multiplexer"
+      ],
+      "vips": [
+        "i2c_vip",
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "thermal_monitoring_vip",
+        "spi_vip"
+      ],
+      "digital_subsystems": [
+        "i2c_sensor_interface",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "multi_sensor_hub",
       "compatible": true
     },
     {
