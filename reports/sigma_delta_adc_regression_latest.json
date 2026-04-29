@@ -1,6 +1,6 @@
 {
   "design": "sigma_delta_adc",
-  "generated_at": "2026-04-30T00:53:57.279180",
+  "generated_at": "2026-04-30T01:19:16.319854",
   "summary": {
     "total": 1,
     "passed": 1,
@@ -18,15 +18,15 @@
       "block": "sigma_delta_adc_top",
       "status": "PASS",
       "category": "Top",
-      "details": "Top-level transient snapshot for the imported Sigma-Delta ADC reference design.; time_points=157955; signals=28",
+      "details": "Top-level transient snapshot for the imported Sigma-Delta ADC reference design.; time_points=103092; signals=28",
       "measurements": {
         "signal_count": 28,
-        "time_points": 157955,
-        "input_span_v": 1.999999999973439,
-        "input_mean_v": 1.2607590966015434,
-        "output_span_v": 0.06835870378670283,
-        "output_final_v": 1.631980868244567,
-        "bitstream_mean_v": 1.6504303636181155,
+        "time_points": 103092,
+        "input_span_v": 0.5877852522924729,
+        "input_mean_v": 1.5539081915241186,
+        "output_span_v": 0.008907732826050951,
+        "output_final_v": 1.658907732826142,
+        "bitstream_mean_v": 1.662156270666165,
         "tracked_signals": "I(a$poly$e_sum), I(ae_comp), I(ae_dac), V(analog_in), I(be_comp)"
       },
       "checks": [
@@ -50,7 +50,7 @@
         },
         {
           "test": "Transient simulation produced enough samples",
-          "value": "time length=157955",
+          "value": "time length=103092",
           "pass": true,
           "unresolved": false
         }

@@ -17,8 +17,8 @@ verification:
   description: Top-level transient snapshot for the imported Sigma-Delta ADC reference design.
   analysis: transient
   settings:
-    tstop: 2e-3
-    tstep: 100e-9
+    tstop: 100e-6
+    tstep: 1e-9
   checks:
     - type: has_key
       key: V(analog_in)

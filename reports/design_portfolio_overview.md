@@ -1,6 +1,6 @@
 # Design Portfolio Overview
 
-Generated: 2026-04-30T00:53:57.343894
+Generated: 2026-04-30T01:19:16.402188
 
 ## Supported Technologies
 
@@ -41,5 +41,5 @@ Analog input is integrated against a one-bit feedback DAC, quantized into a bits
 
 | Case | Block | Status | Details |
 |------|-------|--------|---------|
-| TOP-SIGMA-DELTA-ADC | sigma_delta_adc_top | PASS | Top-level transient snapshot for the imported Sigma-Delta ADC reference design.; time_points=157955; signals=28 |
+| TOP-SIGMA-DELTA-ADC | sigma_delta_adc_top | PASS | Top-level transient snapshot for the imported Sigma-Delta ADC reference design.; time_points=103092; signals=28 |
 

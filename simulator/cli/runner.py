@@ -296,15 +296,32 @@ class SimulationRunner:
         output_path = Path(output_file)
         suffix = output_path.suffix.lower()
         
-        if suffix == '.json':
-            with open(output_path, 'w') as f:
-                json.dump(results, f, indent=2)
-        elif suffix == '.csv':
-            self._save_csv(results, output_path)
-        else:
-            # Default to JSON
-            with open(output_path, 'w') as f:
-                json.dump(results, f, indent=2)
+        # Ensure parent directory exists
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Retry logic for file writes
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if suffix == '.json':
+                    with open(str(output_path), 'w', encoding='utf-8') as f:
+                        json.dump(results, f, indent=2)
+                elif suffix == '.csv':
+                    self._save_csv(results, output_path)
+                else:
+                    # Default to JSON
+                    with open(str(output_path), 'w', encoding='utf-8') as f:
+                        json.dump(results, f, indent=2)
+                return  # Success
+            except OSError as e:
+                if attempt < max_retries - 1:
+                    import time
+                    time.sleep(0.5)  # Brief delay before retry
+                    continue
+                # On final attempt, log and re-raise
+                if self.verbose:
+                    self.log(f"Failed to save {output_file} after {max_retries} attempts: {e}")
+                raise
     
     def _save_csv(self, results: Dict[str, Any], output_path: Path):
         """Save results to CSV format."""

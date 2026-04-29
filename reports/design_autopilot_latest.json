@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-30T00:53:57.419754",
+  "generated_at": "2026-04-30T01:19:16.507180",
   "python_executable": "C:\\Users\\vinay\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
   "strict_mode": true,
   "overall": "PASS",
@@ -120,17 +120,17 @@
         {
           "path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_regression_latest.json",
           "exists": true,
-          "size_bytes": 2762
+          "size_bytes": 2763
         },
         {
           "path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_regression_latest.md",
           "exists": true,
-          "size_bytes": 834
+          "size_bytes": 835
         },
         {
           "path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_design_reference.html",
           "exists": true,
-          "size_bytes": 26719
+          "size_bytes": 26720
         }
       ],
       "report_path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_regression_latest.json",
@@ -153,7 +153,7 @@
       {
         "path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.json",
         "exists": true,
-        "size_bytes": 13153
+        "size_bytes": 13154
       },
       {
         "path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.md",
