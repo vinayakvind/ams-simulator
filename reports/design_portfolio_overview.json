@@ -1,0 +1,323 @@
+{
+  "generated_at": "2026-04-30T00:50:23.667570",
+  "supported_technologies": [
+    {
+      "name": "generic180",
+      "node": "180nm",
+      "vdd": 1.8,
+      "description": "Generic 180nm CMOS with HV options (automotive)"
+    },
+    {
+      "name": "generic130",
+      "node": "130nm",
+      "vdd": 1.2,
+      "description": "Generic 130nm CMOS"
+    },
+    {
+      "name": "generic65",
+      "node": "65nm",
+      "vdd": 1.0,
+      "description": "Generic 65nm CMOS (low-power)"
+    },
+    {
+      "name": "bcd180",
+      "node": "180nm",
+      "vdd": 1.8,
+      "description": "BCD 180nm - Bipolar/CMOS/DMOS for automotive HV"
+    }
+  ],
+  "designs": [
+    {
+      "id": "lin_asic",
+      "title": "LIN ASIC Indexed Design Reference",
+      "technology": "BCD 180nm for target architecture, generic180 for current simulation framework",
+      "summary": "Structured reference for the LIN mixed-signal ASIC so future designs can reuse the same architecture, sizing logic, operating-point targets, corner strategy, and debug order.",
+      "architecture_summary": "VBAT feeds the high-voltage LIN rail and the analog rail. The 3.3V analog rail feeds the bandgap and becomes the source for the 1.8V digital rail. Digital configuration arrives through SPI, lands in the register file, then fans into the control logic and LIN controller.",
+      "block_count": 9,
+      "latest_report": {
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "overall": "PASS"
+      },
+      "tests_by_category": {
+        "Analog": [],
+        "Digital": [],
+        "Top": [],
+        "Mixed": [],
+        "Other": [
+          {
+            "case_id": "ANA-BGR-STARTUP",
+            "block": "bandgap",
+            "status": "PASS",
+            "details": "VREF startup and settling when VDD powers on from 0\u2009V. Verifies nominal output (1.2\u2009V \u00b1\u20095\u00a0%) Mean=1.200V.",
+            "measurements": {
+              "output_peak": 1.199923327304928,
+              "output_valley": 0.0,
+              "output_final": 1.199923327304928,
+              "output_steady_mean": 1.1995376854081294,
+              "output_steady_std": 0.0003672564817803106,
+              "settling_time_ns": 634.6346346346346
+            },
+            "elapsed_ms": 73.9
+          },
+          {
+            "case_id": "ANA-LDO-3V3",
+            "block": "ldo_analog",
+            "status": "PASS",
+            "details": "Output regulation when 12 V supply powers on. Verifies VOUT = 3.3\u2009V \u00b1\u20095\u00a0% Mean=3.300V.",
+            "measurements": {
+              "output_peak": 3.300330027467641,
+              "output_valley": 0.0,
+              "output_final": 3.300330027467641,
+              "output_steady_mean": 3.300329635271439,
+              "output_steady_std": 5.714956128458279e-07,
+              "settling_time_ns": 465.0
+            },
+            "elapsed_ms": 37.7
+          },
+          {
+            "case_id": "ANA-LDO-1V8",
+            "block": "ldo_digital",
+            "status": "PASS",
+            "details": "Output regulation when 3.3 V supply powers on. Verifies VOUT = 1.8\u2009V \u00b1\u20095\u00a0% Mean=1.800V.",
+            "measurements": {
+              "output_peak": 1.8003273322422015,
+              "output_valley": 0.0,
+              "output_final": 1.8003273322422015,
+              "output_steady_mean": 1.8003273322038105,
+              "output_steady_std": 7.507567416272978e-11,
+              "settling_time_ns": 300.0
+            },
+            "elapsed_ms": 39.1
+          },
+          {
+            "case_id": "ANA-LDO-5V0",
+            "block": "ldo_lin",
+            "status": "PASS",
+            "details": "Output regulation for LIN bus driver power-up. Verifies VOUT = 5.0\u2009V \u00b1\u20095\u00a0% Mean=5.000V.",
+            "measurements": {
+              "output_peak": 4.999999744592293,
+              "output_valley": 0.0,
+              "output_final": 4.999999744592293,
+              "output_steady_mean": 4.999992138657321,
+              "output_steady_std": 9.841580766016615e-06,
+              "settling_time_ns": 555.0
+            },
+            "elapsed_ms": 40.6
+          },
+          {
+            "case_id": "ANA-LIN-BUS-SWING",
+            "block": "lin_transceiver",
+            "status": "PASS",
+            "details": "Bus voltage swing between dominant and recessive states. Verifies V_bus_high > 10\u2009V and V_bus_low < 2\u2009V High=11.486V Low=1.091V.",
+            "measurements": {
+              "output_peak": 11.48578913981755,
+              "output_valley": 1.090909090909091,
+              "output_final": 1.3088110787949285,
+              "output_steady_mean": 6.8855270703249385,
+              "output_steady_std": 3.941066135232677
+            },
+            "elapsed_ms": 22.3
+          },
+          {
+            "case_id": "DIG-SPI-DECODE",
+            "block": "spi_controller",
+            "status": "PASS",
+            "details": "SPI slave transaction decode from SCLK/MOSI/CS_N into register address/control handoff",
+            "measurements": {
+              "decoded_reg_addr": 6,
+              "decoded_reg_wdata": 0,
+              "reg_wr_final": 0,
+              "frame_bits": 16
+            }
+          },
+          {
+            "case_id": "DIG-REGFILE-CONTROL",
+            "block": "register_file",
+            "status": "PASS",
+            "details": "Reset defaults, CTRL register write, and baud-divisor fanout were exercised (mask=0x0F, baud_div=0x0234).",
+            "measurements": {
+              "default_power_mask": 15,
+              "lin_en_after_reset": 1,
+              "sleep_mode_after_write": 1,
+              "baud_div_after_write": 564
+            }
+          },
+          {
+            "case_id": "DIG-LIN-CTRL",
+            "block": "lin_controller",
+            "status": "PASS",
+            "details": "Behavioral RTL reset, state-machine bring-up, and LIN master break/sync control-path readiness",
+            "measurements": {
+              "state_after_reset": 1,
+              "txd_after_reset": 0,
+              "irq_after_reset": 0,
+              "master_mode": 1
+            }
+          },
+          {
+            "case_id": "DIG-CTRL-SEQUENCE",
+            "block": "control_logic",
+            "status": "PASS",
+            "details": "Power sequence advanced through BGR, analog LDO, digital LDO, LIN enable, then de-asserted LIN in sleep mode.",
+            "measurements": {
+              "bgr_en": 1,
+              "ldo_ana_en": 1,
+              "ldo_dig_en": 1,
+              "ldo_lin_en": 1,
+              "lin_en": 1,
+              "por_n": 1,
+              "clk_out": 1,
+              "lin_en_in_sleep": 0
+            }
+          },
+          {
+            "case_id": "TOP-MS-BRIDGE",
+            "block": "lin_mixed_signal_interface",
+            "status": "PASS",
+            "details": "Digital TXD logic level drives the analog LIN bus, and the analog bus is thresholded back into RXD logic",
+            "measurements": {
+              "bus_high_v": 11.48578913981755,
+              "bus_low_v": 1.090909090909091,
+              "txd_logic_high_v": 1.8,
+              "txd_logic_low_v": 0.0,
+              "rxd_logic_high_v": 1.8,
+              "rxd_logic_low_v": 0.0,
+              "logic_transitions": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "sar_adc",
+      "title": "SAR ADC Indexed Design Reference",
+      "technology": "generic180 baseline with portability to generic130, generic65, and bcd180 through TechMapper wrappers",
+      "summary": "Indexed reference for a SAR ADC top-level design so imported converter netlists can participate in the same architecture and results flow as other AMS designs.",
+      "architecture_summary": "Analog input is sampled, compared against a DAC trial voltage, and resolved bit by bit by SAR logic until the digital code converges. The indexed wrapper keeps this architecture reusable even when the underlying implementation file changes.",
+      "block_count": 1,
+      "latest_report": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "unresolved": 0,
+        "overall": "PASS"
+      },
+      "tests_by_category": {
+        "Analog": [],
+        "Digital": [],
+        "Top": [
+          {
+            "case_id": "TOP-SAR-ADC",
+            "block": "sar_adc_top",
+            "status": "PASS",
+            "category": "Top",
+            "details": "Top-level transient snapshot for the imported SAR ADC reference design.; time_points=3887; signals=33",
+            "measurements": {
+              "signal_count": 33,
+              "time_points": 3887,
+              "input_span_v": 0.07848814941164206,
+              "input_mean_v": 1.2885320682818846,
+              "output_span_v": 0.3021346708039474,
+              "output_final_v": 1.2507,
+              "tracked_signals": "I(a$poly$e_dac), I(ae_b5), I(ae_b6), I(ae_b7), V(analog_in)"
+            },
+            "checks": [
+              {
+                "test": "Analog input waveform captured",
+                "value": "V(analog_in)",
+                "pass": true,
+                "unresolved": false
+              },
+              {
+                "test": "Internal SAR conversion nodes are present",
+                "value": "V(dac_out)",
+                "pass": true,
+                "unresolved": false
+              },
+              {
+                "test": "Transient simulation produced enough samples",
+                "value": "time length=3887",
+                "pass": true,
+                "unresolved": false
+              }
+            ],
+            "source_path": "C:\\Users\\vinay\\My Simulator\\examples\\standard_circuits\\sar_adc.spice",
+            "raw_results_path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_sar_adc_top_transient_latest_raw.json"
+          }
+        ],
+        "Mixed": [],
+        "Other": []
+      }
+    },
+    {
+      "id": "sigma_delta_adc",
+      "title": "Sigma-Delta ADC Indexed Design Reference",
+      "technology": "generic180 baseline with portability to generic130, generic65, and bcd180 through TechMapper wrappers",
+      "summary": "Indexed reference for a Sigma-Delta ADC top-level design so imported oversampled converter netlists can participate in the same architecture and presentation flow as other AMS designs.",
+      "architecture_summary": "Analog input is integrated against a one-bit feedback DAC, quantized into a bitstream, and then low-pass filtered or decimated to reconstruct the in-band signal. The indexed wrapper keeps that architecture reusable across future implementations and technologies.",
+      "block_count": 1,
+      "latest_report": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "unresolved": 0,
+        "overall": "PASS"
+      },
+      "tests_by_category": {
+        "Analog": [],
+        "Digital": [],
+        "Top": [
+          {
+            "case_id": "TOP-SIGMA-DELTA-ADC",
+            "block": "sigma_delta_adc_top",
+            "status": "PASS",
+            "category": "Top",
+            "details": "Top-level transient snapshot for the imported Sigma-Delta ADC reference design.; time_points=157955; signals=28",
+            "measurements": {
+              "signal_count": 28,
+              "time_points": 157955,
+              "input_span_v": 1.999999999973439,
+              "input_mean_v": 1.2607590966015434,
+              "output_span_v": 0.06835870378670283,
+              "output_final_v": 1.631980868244567,
+              "bitstream_mean_v": 1.6504303636181155,
+              "tracked_signals": "I(a$poly$e_sum), I(ae_comp), I(ae_dac), V(analog_in), I(be_comp)"
+            },
+            "checks": [
+              {
+                "test": "Analog input waveform captured",
+                "value": "V(analog_in)",
+                "pass": true,
+                "unresolved": false
+              },
+              {
+                "test": "Modulator bitstream is present",
+                "value": "V(bitstream)",
+                "pass": true,
+                "unresolved": false
+              },
+              {
+                "test": "Internal sigma-delta nodes are present",
+                "value": "V(dec_filt)",
+                "pass": true,
+                "unresolved": false
+              },
+              {
+                "test": "Transient simulation produced enough samples",
+                "value": "time length=157955",
+                "pass": true,
+                "unresolved": false
+              }
+            ],
+            "source_path": "C:\\Users\\vinay\\My Simulator\\examples\\standard_circuits\\sigma_delta_adc.spice",
+            "raw_results_path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_sigma_delta_adc_top_transient_latest_raw.json"
+          }
+        ],
+        "Mixed": [],
+        "Other": []
+      }
+    }
+  ]
+}

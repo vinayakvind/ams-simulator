@@ -1,0 +1,32 @@
+block:
+  name: sar_adc_top
+  type: mixed
+  generator: ""
+  description: Top-level SAR ADC reference imported into the indexed design flow.
+  technology: generic180
+  source: examples/standard_circuits/sar_adc.spice
+ports: []
+specs:
+  resolution_bits: 8
+  sample_rate_msps: 1.0
+  input_range_v: 2.5
+verification:
+  case_id: TOP-SAR-ADC
+  category: Top
+  standard: Internal ADC architecture spec
+  description: Top-level transient snapshot for the imported SAR ADC reference design.
+  analysis: transient
+  settings:
+    tstop: 100e-6
+    tstep: 100e-9
+  checks:
+    - type: has_key
+      key: V(analog_in)
+      description: Analog input waveform captured
+    - type: has_any_key
+      keys: [V(dac_out), V(sh_out), V(comp_out)]
+      description: Internal SAR conversion nodes are present
+    - type: min_length
+      key: time
+      min: 100
+      description: Transient simulation produced enough samples

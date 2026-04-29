@@ -2,8 +2,10 @@
 Main application window for the AMS Simulator.
 """
 
+import json
 import os
 from pathlib import Path
+from typing import Optional
 
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
@@ -17,7 +19,9 @@ from PyQt6.QtGui import QAction, QIcon, QKeySequence
 from simulator.gui.schematic_editor import SchematicEditor
 from simulator.gui.component_library import ComponentLibrary
 from simulator.gui.property_editor import PropertyEditor
-from simulator.gui.waveform_viewer import WaveformViewer
+from simulator.gui.source_viewer import SourceCodeWindow
+from simulator.gui.test_tracker_window import TestTrackerWindow
+from simulator.gui.waveform_viewer import WaveformWindow
 from simulator.gui.simulation_dialog import SimulationDialog
 from simulator.gui.netlist_viewer import NetlistViewer
 from simulator.gui.terminal_widget import TerminalWidget
@@ -292,6 +296,28 @@ class MainWindow(QMainWindow):
         self.modified = False
         self.api_session_guid = "waiting-for-server"
         self.api_base_url = "http://127.0.0.1:5100"
+        self._hierarchy_tab_specs: dict[str, dict] = {}
+        self._hierarchy_top_level_tab_name: Optional[str] = None
+        self._hierarchy_top_level_spec: Optional[dict] = None
+        self._source_windows: dict[str, SourceCodeWindow] = {}
+        self._last_source_window_key: Optional[str] = None
+        self._test_tracker_window: Optional[TestTrackerWindow] = None
+        self._last_regression_report: Optional[dict] = None
+        self._last_regression_command = ""
+        self._asic_test_plan_path = (
+            Path(__file__).parent.parent.parent / "designs" / "lin_asic" / "LIN_ASIC_TESTPLAN.md"
+        )
+        self._asic_architecture_path = (
+            Path(__file__).parent.parent.parent / "designs" / "lin_asic" / "01_ARCHITECTURE.md"
+        )
+        self._asic_regression_report_path = (
+            Path(__file__).parent.parent.parent / "reports" / "lin_asic_regression_latest.json"
+        )
+        self._asic_regression_log_path = (
+            Path(__file__).parent.parent.parent / "reports" / "lin_asic_regression_latest.log"
+        )
+        self._latest_waveform_window: Optional[WaveformWindow] = None
+        self._waveform_windows: list = []
         self.gui_call_requested.connect(self._execute_gui_call)
         
         # Initialize UI
@@ -322,8 +348,9 @@ class MainWindow(QMainWindow):
         self.component_library.setMinimumWidth(200)
         self.component_library.setMaximumWidth(350)
         
-        # Center panel - Schematic Editor and Waveform Viewer
+        # Center panel - Schematic Editor and terminal
         center_splitter = QSplitter(Qt.Orientation.Vertical)
+        self._center_splitter = center_splitter
         
         # Schematic editor tabs
         self.schematic_tabs = QTabWidget()
@@ -334,18 +361,13 @@ class MainWindow(QMainWindow):
         self.schematic_editor = SchematicEditor()
         self.schematic_tabs.addTab(self.schematic_editor, "Untitled")
         
-        # Waveform viewer
-        self.waveform_viewer = WaveformViewer()
-        self.waveform_viewer.setMinimumHeight(150)
-        
         # Terminal widget
         self.terminal_widget = TerminalWidget()
         self.terminal_widget.setMinimumHeight(150)
         
         center_splitter.addWidget(self.schematic_tabs)
-        center_splitter.addWidget(self.waveform_viewer)
         center_splitter.addWidget(self.terminal_widget)
-        center_splitter.setSizes([500, 150, 200])
+        center_splitter.setSizes([700, 200])
         
         # Right panel - Property Editor and Netlist
         right_splitter = QSplitter(Qt.Orientation.Vertical)
@@ -481,12 +503,582 @@ class MainWindow(QMainWindow):
         self._refresh_api_session_monitor()
         self.api_session_dock.show()
 
+    def present_asic_demo_ui(self) -> None:
+        """Make the ASIC demo UI visible and focused in the current session."""
+        self.showNormal()
+        self.show()
+        self.raise_()
+        self.activateWindow()
+        self.api_session_dock.show()
+        self.api_session_dock.raise_()
+        self._refresh_api_session_monitor()
+        QApplication.processEvents()
+
     def _on_schematic_tab_changed(self, index: int):
         """Track the active tab so API handshakes reflect the real schematic."""
         editor = self.schematic_tabs.widget(index)
         if isinstance(editor, SchematicEditor):
             self.schematic_editor = editor
             self._refresh_api_session_monitor()
+
+    @staticmethod
+    def _normalize_hierarchy_key(value: str) -> str:
+        """Normalize hierarchy aliases so netlist names and tab labels match."""
+        return "".join(ch for ch in (value or "").lower() if ch.isalnum())
+
+    def _extract_hierarchy_aliases(
+        self,
+        tab_name: str,
+        netlist: str,
+        block_key: Optional[str] = None,
+        block_aliases: Optional[list[str]] = None,
+    ) -> set[str]:
+        """Build a set of normalized aliases for a hierarchy tab."""
+        aliases: set[str] = set(block_aliases or [])
+        if block_key:
+            aliases.add(block_key)
+        aliases.add(tab_name)
+        if "] " in tab_name:
+            aliases.add(tab_name.split("] ", 1)[1])
+
+        for line in netlist.splitlines():
+            stripped = line.strip()
+            if stripped.upper().startswith(".SUBCKT "):
+                parts = stripped.split()
+                if len(parts) >= 2:
+                    aliases.add(parts[1])
+
+        normalized_aliases: set[str] = set()
+        for alias in aliases:
+            normalized = self._normalize_hierarchy_key(alias)
+            if normalized:
+                normalized_aliases.add(normalized)
+        return normalized_aliases
+
+    def _register_hierarchy_tab_spec(
+        self,
+        tab_name: str,
+        netlist: str,
+        hierarchical: bool = False,
+        block_key: Optional[str] = None,
+        parent_tab_name: Optional[str] = None,
+        block_aliases: Optional[list[str]] = None,
+        domain: Optional[str] = None,
+        rtl_file: Optional[str] = None,
+        spice_file: Optional[str] = None,
+        display_name: Optional[str] = None,
+    ) -> dict:
+        """Cache enough information to reopen and navigate hierarchy tabs."""
+        resolved_parent = parent_tab_name
+        if not hierarchical and not resolved_parent:
+            resolved_parent = self._hierarchy_top_level_tab_name
+
+        alias_sources = list(block_aliases or [])
+        if block_key:
+            alias_sources.append(block_key)
+
+        spec = {
+            "tab_name": tab_name,
+            "netlist": netlist,
+            "hierarchical": hierarchical,
+            "block_key": block_key,
+            "parent_tab_name": resolved_parent,
+            "block_aliases": alias_sources,
+            "domain": domain,
+            "rtl_file": rtl_file,
+            "spice_file": spice_file,
+            "display_name": display_name or (tab_name.split("] ", 1)[1] if "] " in tab_name else tab_name),
+            "aliases": self._extract_hierarchy_aliases(
+                tab_name,
+                netlist,
+                block_key=block_key,
+                block_aliases=block_aliases,
+            ),
+        }
+
+        if hierarchical and resolved_parent is None:
+            self._hierarchy_top_level_tab_name = tab_name
+            self._hierarchy_top_level_spec = spec
+
+        for alias in spec["aliases"]:
+            self._hierarchy_tab_specs[alias] = spec
+
+        return spec
+
+    def _iter_hierarchy_specs(self):
+        """Yield unique cached hierarchy tab specifications."""
+        seen_tab_names: set[str] = set()
+        if self._hierarchy_top_level_spec:
+            seen_tab_names.add(self._hierarchy_top_level_spec["tab_name"])
+            yield self._hierarchy_top_level_spec
+
+        for spec in self._hierarchy_tab_specs.values():
+            tab_name = spec["tab_name"]
+            if tab_name in seen_tab_names:
+                continue
+            seen_tab_names.add(tab_name)
+            yield spec
+
+    def _find_schematic_tab_index(self, tab_name: str) -> int:
+        """Return the tab index for a schematic tab label, or -1."""
+        for index in range(self.schematic_tabs.count()):
+            if self.schematic_tabs.tabText(index) == tab_name:
+                return index
+        return -1
+
+    def _find_hierarchy_spec(self, *aliases: str) -> Optional[dict]:
+        """Find a cached hierarchy tab spec by any block alias."""
+        for alias in aliases:
+            normalized = self._normalize_hierarchy_key(alias)
+            if normalized and normalized in self._hierarchy_tab_specs:
+                return self._hierarchy_tab_specs[normalized]
+        return None
+
+    def _ensure_hierarchy_tab_open(self, spec: dict) -> int:
+        """Open a cached hierarchy tab if it was closed, then return its index."""
+        index = self._find_schematic_tab_index(spec["tab_name"])
+        if index >= 0:
+            return index
+
+        self.load_block_tab(
+            spec["tab_name"],
+            spec["netlist"],
+            hierarchical=spec.get("hierarchical", False),
+            block_key=spec.get("block_key"),
+            parent_tab_name=spec.get("parent_tab_name"),
+            block_aliases=spec.get("block_aliases"),
+            domain=spec.get("domain"),
+            rtl_file=spec.get("rtl_file"),
+            spice_file=spec.get("spice_file"),
+            display_name=spec.get("display_name"),
+        )
+        return self._find_schematic_tab_index(spec["tab_name"])
+
+    @staticmethod
+    def _read_text_file(path: Path) -> str:
+        """Read a text file using the same Windows-friendly fallback policy as design loading."""
+        for encoding in ("utf-8", "cp1252", "latin-1"):
+            try:
+                return path.read_text(encoding=encoding)
+            except UnicodeDecodeError:
+                continue
+        return path.read_text(errors="replace")
+
+    @staticmethod
+    def _resolve_asic_design_path(relative_path: str) -> Path:
+        """Resolve a path relative to designs/lin_asic."""
+        return Path(__file__).parent.parent.parent / "designs" / "lin_asic" / relative_path
+
+    def _open_digital_block_source(self, spec: dict) -> bool:
+        """Show the mapped RTL source for a digital block in a standalone source window."""
+        display_name = spec.get("display_name") or spec.get("tab_name") or "Digital Block"
+
+        candidates: list[tuple[str, Optional[str]]] = [
+            ("RTL source", spec.get("rtl_file")),
+            ("block wrapper", spec.get("spice_file")),
+        ]
+
+        for label, relative_path in candidates:
+            if not relative_path:
+                continue
+
+            source_path = self._resolve_asic_design_path(relative_path)
+            if not source_path.exists():
+                continue
+
+            self._show_source_window(
+                f"RTL Source — {display_name}",
+                self._read_text_file(source_path),
+                str(source_path),
+            )
+
+            if label == "RTL source":
+                self.statusbar.showMessage(
+                    f"Opened RTL source for {display_name}: {source_path.name}"
+                )
+            else:
+                self.statusbar.showMessage(
+                    f"No standalone RTL file for {display_name}; showing {source_path.name}"
+                )
+            return True
+
+        self.statusbar.showMessage(f"No RTL source file is available for {display_name}")
+        return False
+
+    def _descend_into_hierarchy_block(self, source_editor: SchematicEditor, component) -> None:
+        """Switch from a symbolic hierarchy block into its cached child tab."""
+        model_name = getattr(component, "model_name", "")
+        block_name = getattr(component, "display_name", "Block")
+        instance_name = getattr(component, "instance_name", "")
+        spec = self._find_hierarchy_spec(model_name, block_name, instance_name)
+        if spec is None:
+            self.statusbar.showMessage(f"No child schematic is available for {block_name}")
+            return
+
+        current_index = self.schematic_tabs.indexOf(source_editor)
+        current_tab_name = self.schematic_tabs.tabText(current_index) if current_index >= 0 else ""
+        if spec["tab_name"] == current_tab_name:
+            if spec.get("domain") == "digital":
+                self._open_digital_block_source(spec)
+                return
+            self.statusbar.showMessage(f"Already at the deepest available view for {block_name}")
+            return
+
+        target_index = self._ensure_hierarchy_tab_open(spec)
+        if target_index < 0:
+            self.statusbar.showMessage(f"Failed to open the child schematic for {block_name}")
+            return
+
+        self.schematic_tabs.setCurrentIndex(target_index)
+        if spec.get("domain") == "digital":
+            self._open_digital_block_source(spec)
+            return
+        self.statusbar.showMessage(f"Descended into {block_name}")
+
+    def _ascend_hierarchy(self, source_editor: SchematicEditor) -> None:
+        """Return from a child hierarchy tab to its parent or top-level tab."""
+        target_tab_name = getattr(source_editor, "_navigation_parent_tab_name", None)
+        if not target_tab_name:
+            self.statusbar.showMessage("Already at the top-level schematic")
+            return
+
+        target_index = self._find_schematic_tab_index(target_tab_name)
+        if target_index < 0:
+            target_spec: Optional[dict] = None
+            for spec in self._iter_hierarchy_specs():
+                if spec["tab_name"] == target_tab_name:
+                    target_spec = spec
+                    break
+            if target_spec is not None:
+                target_index = self._ensure_hierarchy_tab_open(target_spec)
+
+        if target_index < 0:
+            self.statusbar.showMessage(f"Parent schematic '{target_tab_name}' is not available")
+            return
+
+        self.schematic_tabs.setCurrentIndex(target_index)
+        self.statusbar.showMessage(f"Returned to {target_tab_name}")
+
+    def _remove_waveform_window(self, window) -> None:
+        """Drop a closed standalone waveform window from the keepalive list."""
+        try:
+            self._waveform_windows.remove(window)
+        except ValueError:
+            pass
+
+    def _remove_source_window(self, key: str) -> None:
+        """Drop a closed standalone source window from the registry."""
+        self._source_windows.pop(key, None)
+        if self._last_source_window_key == key:
+            self._last_source_window_key = None
+
+    def _clear_latest_waveform_window(self) -> None:
+        """Clear the reusable waveform window reference after it is closed."""
+        self._latest_waveform_window = None
+
+    def _get_latest_waveform_window(self) -> WaveformWindow:
+        """Return the reusable standalone waveform window for local simulations."""
+        if self._latest_waveform_window is None:
+            win = WaveformWindow("Latest Simulation")
+            win.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+            win.move(self.x() + 80, self.y() + 80)
+            win.destroyed.connect(lambda _obj=None: self._clear_latest_waveform_window())
+            self._latest_waveform_window = win
+        return self._latest_waveform_window
+
+    @staticmethod
+    def _language_from_source_path(file_path: str) -> str:
+        """Infer a source-viewer language from the file extension."""
+        suffix = Path(file_path).suffix.lower()
+        if suffix in {".v", ".sv"}:
+            return "systemverilog"
+        if suffix in {".sp", ".spice"}:
+            return "spice"
+        if suffix == ".md":
+            return "markdown"
+        return "text"
+
+    def _show_source_window(
+        self,
+        title: str,
+        text: str,
+        file_path: str,
+        language: Optional[str] = None,
+    ) -> None:
+        """Open or reuse a standalone source window for RTL, SPICE, or docs."""
+        key = file_path or title
+        window = self._source_windows.get(key)
+        if window is None:
+            window = SourceCodeWindow(title)
+            window.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+            offset = 28 * (len(self._source_windows) % 6)
+            window.move(self.x() + 90 + offset, self.y() + 90 + offset)
+            window.destroyed.connect(lambda _obj=None, source_key=key: self._remove_source_window(source_key))
+            self._source_windows[key] = window
+
+        window.set_source(
+            title,
+            text,
+            file_path,
+            language or self._language_from_source_path(file_path),
+        )
+        self._last_source_window_key = key
+        window.showNormal()
+        window.show()
+        window.raise_()
+        window.activateWindow()
+
+    def _show_latest_source_window(self) -> None:
+        """Bring the last opened standalone source window to the foreground."""
+        if not self._last_source_window_key:
+            self.statusbar.showMessage("No source window has been opened yet")
+            return
+
+        window = self._source_windows.get(self._last_source_window_key)
+        if window is None:
+            self.statusbar.showMessage("The last source window is no longer open")
+            return
+
+        window.showNormal()
+        window.show()
+        window.raise_()
+        window.activateWindow()
+
+    def close_source_window(self, file_path: Optional[str] = None) -> bool:
+        """Close a standalone source window by file path or the most recent one."""
+        key = file_path or self._last_source_window_key
+        if not key:
+            return False
+
+        window = self._source_windows.get(key)
+        if window is None:
+            return False
+
+        window.close()
+        return True
+
+    def close_test_tracker_window(self) -> bool:
+        """Close the standalone ASIC regression tracker window."""
+        if self._test_tracker_window is None:
+            return False
+        self._test_tracker_window.close()
+        return True
+
+    def hide_api_session_monitor(self) -> None:
+        """Hide the API session monitor dock."""
+        self.api_session_dock.hide()
+
+    def _open_asic_architecture_overview(self) -> None:
+        """Open the ASIC architecture document in a standalone source window."""
+        if not self._asic_architecture_path.exists():
+            self.statusbar.showMessage("ASIC architecture document is missing")
+            return
+
+        self._show_source_window(
+            "ASIC Architecture",
+            self._read_text_file(self._asic_architecture_path),
+            str(self._asic_architecture_path),
+            language="markdown",
+        )
+
+    def _open_asic_regression_log(self) -> None:
+        """Open the ASIC regression log in a standalone source window."""
+        if self._asic_regression_log_path.exists():
+            text = self._read_text_file(self._asic_regression_log_path)
+            file_path = str(self._asic_regression_log_path)
+        else:
+            text = self.terminal_widget.get_output_text() or "No regression log has been generated yet."
+            file_path = str(self._asic_regression_log_path)
+
+        self._show_source_window(
+            "ASIC Regression Log",
+            text,
+            file_path,
+            language="text",
+        )
+
+    def get_gui_window_status(self) -> dict:
+        """Return a summary of currently open GUI windows for API polling."""
+        source_windows = []
+        for key, window in self._source_windows.items():
+            source_windows.append({
+                "key": key,
+                "title": window.windowTitle(),
+                "file_path": window.file_path or key,
+                "visible": window.isVisible(),
+            })
+
+        return {
+            "test_tracker_visible": bool(self._test_tracker_window and self._test_tracker_window.isVisible()),
+            "api_monitor_visible": self.api_session_dock.isVisible(),
+            "source_window_count": len(source_windows),
+            "source_windows": source_windows,
+            "latest_source_key": self._last_source_window_key,
+            "test_plan_open": str(self._asic_test_plan_path) in self._source_windows,
+            "architecture_open": str(self._asic_architecture_path) in self._source_windows,
+            "regression_log_open": str(self._asic_regression_log_path) in self._source_windows,
+            "waveform_window_count": int(self._latest_waveform_window is not None) + len(self._waveform_windows),
+        }
+
+    def _ensure_test_tracker_window(self) -> TestTrackerWindow:
+        """Create the standalone ASIC regression tracker on demand."""
+        if self._test_tracker_window is None:
+            from simulator.verification import build_lin_asic_test_catalog
+
+            window = TestTrackerWindow()
+            window.set_test_cases(build_lin_asic_test_catalog())
+            window.run_regression_requested.connect(self._run_asic_regression_from_terminal)
+            window.refresh_requested.connect(self._refresh_regression_report_from_disk)
+            window.open_regression_log_requested.connect(self._open_asic_regression_log)
+            window.open_test_plan_requested.connect(self._open_asic_test_plan)
+            window.show_terminal_requested.connect(self._focus_terminal)
+            window.show_api_monitor_requested.connect(self._show_api_session_monitor)
+            window.destroyed.connect(lambda _obj=None: setattr(self, "_test_tracker_window", None))
+            self._test_tracker_window = window
+
+            if self._last_regression_report:
+                window.update_report(self._last_regression_report)
+            window.set_terminal_status(self.terminal_widget.get_status())
+
+        return self._test_tracker_window
+
+    def show_test_tracker_window(self) -> None:
+        """Present the standalone ASIC regression tracker window."""
+        window = self._ensure_test_tracker_window()
+        window.showNormal()
+        window.show()
+        window.raise_()
+        window.activateWindow()
+
+    def _build_asic_regression_command(self) -> str:
+        """Return the terminal command used for the LIN ASIC regression suite."""
+        return (
+            "python scripts/run_lin_asic_regression.py "
+            "--json reports/lin_asic_regression_latest.json "
+            "--markdown reports/lin_asic_regression_latest.md "
+            "--log reports/lin_asic_regression_latest.log"
+        )
+
+    def _refresh_regression_report_from_disk(self) -> None:
+        """Load the latest ASIC regression report into the tracker window."""
+        if not self._asic_regression_report_path.exists():
+            self.statusbar.showMessage("No ASIC regression report is available yet")
+            return
+
+        try:
+            self._last_regression_report = json.loads(
+                self._asic_regression_report_path.read_text(encoding="utf-8")
+            )
+            self._last_regression_report["report_path"] = str(self._asic_regression_report_path)
+            self._last_regression_report.setdefault("log_path", str(self._asic_regression_log_path))
+            tracker = self._ensure_test_tracker_window()
+            tracker.update_report(self._last_regression_report)
+            tracker.set_terminal_status(self.terminal_widget.get_status())
+            self.statusbar.showMessage("Loaded latest ASIC regression report")
+        except Exception as exc:
+            self.statusbar.showMessage(f"Failed to load regression report: {exc}")
+
+    def _open_asic_test_plan(self) -> None:
+        """Open the ASIC verification plan in a standalone source window."""
+        if not self._asic_test_plan_path.exists():
+            self.statusbar.showMessage("ASIC test plan file is missing")
+            return
+
+        self._show_source_window(
+            "ASIC Test Plan",
+            self._read_text_file(self._asic_test_plan_path),
+            str(self._asic_test_plan_path),
+            language="markdown",
+        )
+
+    def _run_asic_regression_from_terminal(self) -> bool:
+        """Run the ASIC regression suite through the integrated terminal."""
+        command = self._build_asic_regression_command()
+        self._last_regression_command = command
+        self.show_test_tracker_window()
+        tracker = self._ensure_test_tracker_window()
+        tracker.set_regression_state(True, command)
+        tracker.append_debug_line(f"[GUI] Starting regression: {command}")
+        if self.terminal_widget.run_command(command):
+            self.statusbar.showMessage("ASIC regression started in the integrated terminal")
+            return True
+
+        tracker.set_regression_state(False, command)
+        tracker.append_debug_line("[GUI] Regression start failed")
+        return False
+
+    def _on_terminal_command_started(self, command: str) -> None:
+        """Mirror terminal lifecycle into the tracker window."""
+        if self._test_tracker_window:
+            self._test_tracker_window.set_terminal_status(self.terminal_widget.get_status())
+            self._test_tracker_window.append_debug_line(f"[TERM] Started: {command}")
+            if "run_lin_asic_regression.py" in command:
+                self._test_tracker_window.set_regression_state(True, command)
+
+    def _on_terminal_command_output(self, text: str, is_error: bool) -> None:
+        """Stream terminal output snippets into the tracker debug log."""
+        if not self._test_tracker_window or not text.strip():
+            return
+
+        prefix = "[ERR]" if is_error else "[OUT]"
+        for line in text.rstrip().splitlines()[-6:]:
+            self._test_tracker_window.append_debug_line(f"{prefix} {line}")
+
+    def _on_terminal_command_finished(self, exit_code: int, command: str) -> None:
+        """Refresh tracker state when a terminal command completes."""
+        if self._test_tracker_window:
+            self._test_tracker_window.set_terminal_status(self.terminal_widget.get_status())
+            self._test_tracker_window.append_debug_line(
+                f"[TERM] Finished (exit={exit_code}): {command}"
+            )
+            if "run_lin_asic_regression.py" in command:
+                self._test_tracker_window.set_regression_state(False, command)
+                self._refresh_regression_report_from_disk()
+
+    def _focus_terminal(self) -> None:
+        """Bring the integrated terminal into focus and reserve visible space."""
+        sizes = self._center_splitter.sizes()
+        if len(sizes) >= 2 and sizes[1] < 180:
+            total = sum(sizes)
+            self._center_splitter.setSizes([max(400, total - 260), 260])
+        self.terminal_widget.command_input.setFocus()
+
+    def _show_api_session_monitor(self) -> None:
+        """Bring the API session dock to the foreground."""
+        self.api_session_dock.show()
+        self.api_session_dock.raise_()
+
+    def run_terminal_command(self, command: str) -> bool:
+        """Public GUI-thread hook used by the API layer to run terminal commands."""
+        return self.terminal_widget.run_command(command)
+
+    def stop_terminal_command(self) -> None:
+        """Public GUI-thread hook used by the API layer to stop terminal commands."""
+        self.terminal_widget.stop_command()
+
+    def get_terminal_status(self) -> dict:
+        """Return terminal status for API polling."""
+        return self.terminal_widget.get_status()
+
+    def get_terminal_output(self) -> str:
+        """Return terminal output for API polling."""
+        return self.terminal_widget.get_output_text()
+
+    def get_test_tracker_status(self) -> dict:
+        """Return the latest ASIC verification status for API polling."""
+        terminal_status = self.terminal_widget.get_status()
+        return {
+            "report_path": str(self._asic_regression_report_path),
+            "log_path": str(self._asic_regression_log_path),
+            "test_plan_path": str(self._asic_test_plan_path),
+            "architecture_path": str(self._asic_architecture_path),
+            "has_report": self._last_regression_report is not None,
+            "summary": (self._last_regression_report or {}).get("summary", {}),
+            "coverage": (self._last_regression_report or {}).get("coverage", {}),
+            "running": terminal_status.get("running", False),
+            "active_command": terminal_status.get("active_command", ""),
+            "tests": (self._last_regression_report or {}).get("tests", []),
+        }
     
     def _create_menus(self):
         """Create the menu bar."""
@@ -630,6 +1222,14 @@ class MainWindow(QMainWindow):
         grid_action.triggered.connect(self._toggle_grid)
         view_menu.addAction(grid_action)
         view_menu.addSeparator()
+        waveform_window_action = QAction("Show &Waveform Window", self)
+        waveform_window_action.setShortcut(QKeySequence("Ctrl+Shift+W"))
+        waveform_window_action.triggered.connect(lambda: self._show_waveform_viewer())
+        view_menu.addAction(waveform_window_action)
+        source_window_action = QAction("Show Last &Source Window", self)
+        source_window_action.setShortcut(QKeySequence("Ctrl+Shift+R"))
+        source_window_action.triggered.connect(self._show_latest_source_window)
+        view_menu.addAction(source_window_action)
         view_menu.addAction(self.api_session_dock.toggleViewAction())
         
         # Component menu
@@ -736,6 +1336,48 @@ class MainWindow(QMainWindow):
         auto_design_action.setShortcut(QKeySequence("Ctrl+Shift+D"))
         auto_design_action.triggered.connect(self._open_auto_design_dialog)
         tools_menu.addAction(auto_design_action)
+
+        verification_menu = menubar.addMenu("&Verification")
+
+        run_regression_action = QAction("Run &ASIC Regression", self)
+        run_regression_action.setShortcut(QKeySequence("Ctrl+Shift+T"))
+        run_regression_action.triggered.connect(self._run_asic_regression_from_terminal)
+        verification_menu.addAction(run_regression_action)
+
+        show_tracker_action = QAction("Show Test &Tracker", self)
+        show_tracker_action.triggered.connect(self.show_test_tracker_window)
+        verification_menu.addAction(show_tracker_action)
+
+        refresh_tracker_action = QAction("&Refresh Regression Report", self)
+        refresh_tracker_action.triggered.connect(self._refresh_regression_report_from_disk)
+        verification_menu.addAction(refresh_tracker_action)
+
+        open_regression_log_action = QAction("Open Regression &Log", self)
+        open_regression_log_action.triggered.connect(self._open_asic_regression_log)
+        verification_menu.addAction(open_regression_log_action)
+
+        open_test_plan_action = QAction("Open ASIC Test &Plan", self)
+        open_test_plan_action.triggered.connect(self._open_asic_test_plan)
+        verification_menu.addAction(open_test_plan_action)
+
+        open_architecture_action = QAction("Open ASIC &Architecture", self)
+        open_architecture_action.triggered.connect(self._open_asic_architecture_overview)
+        verification_menu.addAction(open_architecture_action)
+
+        debug_menu = menubar.addMenu("&Debug")
+
+        focus_terminal_action = QAction("Focus &Terminal", self)
+        focus_terminal_action.setShortcut(QKeySequence("Ctrl+Shift+`"))
+        focus_terminal_action.triggered.connect(self._focus_terminal)
+        debug_menu.addAction(focus_terminal_action)
+
+        api_monitor_action = QAction("Show API Session &Monitor", self)
+        api_monitor_action.triggered.connect(self._show_api_session_monitor)
+        debug_menu.addAction(api_monitor_action)
+
+        latest_source_action = QAction("Show Latest &Source Window", self)
+        latest_source_action.triggered.connect(self._show_latest_source_window)
+        debug_menu.addAction(latest_source_action)
         
         # Help menu
         help_menu = menubar.addMenu("&Help")
@@ -930,6 +1572,10 @@ class MainWindow(QMainWindow):
         # Schematic tabs
         self.schematic_tabs.tabCloseRequested.connect(self._close_tab)
         self.schematic_tabs.currentChanged.connect(self._on_schematic_tab_changed)
+
+        self.terminal_widget.command_started.connect(self._on_terminal_command_started)
+        self.terminal_widget.command_output.connect(self._on_terminal_command_output)
+        self.terminal_widget.command_finished.connect(self._on_terminal_command_finished)
     
     def _restore_state(self):
         """Restore window state from settings."""
@@ -940,6 +1586,9 @@ class MainWindow(QMainWindow):
         state = self.settings.value("windowState")
         if state:
             self.restoreState(state)
+
+        # Keep the live API monitor visible even when restoring an older layout.
+        self.api_session_dock.show()
     
     def closeEvent(self, event):
         """Handle window close event."""
@@ -961,6 +1610,16 @@ class MainWindow(QMainWindow):
         # Save window state
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
+
+        if self._test_tracker_window is not None:
+            self._test_tracker_window.close()
+        for window in list(self._source_windows.values()):
+            window.close()
+
+        if self._latest_waveform_window is not None:
+            self._latest_waveform_window.close()
+        for window in list(self._waveform_windows):
+            window.close()
         
         event.accept()
     
@@ -1078,6 +1737,12 @@ class MainWindow(QMainWindow):
         editor.zoom_changed.connect(self._update_zoom)
         editor.mode_changed.connect(self._update_mode)
         editor.schematic_modified.connect(self._refresh_api_session_monitor)
+        editor.hierarchy_descend_requested.connect(
+            lambda component, source_editor=editor: self._descend_into_hierarchy_block(source_editor, component)
+        )
+        editor.hierarchy_ascend_requested.connect(
+            lambda source_editor=editor: self._ascend_hierarchy(source_editor)
+        )
     
     # Edit operations
     def _undo(self):
@@ -1139,26 +1804,29 @@ class MainWindow(QMainWindow):
             if dialog.exec():
                 results = dialog.get_results()
                 if results:
-                    self.waveform_viewer.display_results(results)
-                    self._show_waveform_viewer()  # Auto-open waveform viewer
+                    self._show_waveform_viewer(
+                        results,
+                        title=f"{analysis_type} Simulation",
+                    )
                     self.statusbar.showMessage(f"{analysis_type} simulation completed")
         except Exception as e:
             QMessageBox.critical(self, "Simulation Error", str(e))
     
-    def _show_waveform_viewer(self):
-        """Ensure the waveform viewer is visible and has adequate space."""
-        # Get the center splitter (parent of waveform viewer)
-        center_splitter = self.waveform_viewer.parent()
-        if isinstance(center_splitter, QSplitter):
-            sizes = center_splitter.sizes()
-            # Ensure waveform viewer has at least 200 pixels
-            if len(sizes) >= 2 and sizes[1] < 200:
-                total = sum(sizes)
-                sizes[0] = total - 400  # Reserve 400 for waveform + terminal
-                sizes[1] = 250  # Waveform viewer
-                if len(sizes) > 2:
-                    sizes[2] = 150  # Terminal
-                center_splitter.setSizes(sizes)
+    def _show_waveform_viewer(
+        self,
+        results: Optional[dict] = None,
+        title: str = "Latest Simulation",
+    ) -> None:
+        """Show the reusable standalone waveform window for local simulations."""
+        window = self._get_latest_waveform_window()
+        window.setWindowTitle(f"Waveforms — {title}")
+        if results is not None:
+            window.display_results(results)
+        window.showNormal()
+        window.show()
+        window.raise_()
+        window.activateWindow()
+        QApplication.processEvents()
     
     def _simulation_settings(self):
         """Open simulation settings dialog."""
@@ -1220,7 +1888,7 @@ class MainWindow(QMainWindow):
             "<li>DC, AC, and Transient analysis</li>"
             "<li>Verilog, Verilog-A, and Verilog-AMS simulation</li>"
             "<li>Mixed-signal interface</li>"
-            "<li>Waveform viewer with measurements</li>"
+            "<li>Standalone waveform window with measurements</li>"
             "<li>Batch simulation and reporting</li>"
             "</ul>")
     
@@ -1291,7 +1959,7 @@ class MainWindow(QMainWindow):
         
         Parses the netlist for analysis commands (.TRAN, .AC, .DC),
         extracts parameters, runs the appropriate engine analysis,
-        and displays results in the waveform viewer.
+        and displays results in a separate waveform window.
         
         Args:
             netlist: SPICE netlist text.
@@ -1387,8 +2055,10 @@ class MainWindow(QMainWindow):
                 results = analysis.run(settings, progress_cb)
             
             if results:
-                self.waveform_viewer.display_results(results)
-                self._show_waveform_viewer()
+                self._show_waveform_viewer(
+                    results,
+                    title=f"{name} — {analysis_type}",
+                )
                 self.statusbar.showMessage(
                     f"{name}: {analysis_type} analysis complete"
                 )
@@ -1507,7 +2177,7 @@ class MainWindow(QMainWindow):
             self._run_netlist_simulation(result.netlist, title)
 
             # Show summary in terminal
-            if hasattr(self, 'terminal'):
+            if hasattr(self, 'terminal_widget'):
                 summary = (
                     f"\n=== Auto-Design Results: {block_type.upper()} ===\n"
                     f"Status: {'SUCCESS' if result.success else 'PARTIAL'}\n"
@@ -1520,7 +2190,7 @@ class MainWindow(QMainWindow):
                 summary += f"Design Variables:\n"
                 for k, v in result.variables.items():
                     summary += f"  {k}: {v:.4g}\n"
-                self.terminal.append_text(summary)
+                self.terminal_widget.append_text(summary)
         except Exception as e:
             QMessageBox.critical(self, "Auto-Design Error", f"Failed:\n{e}")
 
@@ -1534,13 +2204,39 @@ class MainWindow(QMainWindow):
         tab_name: str,
         netlist: str,
         hierarchical: bool = False,
+        block_key: Optional[str] = None,
+        parent_tab_name: Optional[str] = None,
+        block_aliases: Optional[list[str]] = None,
+        domain: Optional[str] = None,
+        rtl_file: Optional[str] = None,
+        spice_file: Optional[str] = None,
+        display_name: Optional[str] = None,
     ) -> None:
         """Open a new schematic tab and load *netlist* into it.
 
         Used by the API server to populate one tab per LIN ASIC block so
         the schematic editor shows the full chip hierarchy.
         """
+        spec = self._register_hierarchy_tab_spec(
+            tab_name,
+            netlist,
+            hierarchical=hierarchical,
+            block_key=block_key,
+            parent_tab_name=parent_tab_name,
+            block_aliases=block_aliases,
+            domain=domain,
+            rtl_file=rtl_file,
+            spice_file=spice_file,
+            display_name=display_name,
+        )
+
         editor = SchematicEditor()
+        editor.configure_hierarchy_navigation(
+            tab_name,
+            parent_tab_name=spec.get("parent_tab_name"),
+            root_tab_name=self._hierarchy_top_level_tab_name or tab_name,
+        )
+        editor._hierarchy_aliases = set(spec.get("aliases", set()))
         index = self.schematic_tabs.addTab(editor, tab_name)
         self.schematic_tabs.setCurrentIndex(index)
         self.schematic_editor = editor
@@ -1552,12 +2248,16 @@ class MainWindow(QMainWindow):
     def run_netlist_in_window(self, results: dict, title: str) -> None:
         """Display simulation results in a new standalone waveform window.
 
-        Opens a separate WaveformWindow (not the embedded panel) so that
+        Opens a separate WaveformWindow so that
         each block's waveform is shown in its own resizable window.
         """
-        from simulator.gui.waveform_viewer import WaveformWindow
         win = WaveformWindow(title)
+        win.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
         win.display_results(results)
+        offset = 36 * (len(self._waveform_windows) % 6)
+        win.move(self.x() + 60 + offset, self.y() + 60 + offset)
+        self._waveform_windows.append(win)
+        win.destroyed.connect(lambda _obj=None, window=win: self._remove_waveform_window(window))
         win.showNormal()
         win.show()
         win.raise_()

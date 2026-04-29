@@ -12,6 +12,7 @@ from typing import Optional, Dict, Any
 from simulator.engine.analog_engine import AnalogEngine, DCAnalysis, ACAnalysis, TransientAnalysis
 from simulator.engine.digital_engine import DigitalEngine
 from simulator.engine.mixed_signal_engine import MixedSignalEngine
+from simulator.engine.ngspice_backend import NgSpiceBackend
 
 
 class SimulationRunner:
@@ -22,11 +23,107 @@ class SimulationRunner:
         self._analog_engine = AnalogEngine()
         self._digital_engine = DigitalEngine()
         self._mixed_engine = MixedSignalEngine()
+        self._ngspice_backend: Optional[NgSpiceBackend] = None
     
     def log(self, message: str):
         """Log a message if verbose mode is enabled."""
         if self.verbose:
             print(f"[INFO] {message}")
+
+    def _get_ngspice_backend(self) -> NgSpiceBackend:
+        """Lazily create the ngspice backend when a transient fallback needs it."""
+        if self._ngspice_backend is None:
+            self._ngspice_backend = NgSpiceBackend()
+        return self._ngspice_backend
+
+    def _netlist_uses_unsupported_behavioral_sources(self, netlist: str) -> bool:
+        """Detect transient netlists that require ngspice for TABLE/POLY E sources."""
+        for raw_line in netlist.splitlines():
+            stripped = raw_line.strip()
+            if not stripped or stripped.startswith('*') or stripped.startswith('.'):
+                continue
+            if stripped[0].upper() != 'E':
+                continue
+            upper_line = stripped.upper()
+            if 'TABLE' in upper_line or 'POLY' in upper_line:
+                return True
+        return False
+
+    def _should_use_ngspice(self, netlist: str, analysis_type: str) -> bool:
+        """Use ngspice only when the built-in transient solver cannot represent the netlist."""
+        return analysis_type == 'transient' and self._netlist_uses_unsupported_behavioral_sources(netlist)
+
+    def _prepare_ngspice_netlist(self, netlist: str, analysis_type: str, kwargs: dict) -> str:
+        """Inject the requested analysis command into a netlist for ngspice batch mode."""
+        filtered_lines: list[str] = []
+        for line in netlist.strip().splitlines():
+            stripped = line.strip()
+            lower_line = stripped.lower()
+            if any(lower_line.startswith(cmd) for cmd in ('.dc', '.ac', '.tran', '.op', '.end', '.control', '.endc')):
+                continue
+            filtered_lines.append(line)
+
+        if analysis_type == 'transient':
+            tstop = kwargs.get('tstop', 1e-6)
+            tstep = kwargs.get('tstep', 1e-9)
+            tstart = kwargs.get('tstart', 0)
+            directive = f".tran {tstep} {tstop} {tstart}"
+            if kwargs.get('uic', False):
+                directive += ' uic'
+            filtered_lines.append(directive)
+        else:
+            raise ValueError(f"ngspice fallback is not supported for analysis type: {analysis_type}")
+
+        filtered_lines.append('.end')
+        return '\n'.join(filtered_lines)
+
+    def _normalize_signal_name(self, key: str) -> str:
+        """Keep node naming stable across Python and ngspice backends."""
+        if len(key) > 1 and key[1] == '(' and key[0].lower() in {'v', 'i'}:
+            return key[0].upper() + key[1:]
+        return key
+
+    def _normalize_value(self, value: Any) -> Any:
+        """Convert backend-specific numeric containers into JSON-friendly Python values."""
+        if hasattr(value, 'tolist'):
+            value = value.tolist()
+        if isinstance(value, tuple):
+            value = list(value)
+        if isinstance(value, list):
+            return [self._normalize_value(item) for item in value]
+        if hasattr(value, 'item'):
+            try:
+                return value.item()
+            except Exception:
+                return str(value)
+        return value
+
+    def _normalize_results(self, results: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize simulation results so higher-level tooling can treat both backends identically."""
+        normalized: Dict[str, Any] = {}
+        for key, value in results.items():
+            normalized[self._normalize_signal_name(key)] = self._normalize_value(value)
+        return normalized
+
+    def _run_analysis(self, netlist: str, analysis_type: str, kwargs: dict) -> Dict[str, Any]:
+        """Dispatch to the built-in simulation engine for the requested analysis."""
+        if analysis_type == 'dc':
+            return self._run_dc_analysis(netlist, kwargs)
+        if analysis_type == 'ac':
+            return self._run_ac_analysis(netlist, kwargs)
+        if analysis_type == 'transient':
+            return self._run_transient_analysis(netlist, kwargs)
+        if analysis_type == 'digital':
+            return self._run_digital_analysis(netlist, kwargs)
+        if analysis_type == 'mixed':
+            return self._run_mixed_analysis(netlist, kwargs)
+        raise ValueError(f"Unknown analysis type: {analysis_type}")
+
+    def _run_ngspice_transient_analysis(self, netlist: str, kwargs: dict) -> Dict[str, Any]:
+        """Run transient analysis through ngspice for unsupported behavioral SPICE constructs."""
+        backend = self._get_ngspice_backend()
+        prepared_netlist = self._prepare_ngspice_netlist(netlist, 'transient', kwargs)
+        return self._normalize_results(backend.simulate(prepared_netlist))
     
     def run_netlist(self, netlist_path: str, analysis_type: str = 'dc',
                     output_file: Optional[str] = None, **kwargs) -> Dict[str, Any]:
@@ -59,19 +156,29 @@ class SimulationRunner:
         
         self.log(f"Running {analysis_type} analysis...")
         start_time = time.time()
-        
-        if analysis_type == 'dc':
-            results = self._run_dc_analysis(netlist, kwargs)
-        elif analysis_type == 'ac':
-            results = self._run_ac_analysis(netlist, kwargs)
-        elif analysis_type == 'transient':
-            results = self._run_transient_analysis(netlist, kwargs)
-        elif analysis_type == 'digital':
-            results = self._run_digital_analysis(netlist, kwargs)
-        elif analysis_type == 'mixed':
-            results = self._run_mixed_analysis(netlist, kwargs)
+        backend_name = 'python'
+
+        if self._should_use_ngspice(netlist, analysis_type):
+            backend = self._get_ngspice_backend()
+            if backend.is_available():
+                self.log(f"Using ngspice fallback: {backend.ngspice_path}")
+                try:
+                    results = self._run_ngspice_transient_analysis(netlist, kwargs)
+                    if results:
+                        backend_name = 'ngspice'
+                    else:
+                        self.log("ngspice returned no parsed results; falling back to Python engine")
+                        results = self._run_analysis(netlist, analysis_type, kwargs)
+                except Exception as exc:
+                    self.log(f"ngspice fallback failed ({exc}); falling back to Python engine")
+                    results = self._run_analysis(netlist, analysis_type, kwargs)
+            else:
+                self.log("ngspice is unavailable; using Python engine for unsupported behavioral sources")
+                results = self._run_analysis(netlist, analysis_type, kwargs)
         else:
-            raise ValueError(f"Unknown analysis type: {analysis_type}")
+            results = self._run_analysis(netlist, analysis_type, kwargs)
+
+        results = self._normalize_results(results)
         
         elapsed = time.time() - start_time
         self.log(f"Simulation completed in {elapsed:.3f} seconds")
@@ -81,6 +188,7 @@ class SimulationRunner:
             'netlist_file': str(netlist_path),
             'analysis_type': analysis_type,
             'elapsed_time': elapsed,
+            'backend': backend_name,
         }
         
         # Save results if output file specified

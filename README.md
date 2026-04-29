@@ -186,6 +186,67 @@ python scripts/copilot_cli_watchdog.py \
 There is no stable Copilot premium API exposed in this repository, so the script is designed to accept
 your own usage source while still handling restart, pause, and backup logic automatically.
 
+### Automation - Script-Initiated Agent CLI Control
+
+```bash
+# Generate the default workflow queue (only needed if you removed the committed queue file)
+python scripts/agent_cli_controller.py --write-default-queue
+
+# Run one full controller cycle: handshake -> validation commands -> feedback -> next-agent prompt
+python scripts/agent_cli_controller.py
+
+# Open a dedicated visible PowerShell window that keeps the controller + Copilot CLI loop running
+pwsh -File scripts/open_agent_cli_window.ps1 -ContinueOnAgentExit
+
+# Keep the controller running daily while the laptop stays on
+pwsh -File scripts/start_agent_cli_daemon.ps1
+
+# Register the startup launcher so the controller launches automatically on login
+pwsh -File scripts/install_agent_startup.ps1 -AtLogon
+```
+
+The controller writes these repo artifacts each cycle:
+
+- `reports/agent_handshake_latest.json`
+- `reports/agent_feedback_latest.json`
+- `reports/agent_feedback_latest.md`
+- `reports/agent_prompt_latest.md`
+- `reports/agent_controller_state.json`
+
+To let the script drive an external agent CLI, set `AMS_AGENT_COMMAND_TEMPLATE` before launching
+`start_agent_cli_daemon.ps1`. The template can reference these placeholders:
+
+- `{prompt_file}`
+- `{state_file}`
+- `{feedback_file}`
+- `{handshake_file}`
+- `{queue_file}`
+- `{repo_root}`
+- `{cycle}`
+
+Example pattern:
+
+```powershell
+$env:AMS_AGENT_COMMAND_TEMPLATE = 'your-agent-cli --prompt-file "{prompt_file}"'
+pwsh -File scripts/start_agent_cli_daemon.ps1 -ContinueOnAgentExit
+```
+
+If the local VS Code Copilot CLI bootstrapper exists at the standard user path, `start_agent_cli_daemon.ps1`
+automatically uses [scripts/run_copilot_prompt.ps1](scripts/run_copilot_prompt.ps1) as the external agent command,
+so the controller can launch Copilot itself without an extra manual template.
+
+If you want a visible live window instead of a background-style daemon shell, use
+[scripts/open_agent_cli_window.ps1](scripts/open_agent_cli_window.ps1). It opens a dedicated PowerShell window,
+sets the title, and starts the continuous controller + Copilot CLI loop inside that window.
+
+`install_agent_startup.ps1` first tries to register a Windows scheduled task. If the current account is not
+allowed to create scheduled tasks, it falls back to placing a launcher in the current user's Startup folder,
+which still gives automatic login-time startup without requiring elevation.
+
+The controller cannot remove external token or rate limits, but it does make the workflow resumable:
+if the external agent exits because of a token/context limit, the controller keeps the state, regenerates
+the next prompt from the latest repo reports, and starts the next cycle automatically.
+
 ### Batch Configuration File (JSON)
 
 ```json

@@ -252,6 +252,8 @@ class SchematicEditor(QGraphicsView):
     zoom_changed = pyqtSignal(float)
     mode_changed = pyqtSignal(str)
     schematic_modified = pyqtSignal()
+    hierarchy_descend_requested = pyqtSignal(object)
+    hierarchy_ascend_requested = pyqtSignal()
     
     def __init__(self):
         super().__init__()
@@ -294,12 +296,28 @@ class SchematicEditor(QGraphicsView):
         self._auto_wire_enabled = True
         self._dragging_from_pin: Optional[tuple] = None  # (component_id, pin)
         self._auto_wire_preview: Optional[QGraphicsPathItem] = None
+
+        # Hierarchy navigation state
+        self._navigation_tab_name: str = ""
+        self._navigation_parent_tab_name: Optional[str] = None
+        self._navigation_root_tab_name: Optional[str] = None
         
         # Setup view
         self._setup_view()
         
         # Draw grid
         self._draw_grid()
+
+    def configure_hierarchy_navigation(
+        self,
+        tab_name: str,
+        parent_tab_name: Optional[str] = None,
+        root_tab_name: Optional[str] = None,
+    ) -> None:
+        """Attach parent/root tab targets for right-click hierarchy navigation."""
+        self._navigation_tab_name = tab_name
+        self._navigation_parent_tab_name = parent_tab_name
+        self._navigation_root_tab_name = root_tab_name or tab_name
     
     def _setup_view(self):
         """Setup view properties."""
@@ -1008,6 +1026,32 @@ class SchematicEditor(QGraphicsView):
     def _show_context_menu(self, pos):
         """Show context menu."""
         menu = QMenu(self)
+
+        component_item = self._component_item_at_view_pos(pos)
+        if component_item and not component_item.isSelected():
+            for selected_item in self.scene.selectedItems():
+                selected_item.setSelected(False)
+            component_item.setSelected(True)
+            self.selection_changed.emit(component_item.component)
+
+        if component_item and isinstance(component_item.component, HierarchicalBlock):
+            block_name = component_item.component.display_name
+            action_label = f"Descend Into {block_name}"
+            if component_item.component.domain == "DIGITAL":
+                action_label = f"Descend Into {block_name} / Open RTL Source"
+            menu.addAction(
+                action_label,
+                lambda comp=component_item.component: self.hierarchy_descend_requested.emit(comp),
+            )
+
+        if self._navigation_parent_tab_name:
+            target_label = "Ascend To Parent"
+            if self._navigation_root_tab_name == self._navigation_parent_tab_name:
+                target_label = "Ascend To Top Level"
+            menu.addAction(target_label, self.hierarchy_ascend_requested.emit)
+
+        if component_item or self._navigation_parent_tab_name:
+            menu.addSeparator()
         
         menu.addAction("Cut", self.cut)
         menu.addAction("Copy", self.copy)
@@ -1021,6 +1065,16 @@ class SchematicEditor(QGraphicsView):
         menu.addAction("Flip Vertical", self.flip_selected_vertical)
         
         menu.exec(self.mapToGlobal(pos))
+
+    def _component_item_at_view_pos(self, pos) -> Optional[ComponentGraphicsItem]:
+        """Return the component item under a viewport position, if any."""
+        scene_pos = self.mapToScene(pos)
+        item = self.scene.itemAt(scene_pos, QTransform())
+        while item is not None and not isinstance(item, ComponentGraphicsItem):
+            item = item.parentItem()
+        if isinstance(item, ComponentGraphicsItem):
+            return item
+        return None
     
     # Netlist generation
     # Default SPICE .MODEL definitions for NgSpice compatibility

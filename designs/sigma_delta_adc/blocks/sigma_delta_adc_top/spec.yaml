@@ -1,0 +1,35 @@
+block:
+  name: sigma_delta_adc_top
+  type: mixed
+  generator: ""
+  description: Top-level Sigma-Delta ADC reference imported into the indexed design flow.
+  technology: generic180
+  source: examples/standard_circuits/sigma_delta_adc.spice
+ports: []
+specs:
+  modulator_order: 1
+  oversampling_ratio: 64
+  signal_bandwidth_khz: 20
+verification:
+  case_id: TOP-SIGMA-DELTA-ADC
+  category: Top
+  standard: Internal ADC architecture spec
+  description: Top-level transient snapshot for the imported Sigma-Delta ADC reference design.
+  analysis: transient
+  settings:
+    tstop: 2e-3
+    tstep: 100e-9
+  checks:
+    - type: has_key
+      key: V(analog_in)
+      description: Analog input waveform captured
+    - type: has_key
+      key: V(bitstream)
+      description: Modulator bitstream is present
+    - type: has_any_key
+      keys: [V(dec_filt), V(fb_dac), V(int_out)]
+      description: Internal sigma-delta nodes are present
+    - type: min_length
+      key: time
+      min: 1000
+      description: Transient simulation produced enough samples

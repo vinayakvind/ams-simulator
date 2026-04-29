@@ -36,6 +36,15 @@ blocks:
     source: rtl/spi_slave.v
     ports: [CLK, MOSI, MISO, CS_N, SCLK]
 
+  - name: sar_adc_top
+    type: mixed
+    source: examples/standard_circuits/sar_adc.spice
+    verification:
+      analysis: transient
+      settings: {tstop: 100e-6, tstep: 100e-9}
+      checks:
+        - {type: has_key, key: V(analog_in), description: Analog input captured}
+
 connectivity:
   - from: bandgap.VREF
     to: [ldo_analog.VREF, ldo_digital.VREF]
@@ -86,3 +95,8 @@ python designs/framework/scripts/create_design.py \
 ```
 
 This creates the full directory tree with all block folders, specs, and testbenches.
+
+### Imported Source Blocks
+
+The framework can now wrap existing SPICE, Verilog, or SystemVerilog sources into a design directory by using `source:`.
+Use this when you want indexed documentation, reports, and architecture capture for an already-existing design instead of regenerating the implementation from scratch.

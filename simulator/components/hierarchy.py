@@ -45,6 +45,18 @@ class HierarchicalBlock(Component):
         return self._block_name
 
     @property
+    def instance_name(self) -> str:
+        return self._instance_name
+
+    @property
+    def model_name(self) -> str:
+        return self._model_name
+
+    @property
+    def domain(self) -> str:
+        return self._domain
+
+    @property
     def symbol_path(self) -> list[tuple]:
         half_h = self._body_height / 2
         x0 = -self._body_width / 2

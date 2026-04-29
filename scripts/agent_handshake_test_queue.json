@@ -1,0 +1,15 @@
+{
+  "goal": "Handshake test only. Do not modify repository files and do not start implementation work. Confirm that the controller prompt reached the CLI by replying with exactly one line: HANDSHAKE_OK repo=ams-simulator mode=controller.",
+  "focus_areas": [
+    "Validate script-to-CLI prompt handoff",
+    "Keep the external CLI response limited to a one-line acknowledgment",
+    "Do not modify repository files during this test"
+  ],
+  "steps": [
+    {
+      "id": "verify-project-status",
+      "command": "\"{python}\" scripts/verify_project_status.py",
+      "continue_on_failure": false
+    }
+  ]
+}

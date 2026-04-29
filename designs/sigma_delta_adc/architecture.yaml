@@ -1,0 +1,46 @@
+chip:
+  name: SIGMA_DELTA_ADC
+  technology: generic180
+  supply:
+    vdd_io: 3.3
+    vref_p: 2.5
+    vref_n: 0.0
+
+blocks:
+  - name: sigma_delta_adc_top
+    type: mixed
+    source: examples/standard_circuits/sigma_delta_adc.spice
+    ports: [vdd, analog_in, clk]
+    verification:
+      case_id: TOP-SIGMA-DELTA-ADC
+      category: Top
+      standard: Internal ADC architecture spec
+      description: Top-level transient snapshot for the imported Sigma-Delta ADC reference design.
+      analysis: transient
+      settings:
+        tstop: 2e-3
+        tstep: 100e-9
+      checks:
+        - type: has_key
+          key: V(analog_in)
+          description: Analog input waveform captured
+        - type: has_key
+          key: V(bitstream)
+          description: Modulator bitstream is present
+        - type: has_any_key
+          keys: [V(dec_filt), V(fb_dac), V(int_out)]
+          description: Internal sigma-delta nodes are present
+        - type: min_length
+          key: time
+          min: 1000
+          description: Transient simulation produced enough samples
+
+connectivity:
+  - from: analog_in
+    to: [sigma_delta_adc_top]
+
+pad_ring:
+  - {name: VDD, type: power, voltage: 3.3}
+  - {name: VIN, type: analog_input}
+  - {name: CLK, type: digital_input}
+  - {name: GND, type: ground}

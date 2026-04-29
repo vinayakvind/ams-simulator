@@ -95,12 +95,26 @@ def main() -> int:
                         "lin.architecture", "LIN ASIC architecture file exists"))
     checks.append(check((ROOT / "designs" / "lin_asic" / "design_index.json").exists(),
                         "lin.index", "LIN ASIC design index exists"))
+    checks.append(check((ROOT / "designs" / "lin_asic" / "design_reference.json").exists(),
+                        "lin.design_reference", "LIN ASIC indexed design reference exists"))
+    checks.append(check((ROOT / "reports" / "lin_asic_design_reference.html").exists(),
+                        "lin.design_reference.html", "LIN ASIC design-reference webpage exists"))
     checks.append(check((ROOT / "analog_books_repo" / "catalog" / "analog_books_index.json").exists(),
                         "analog.books.catalog", "analog books catalog exists"))
     checks.append(check((ROOT / "scripts" / "copilot_cli_watchdog.py").exists(),
                         "automation.watchdog", "Copilot CLI watchdog exists"))
     checks.append(check((ROOT / "scripts" / "repo_backup_guard.py").exists(),
                         "automation.backup.guard", "repo backup guard exists"))
+    checks.append(check((ROOT / "scripts" / "agent_cli_controller.py").exists(),
+                        "automation.agent.controller", "script-driven agent CLI controller exists"))
+    checks.append(check((ROOT / "scripts" / "agent_workflow.json").exists(),
+                        "automation.agent.queue", "default agent workflow queue exists"))
+    checks.append(check((ROOT / "scripts" / "open_agent_cli_window.ps1").exists(),
+                        "automation.agent.window", "visible agent window launcher exists"))
+    checks.append(check((ROOT / "scripts" / "start_agent_cli_daemon.ps1").exists(),
+                        "automation.agent.startup", "startup wrapper exists"))
+    checks.append(check((ROOT / "scripts" / "install_agent_startup.ps1").exists(),
+                        "automation.agent.scheduler", "startup task installer exists"))
 
     git_status = run_git("status", "--short", "--branch")
     synced = "## master...origin/master" in git_status.stdout

@@ -1,0 +1,278 @@
+{
+  "design": {
+    "id": "sigma_delta_adc",
+    "title": "Sigma-Delta ADC Indexed Design Reference",
+    "headline": "Reusable Sigma-Delta ADC architecture, verification contract, and results wrapper.",
+    "summary": "Indexed reference for a Sigma-Delta ADC top-level design so imported oversampled converter netlists can participate in the same architecture and presentation flow as other AMS designs.",
+    "narrative": "This manifest captures the reusable architecture intent for a Sigma-Delta ADC reference design. It records the modulator partition, the core equations behind oversampling and noise shaping, the transient-oriented validation flow, and the file locations needed to regenerate both the design-reference page and the portfolio presentation.",
+    "standard": "Internal ADC architecture reference",
+    "technology": "generic180 baseline with portability to generic130, generic65, and bcd180 through TechMapper wrappers",
+    "signoff_boundary": "Current validation is a reusable top-level snapshot on an imported reference design. Replace with explicit sub-block implementations and foundry signoff flows for silicon work.",
+    "tags": [
+      "adc",
+      "sigma-delta",
+      "oversampling",
+      "data converter",
+      "indexed methodology",
+      "technology portability"
+    ]
+  },
+  "flow_summary": "The Sigma-Delta ADC uses the same indexed flow as the rest of the framework: capture architecture, define verification settings, save a normalized snapshot result, and publish HTML plus portfolio outputs.",
+  "analysis_summary": "Primary validation is transient-oriented because the key behavior is oversampled bitstream generation, feedback DAC interaction, and filtered-output evolution over time.",
+  "script_summary": "Use the snapshot script to normalize the top-level run and the portfolio generator to publish architecture and status across designs.",
+  "architecture": {
+    "summary": "Analog input is integrated against a one-bit feedback DAC, quantized into a bitstream, and then low-pass filtered or decimated to reconstruct the in-band signal. The indexed wrapper keeps that architecture reusable across future implementations and technologies.",
+    "power_tree_summary": "3.3V supply and 0V/2.5V references establish the first-order Sigma-Delta operating range.",
+    "domains": [
+      {
+        "name": "VDD",
+        "voltage": "3.3V",
+        "source": "external supply",
+        "drives": "integrator, quantizer, DAC model, decimation path"
+      },
+      {
+        "name": "VIN",
+        "voltage": "analog stimulus centered in converter range",
+        "source": "analog input source",
+        "drives": "modulator summing node"
+      },
+      {
+        "name": "VREF",
+        "voltage": "0V to 2.5V",
+        "source": "internal or external reference pair",
+        "drives": "one-bit feedback DAC swing"
+      }
+    ],
+    "power_sequence": [
+      "Establish the reference endpoints before enabling the modulator loop.",
+      "Start the sampling clock so the integrator and quantizer enter a stable noise-shaping regime.",
+      "Observe the bitstream and filtered output over a long enough time window to assess behavior."
+    ],
+    "control_path": [
+      {
+        "title": "Summing path",
+        "description": "Analog input and feedback DAC output form the modulator error signal."
+      },
+      {
+        "title": "Noise-shaping path",
+        "description": "The integrator accumulates low-frequency error while the one-bit quantizer emits the high-rate bitstream."
+      },
+      {
+        "title": "Reconstruction path",
+        "description": "The filtered or decimated output estimates the in-band analog value."
+      }
+    ]
+  },
+  "indexed_flow": [
+    {
+      "index": "01",
+      "title": "Capture oversampled converter architecture",
+      "description": "Freeze the summing, integrating, quantizing, feedback, and filtering roles before implementation details change.",
+      "outputs": ["01_ARCHITECTURE.md", "architecture.yaml"]
+    },
+    {
+      "index": "02",
+      "title": "Import or generate implementation",
+      "description": "Wrap the chosen Sigma-Delta source file into the indexed flow so reporting and reuse stay stable.",
+      "outputs": ["blocks/sigma_delta_adc_top/spec.yaml", "examples/standard_circuits/sigma_delta_adc.spice"]
+    },
+    {
+      "index": "03",
+      "title": "Run the top-level snapshot",
+      "description": "Execute the transient snapshot and save a normalized regression JSON for later presentation.",
+      "outputs": ["reports/sigma_delta_adc_regression_latest.json"]
+    },
+    {
+      "index": "04",
+      "title": "Publish reusable reference",
+      "description": "Generate the standalone HTML page and include the converter in the overall portfolio presentation.",
+      "outputs": ["reports/sigma_delta_adc_design_reference.html", "reports/design_portfolio_overview.pptx"]
+    }
+  ],
+  "analysis_playbook": [
+    {
+      "type": "transient",
+      "name": "Top-level modulator snapshot",
+      "purpose": "Capture analog input, bitstream activity, and filtered-output behavior over an oversampled window.",
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design sigma_delta_adc --block sigma_delta_adc_top",
+      "pass_criteria": "Transient results include analog input, bitstream activity, at least one filtered or internal node, and sufficient sample depth.",
+      "debug_focus": "analog_in, bitstream, int_out, dec_filt, fb_dac"
+    },
+    {
+      "type": "presentation",
+      "name": "Portfolio publication",
+      "purpose": "Surface the converter in the cross-design architecture and results presentation.",
+      "command": "python designs/framework/scripts/generate_portfolio_presentation.py",
+      "pass_criteria": "The design appears in JSON, Markdown, and PPT outputs with its latest status.",
+      "debug_focus": "Manifest completeness and saved regression artifact naming."
+    }
+  ],
+  "corner_closure": {
+    "summary": "No PVT closure is claimed yet. This wrapper records the intended architecture and validation contract for future technology-specific Sigma-Delta work.",
+    "matrix": {
+      "process": "generic180 baseline today; future TT/FF/SS and foundry corners",
+      "voltage": "nominal 3.3V today; future min/nom/max",
+      "temperature_c": "room only today; future -40, 27, 125"
+    },
+    "closure_order": [
+      "Confirm bitstream and filtered-output visibility before claiming in-band performance.",
+      "Add explicit integrator, quantizer, DAC, and decimator verification before PVT closure.",
+      "Promote the imported reference into a technology-specific implementation only after architecture is frozen."
+    ],
+    "pass_rule": "Current pass means the imported top-level source executed with the required visibility for architecture review. It does not mean silicon signoff closure.",
+    "model_note": "Technology portability is architecture-driven today. Replace the imported reference with block-level implementations and foundry models for real development."
+  },
+  "script_index": [
+    {
+      "name": "Run top-level snapshot",
+      "purpose": "Create a normalized regression JSON from spec.yaml verification settings.",
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design sigma_delta_adc --block sigma_delta_adc_top"
+    },
+    {
+      "name": "Generate Sigma-Delta webpage",
+      "purpose": "Render the indexed Sigma-Delta reference as a standalone HTML page.",
+      "command": "python designs/framework/scripts/generate_design_reference.py --input designs/sigma_delta_adc/design_reference.json --output reports/sigma_delta_adc_design_reference.html"
+    },
+    {
+      "name": "Generate portfolio PPT",
+      "purpose": "Include the Sigma-Delta ADC in the overall architecture and results presentation.",
+      "command": "python designs/framework/scripts/generate_portfolio_presentation.py"
+    }
+  ],
+  "debug_playbook": [
+    {
+      "title": "If the bitstream is missing",
+      "description": "Check that the imported source still exposes the quantizer output node expected by the snapshot checks."
+    },
+    {
+      "title": "If the time window is too short",
+      "description": "Increase the transient stop time so the oversampled loop and filtered output have enough time to develop."
+    }
+  ],
+  "future_design_reuse": [
+    {
+      "title": "Swap in a different Sigma-Delta implementation",
+      "description": "Only the source path and verification settings need to change when retargeting the wrapper to another oversampled ADC design."
+    },
+    {
+      "title": "Retarget technology",
+      "description": "Keep the indexed architecture and update the implementation source plus technology metadata for the next node."
+    }
+  ],
+  "blocks": [
+    {
+      "block_key": "sigma_delta_adc_top",
+      "name": "Sigma-Delta ADC Top Level",
+      "domain": "mixed",
+      "aliases": ["sigma_delta_adc_top", "sigma_delta_adc"],
+      "role": "Converts an analog input into a noise-shaped bitstream and filtered low-rate estimate using oversampling.",
+      "architecture": "The imported top-level reference models a first-order integrator, one-bit quantizer, feedback DAC, and simple output filtering in one reusable netlist.",
+      "implementation_steps": [
+        {
+          "title": "Form the modulator error",
+          "description": "Subtract feedback DAC output from the analog input at the summing node."
+        },
+        {
+          "title": "Integrate and quantize",
+          "description": "The integrator accumulates low-frequency error and the quantizer emits the one-bit bitstream."
+        },
+        {
+          "title": "Reconstruct the signal",
+          "description": "Filter or decimate the bitstream to recover the in-band output estimate."
+        }
+      ],
+      "primary_specs": [
+        {
+          "name": "Modulator order",
+          "target": "1st order reference",
+          "reason": "Defines the noise-shaping slope and architecture complexity."
+        },
+        {
+          "name": "Oversampling ratio",
+          "target": "64x",
+          "reason": "Sets the relationship between sampling rate and in-band noise shaping."
+        },
+        {
+          "name": "Signal bandwidth",
+          "target": "20 kHz class reference",
+          "reason": "Defines the in-band region for the filtered output."
+        }
+      ],
+      "sizing_formulas": [
+        {
+          "title": "Oversampling ratio",
+          "formula": "OSR = fS / (2 * BW)",
+          "explanation": "Relates sample rate to target signal bandwidth.",
+          "variables": ["fS", "BW"]
+        },
+        {
+          "title": "First-order SNR trend",
+          "formula": "SNR improves as oversampling pushes quantization noise out of band",
+          "explanation": "The first-order loop trades time-domain bit density for improved in-band resolution after filtering.",
+          "variables": ["OSR"]
+        }
+      ],
+      "dc_operating_points": [
+        {
+          "node": "analog_in",
+          "target": "Centered analog sinusoid within converter range",
+          "how_set": "Input source inside the imported reference netlist",
+          "why": "Provides the modulator stimulus."
+        },
+        {
+          "node": "bitstream",
+          "target": "High-rate one-bit output with density proportional to input",
+          "how_set": "Quantizer output from the integrator state",
+          "why": "Primary Sigma-Delta observable."
+        },
+        {
+          "node": "dec_filt",
+          "target": "Smoothed estimate of the in-band input",
+          "how_set": "Simple reconstruction filter in the imported reference",
+          "why": "Readable low-rate output estimate for validation."
+        }
+      ],
+      "analysis_steps": [
+        {
+          "type": "transient",
+          "name": "Top-level modulator snapshot",
+          "purpose": "Observe input, feedback, bitstream, and filtered-output behavior over an oversampled window.",
+          "command": "python designs/framework/scripts/run_design_snapshot.py --design sigma_delta_adc --block sigma_delta_adc_top",
+          "pass_criteria": "Input waveform, bitstream, and at least one internal or filtered node are present with enough time samples.",
+          "debug_focus": "analog_in, bitstream, dec_filt, fb_dac, int_out"
+        }
+      ],
+      "corner_focus": [
+        {
+          "condition": "Future PVT closure",
+          "risk": "Integrator gain, comparator threshold, and decimation timing will all move differently across technologies.",
+          "primary_knob": "Technology-specific sub-block implementation and timing budgets"
+        }
+      ],
+      "tuning_knobs": [
+        {
+          "title": "Sampling rate",
+          "description": "Directly changes OSR and the amount of shaped out-of-band noise."
+        },
+        {
+          "title": "Loop filter constant",
+          "description": "Sets the effective integrator strength and therefore the bitstream density response."
+        }
+      ],
+      "files": [
+        {
+          "path": "designs/sigma_delta_adc/blocks/sigma_delta_adc_top/spec.yaml",
+          "role": "Top-level verification contract for the Sigma-Delta wrapper"
+        },
+        {
+          "path": "examples/standard_circuits/sigma_delta_adc.spice",
+          "role": "Imported Sigma-Delta ADC source netlist"
+        },
+        {
+          "path": "reports/sigma_delta_adc_regression_latest.json",
+          "role": "Latest normalized top-level snapshot report"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "created_at": "2026-04-29T23:55:53.425446",
+  "queue_file": "C:\\Users\\vinay\\My Simulator\\scripts\\agent_handshake_test_queue.json",
+  "cycle_count": 1,
+  "status": "waiting_for_next_cycle",
+  "validation_history": [
+    {
+      "cycle": 1,
+      "started_at": "2026-04-29T23:55:53.425819",
+      "finished_at": "2026-04-29T23:56:33.117946",
+      "failed_steps": [],
+      "next_actions": [
+        "Expand generic65 chip-profile support for: lin_node_asic, power_management_unit.",
+        "Expand generic65 reusable IP support for: buck_converter, ldo_analog, ldo_lin, lin_transceiver."
+      ]
+    }
+  ],
+  "last_feedback_json": "C:\\Users\\vinay\\My Simulator\\reports\\agent_handshake_test_feedback.json",
+  "last_prompt_file": "C:\\Users\\vinay\\My Simulator\\reports\\agent_handshake_test_prompt.md",
+  "last_agent_result": {
+    "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\vinay\\My Simulator\\scripts\\run_copilot_prompt.ps1\" -PromptFile \"C:\\Users\\vinay\\My Simulator\\reports\\agent_handshake_test_prompt.md\" -RepoRoot \"c:\\Users\\vinay\\My Simulator\"",
+    "exit_code": 0,
+    "token_limit_detected": false,
+    "log_path": "C:\\Users\\vinay\\My Simulator\\reports\\agent_handshake_test.log",
+    "output_tail": [
+      "HANDSHAKE_OK repo=ams-simulator mode=controller",
+      "",
+      "\u25cf Continuing autonomously (0.33 premium requests)",
+      "",
+      "",
+      "",
+      "Changes   +0 -0",
+      "Requests  0.66 Premium (18s)",
+      "Tokens    \u2191 50.5k \u2022 \u2193 531 \u2022 39.5k (cached)"
+    ]
+  },
+  "last_cycle_started_at": "2026-04-29T23:55:53.425819",
+  "last_cycle_finished_at": "2026-04-29T23:56:33.117946",
+  "last_feedback_markdown": "C:\\Users\\vinay\\My Simulator\\reports\\agent_handshake_test_feedback.md",
+  "last_handshake_file": "C:\\Users\\vinay\\My Simulator\\reports\\agent_handshake_test_handshake.json",
+  "last_validation_results": [
+    {
+      "id": "verify-project-status",
+      "title": "verify-project-status",
+      "command": "\"C:\\Users\\vinay\\My Simulator\\.venv\\Scripts\\python.exe\" scripts/verify_project_status.py",
+      "cwd": "C:\\Users\\vinay\\My Simulator",
+      "started_at": "2026-04-29T23:55:56.654902",
+      "finished_at": "2026-04-29T23:55:57.385793",
+      "duration_seconds": 0.731,
+      "exit_code": 0,
+      "continue_on_failure": false,
+      "log_path": "C:\\Users\\vinay\\My Simulator\\reports\\agent_cycles\\cycle_0001_verify-project-status.log",
+      "output_tail": [
+        "[PASS] analog.books.catalog: analog books catalog exists",
+        "[PASS] automation.watchdog: Copilot CLI watchdog exists",
+        "[PASS] automation.backup.guard: repo backup guard exists",
+        "[PASS] automation.agent.controller: script-driven agent CLI controller exists",
+        "[PASS] automation.agent.queue: default agent workflow queue exists",
+        "[PASS] automation.agent.startup: startup wrapper exists",
+        "[PASS] automation.agent.scheduler: startup task installer exists",
+        "[PASS] git.sync: ## master...origin/master",
+        "",
+        "Summary: 15/15 checks passed"
+      ]
+    }
+  ]
+}

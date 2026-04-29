@@ -1,0 +1,799 @@
+{
+  "generated_at": "2026-04-30T00:44:41.532394",
+  "technology_filter": "generic180",
+  "summary": {
+    "technology_count": 4,
+    "reusable_ip_count": 15,
+    "verification_ip_count": 6,
+    "digital_subsystem_count": 3,
+    "chip_profile_count": 5,
+    "compatible_ip_count": 15,
+    "compatible_digital_subsystem_count": 3,
+    "compatible_chip_profile_count": 5
+  },
+  "technologies": [
+    {
+      "name": "generic180",
+      "node": "180nm",
+      "vdd": 1.8,
+      "description": "Generic 180nm CMOS with HV options (automotive)"
+    },
+    {
+      "name": "generic130",
+      "node": "130nm",
+      "vdd": 1.2,
+      "description": "Generic 130nm CMOS"
+    },
+    {
+      "name": "generic65",
+      "node": "65nm",
+      "vdd": 1.0,
+      "description": "Generic 65nm CMOS (low-power)"
+    },
+    {
+      "name": "bcd180",
+      "node": "180nm",
+      "vdd": 1.8,
+      "description": "BCD 180nm - Bipolar/CMOS/DMOS for automotive HV"
+    }
+  ],
+  "reusable_ips": [
+    {
+      "name": "Bandgap Reference",
+      "domain": "analog",
+      "category": "reference",
+      "generator": "bandgap_ref",
+      "ports": [
+        "VDD",
+        "VREF",
+        "GND",
+        "EN"
+      ],
+      "aliases": [
+        "bandgap_ref",
+        "bandgap_reference"
+      ],
+      "description": "Master 1.2 V reference for mixed-signal chips.",
+      "role": "Provides a stable reference for regulators, comparators, and analog bias paths.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "bandgap",
+      "compatible": true
+    },
+    {
+      "name": "Buck Converter",
+      "domain": "analog",
+      "category": "power",
+      "source": "examples/standard_circuits/buck_converter.spice",
+      "ports": [],
+      "aliases": [
+        "buck"
+      ],
+      "description": "Switching regulator reference for PMIC and power-management chip assembly.",
+      "role": "Generates efficient lower-voltage rails from higher-voltage sources.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "buck_converter",
+      "compatible": true
+    },
+    {
+      "name": "CMOS Comparator",
+      "domain": "analog",
+      "category": "sense",
+      "source": "examples/adc/comparator_cmos.spice",
+      "ports": [],
+      "aliases": [
+        "comparator"
+      ],
+      "description": "Reusable comparator for converter and monitor macros.",
+      "role": "Compares analog levels for thresholding and bit decisions.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "comparator_cmos",
+      "compatible": true
+    },
+    {
+      "name": "Control Logic",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "control_logic",
+      "ports": [
+        "clk",
+        "rst_n",
+        "en_bgr",
+        "en_ana",
+        "en_dig",
+        "en_if"
+      ],
+      "aliases": [
+        "ctrl_logic"
+      ],
+      "description": "Chip-level sequencing and enable orchestration logic.",
+      "role": "Coordinates power-up order, mode transitions, and safety gating.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "control_logic",
+      "compatible": true
+    },
+    {
+      "name": "R-2R DAC 4-bit",
+      "domain": "analog",
+      "category": "converter",
+      "source": "examples/adc/dac_r2r_4bit.spice",
+      "ports": [],
+      "aliases": [
+        "r2r_dac"
+      ],
+      "description": "Reusable DAC building block for converter and mixed-signal control designs.",
+      "role": "Converts digital control words into analog voltage levels.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "dac_r2r_4bit",
+      "compatible": true
+    },
+    {
+      "name": "Analog LDO",
+      "domain": "analog",
+      "category": "power",
+      "generator": "ldo_analog",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "ldo_ana"
+      ],
+      "description": "Regulated analog rail generator for sensor, reference, and interface domains.",
+      "role": "Creates a quiet analog rail from a higher-voltage source.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ldo_analog",
+      "compatible": true
+    },
+    {
+      "name": "Digital LDO",
+      "domain": "analog",
+      "category": "power",
+      "generator": "ldo_digital",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "ldo_dig"
+      ],
+      "description": "Low-noise regulator for digital core and control logic domains.",
+      "role": "Generates the digital core supply from the parent analog rail.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ldo_digital",
+      "compatible": true
+    },
+    {
+      "name": "LIN Rail LDO",
+      "domain": "analog",
+      "category": "power",
+      "generator": "ldo_lin",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "ldo_lin_driver"
+      ],
+      "description": "Automotive-facing regulator for LIN bus driver domains.",
+      "role": "Creates the LIN transceiver supply from VBAT or another HV source.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ldo_lin",
+      "compatible": true
+    },
+    {
+      "name": "LIN Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "lin_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "tx_req",
+        "rx_valid",
+        "baud_div"
+      ],
+      "aliases": [
+        "lin_protocol"
+      ],
+      "description": "Protocol state machine for LIN framing, timing, and control.",
+      "role": "Owns the LIN protocol engine and timing behavior.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lin_controller",
+      "compatible": true
+    },
+    {
+      "name": "LIN Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "lin_transceiver",
+      "ports": [
+        "VBAT",
+        "VDD5",
+        "VDDIO",
+        "GND",
+        "TXD",
+        "RXD",
+        "LIN",
+        "EN"
+      ],
+      "aliases": [
+        "lin_tx_rx",
+        "lin_txrx"
+      ],
+      "description": "Mixed-signal LIN physical interface with driver and receiver paths.",
+      "role": "Bridges digital control signals to the automotive LIN bus and back.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lin_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "Register File",
+      "domain": "digital",
+      "category": "control",
+      "generator": "register_file",
+      "ports": [
+        "clk",
+        "rst_n",
+        "wr_en",
+        "addr",
+        "wdata",
+        "rdata"
+      ],
+      "aliases": [
+        "registers",
+        "reg_file"
+      ],
+      "description": "Central register bank for configuration, status, and trim control.",
+      "role": "Holds chip configuration state and status visibility.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "register_file",
+      "compatible": true
+    },
+    {
+      "name": "Sample and Hold Frontend",
+      "domain": "analog",
+      "category": "converter",
+      "source": "examples/adc/sample_hold_cmos.spice",
+      "ports": [],
+      "aliases": [
+        "sample_hold"
+      ],
+      "description": "Reusable sample-and-hold front-end stage for ADC assembly.",
+      "role": "Captures the analog input and holds it stable for conversion.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sample_hold_frontend",
+      "compatible": true
+    },
+    {
+      "name": "SAR ADC Top",
+      "domain": "mixed",
+      "category": "converter",
+      "source": "examples/standard_circuits/sar_adc.spice",
+      "ports": [],
+      "aliases": [
+        "sar_adc"
+      ],
+      "description": "Top-level successive-approximation ADC reference implementation.",
+      "role": "Provides a reusable sampled-data converter macro for sensor or monitor chips.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "verification": {
+        "case_id": "TOP-SAR-ADC",
+        "category": "Top",
+        "standard": "Internal ADC architecture spec",
+        "description": "Top-level transient snapshot for the imported SAR ADC reference design.",
+        "analysis": "transient",
+        "settings": {
+          "tstop": 0.0001,
+          "tstep": 1e-07
+        },
+        "checks": [
+          {
+            "type": "has_key",
+            "key": "V(analog_in)",
+            "description": "Analog input waveform captured"
+          },
+          {
+            "type": "has_any_key",
+            "keys": [
+              "V(dac_out)",
+              "V(sh_out)",
+              "V(comp_out)"
+            ],
+            "description": "Internal SAR conversion nodes are present"
+          },
+          {
+            "type": "min_length",
+            "key": "time",
+            "min": 100,
+            "description": "Transient simulation produced enough samples"
+          }
+        ]
+      },
+      "key": "sar_adc_top",
+      "compatible": true
+    },
+    {
+      "name": "Sigma-Delta ADC Top",
+      "domain": "mixed",
+      "category": "converter",
+      "source": "examples/standard_circuits/sigma_delta_adc.spice",
+      "ports": [],
+      "aliases": [
+        "sigma_delta_adc"
+      ],
+      "description": "Top-level sigma-delta ADC reference implementation.",
+      "role": "Provides an oversampled converter macro for sensing and monitoring chips.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "verification": {
+        "case_id": "TOP-SIGMA-DELTA-ADC",
+        "category": "Top",
+        "standard": "Internal ADC architecture spec",
+        "description": "Top-level transient snapshot for the imported Sigma-Delta ADC reference design.",
+        "analysis": "transient",
+        "settings": {
+          "tstop": 0.002,
+          "tstep": 1e-07
+        },
+        "checks": [
+          {
+            "type": "has_key",
+            "key": "V(analog_in)",
+            "description": "Analog input waveform captured"
+          },
+          {
+            "type": "has_key",
+            "key": "V(bitstream)",
+            "description": "Modulator bitstream is present"
+          },
+          {
+            "type": "has_any_key",
+            "keys": [
+              "V(dec_filt)",
+              "V(fb_dac)",
+              "V(int_out)"
+            ],
+            "description": "Internal sigma-delta nodes are present"
+          },
+          {
+            "type": "min_length",
+            "key": "time",
+            "min": 1000,
+            "description": "Transient simulation produced enough samples"
+          }
+        ]
+      },
+      "key": "sigma_delta_adc_top",
+      "compatible": true
+    },
+    {
+      "name": "SPI Controller",
+      "domain": "digital",
+      "category": "control",
+      "generator": "spi_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "sclk",
+        "mosi",
+        "miso",
+        "cs_n"
+      ],
+      "aliases": [
+        "spi"
+      ],
+      "description": "Register access path for software-programmable mixed-signal chips.",
+      "role": "Provides serial register access into the chip control plane.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "spi_controller",
+      "compatible": true
+    }
+  ],
+  "verification_ips": [
+    {
+      "name": "ADC Transient VIP",
+      "protocol": "Converter transient",
+      "checks": [
+        "input stimulus",
+        "internal decision nodes",
+        "bitstream or DAC activity"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates converter activity over a sampled-data transient window.",
+      "key": "adc_transient_vip"
+    },
+    {
+      "name": "Analog Snapshot VIP",
+      "protocol": "Analog snapshot",
+      "checks": [
+        "waveform presence",
+        "minimum sample count",
+        "tracked node visibility"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Turns a block verification spec into a normalized regression artifact.",
+      "key": "analog_snapshot_vip"
+    },
+    {
+      "name": "LIN Verification IP",
+      "protocol": "LIN",
+      "checks": [
+        "break and sync",
+        "frame timing",
+        "TX/RX thresholding"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Covers LIN protocol and mixed-signal bus behavior.",
+      "key": "lin_vip"
+    },
+    {
+      "name": "Mixed-Signal Bridge VIP",
+      "protocol": "Mixed-signal interface",
+      "checks": [
+        "digital-to-analog drive",
+        "analog-to-digital thresholding",
+        "interface closure"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Checks top-level mixed-signal bridge behavior between digital logic and analog interfaces.",
+      "key": "mixed_signal_bridge_vip"
+    },
+    {
+      "name": "Power Sequence VIP",
+      "protocol": "Power-up sequencing",
+      "checks": [
+        "rail order",
+        "enable staging",
+        "reset release"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Checks rail bring-up order and control-logic sequencing assumptions.",
+      "key": "power_sequence_vip"
+    },
+    {
+      "name": "SPI Verification IP",
+      "protocol": "SPI",
+      "checks": [
+        "transaction decode",
+        "register access",
+        "reset defaults"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Exercises the serial programming path and register map visibility.",
+      "key": "spi_vip"
+    }
+  ],
+  "digital_subsystems": [
+    {
+      "name": "Converter Control Plane",
+      "blocks": [
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Digital control subsystem for sampling cadence, trim, and observability.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "converter_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "LIN Node Control Plane",
+      "blocks": [
+        "spi_controller",
+        "register_file",
+        "lin_controller",
+        "control_logic"
+      ],
+      "description": "Integrated digital subsystem for protocol control, configuration, and sequencing.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lin_node_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "Sensor Hub Control Plane",
+      "blocks": [
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Shared digital control and telemetry plane for mixed-signal sensor chips.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sensor_hub_control_plane",
+      "compatible": true
+    }
+  ],
+  "chip_profiles": [
+    {
+      "name": "LIN Node ASIC",
+      "summary": "Automotive LIN node with integrated analog rails, transceiver, and digital control plane.",
+      "headline": "Integrated LIN chip assembly from reusable power, interface, and digital IP.",
+      "narrative": "This profile combines the reusable bandgap, regulator, LIN interface, and control-plane IP blocks into an automotive-oriented mixed-signal chip scaffold.",
+      "standard": "ISO 17987 / LIN 2.2A",
+      "tags": [
+        "automotive",
+        "lin",
+        "mixed-signal",
+        "ip library",
+        "vip"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "ldo_lin",
+        "lin_transceiver",
+        "spi_controller",
+        "register_file",
+        "lin_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "spi_vip",
+        "lin_vip",
+        "power_sequence_vip",
+        "mixed_signal_bridge_vip"
+      ],
+      "digital_subsystems": [
+        "lin_node_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lin_node_asic",
+      "compatible": true
+    },
+    {
+      "name": "Mixed-Signal Sensor Hub",
+      "summary": "Sensor/control chip scaffold combining references, rails, multiple converter macros, and shared digital control.",
+      "headline": "Sensor-hub chip assembly from reusable analog, converter, and digital subsystem IP.",
+      "narrative": "This profile combines power/reference infrastructure with multiple converter macros and a shared digital control plane so new monitor or sensor chips start from integrated building blocks instead of a blank architecture.",
+      "standard": "Internal sensor and monitor architecture reference",
+      "tags": [
+        "sensor hub",
+        "mixed-signal",
+        "adc",
+        "control plane",
+        "vip"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "sar_adc_top",
+        "sigma_delta_adc_top",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "spi_vip",
+        "power_sequence_vip",
+        "adc_transient_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "sensor_hub_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "mixed_signal_sensor_hub",
+      "compatible": true
+    },
+    {
+      "name": "Power Management Unit",
+      "summary": "PMU-oriented chip scaffold combining references, regulators, switching conversion, and control-plane logic.",
+      "headline": "Reusable PMU chip assembly with analog power IP and digital control integration.",
+      "narrative": "This profile starts a power-management chip from reusable bandgap, regulator, switching, and digital-control assets already in the repository.",
+      "standard": "Internal PMU architecture reference",
+      "tags": [
+        "pmu",
+        "power",
+        "ldo",
+        "buck",
+        "vip"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "buck_converter",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "spi_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "sensor_hub_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "power_management_unit",
+      "compatible": true
+    },
+    {
+      "name": "SAR ADC Macro",
+      "summary": "Converter-oriented chip scaffold centered on a reusable SAR ADC macro and digital control hooks.",
+      "headline": "Reusable SAR ADC chip assembly with verification hooks baked in.",
+      "narrative": "This profile packages the available SAR ADC macro and supporting control/VIP pieces into a reusable converter design scaffold.",
+      "standard": "Internal ADC architecture reference",
+      "tags": [
+        "adc",
+        "sar",
+        "data converter",
+        "ip library",
+        "vip"
+      ],
+      "blocks": [
+        "sar_adc_top",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "spi_vip"
+      ],
+      "digital_subsystems": [
+        "converter_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sar_adc_macro",
+      "compatible": true
+    },
+    {
+      "name": "Sigma-Delta ADC Macro",
+      "summary": "Oversampled converter scaffold centered on a reusable sigma-delta ADC macro and its control plane.",
+      "headline": "Reusable sigma-delta converter chip assembly with integrated validation flow.",
+      "narrative": "This profile packages the available sigma-delta ADC macro and the reusable digital control path for monitoring and sensing designs.",
+      "standard": "Internal ADC architecture reference",
+      "tags": [
+        "adc",
+        "sigma-delta",
+        "data converter",
+        "ip library",
+        "vip"
+      ],
+      "blocks": [
+        "sigma_delta_adc_top",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "spi_vip"
+      ],
+      "digital_subsystems": [
+        "converter_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sigma_delta_macro",
+      "compatible": true
+    }
+  ]
+}

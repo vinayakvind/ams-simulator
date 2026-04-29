@@ -1,0 +1,170 @@
+{
+  "generated_at": "2026-04-30T00:50:23.776541",
+  "python_executable": "C:\\Users\\vinay\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "strict_mode": true,
+  "overall": "PASS",
+  "steps": [
+    {
+      "step": "Discover indexed designs",
+      "status": "PASS",
+      "details": "lin_asic, sar_adc, sigma_delta_adc"
+    },
+    {
+      "step": "Execute lin_asic",
+      "status": "PASS",
+      "details": "lin-regression completed with overall PASS"
+    },
+    {
+      "step": "Render lin_asic HTML",
+      "status": "PASS",
+      "details": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_design_reference.html"
+    },
+    {
+      "step": "Execute sar_adc",
+      "status": "PASS",
+      "details": "design-snapshot completed with overall PASS"
+    },
+    {
+      "step": "Render sar_adc HTML",
+      "status": "PASS",
+      "details": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_design_reference.html"
+    },
+    {
+      "step": "Execute sigma_delta_adc",
+      "status": "PASS",
+      "details": "design-snapshot completed with overall PASS"
+    },
+    {
+      "step": "Render sigma_delta_adc HTML",
+      "status": "PASS",
+      "details": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_design_reference.html"
+    },
+    {
+      "step": "Generate portfolio artifacts",
+      "status": "PASS",
+      "details": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.pptx"
+    }
+  ],
+  "designs": [
+    {
+      "id": "lin_asic",
+      "title": "LIN ASIC Indexed Design Reference",
+      "execution_mode": "lin-regression",
+      "overall": "PASS",
+      "artifact_checks": [
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.json",
+          "exists": true,
+          "size_bytes": 8229
+        },
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.md",
+          "exists": true,
+          "size_bytes": 2048
+        },
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_design_reference.html",
+          "exists": true,
+          "size_bytes": 97399
+        }
+      ],
+      "report_path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.json",
+      "markdown_report_path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.md",
+      "summary": {
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "overall": "PASS"
+      },
+      "html_path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_design_reference.html"
+    },
+    {
+      "id": "sar_adc",
+      "title": "SAR ADC Indexed Design Reference",
+      "execution_mode": "design-snapshot",
+      "overall": "PASS",
+      "artifact_checks": [
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_regression_latest.json",
+          "exists": true,
+          "size_bytes": 2398
+        },
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_regression_latest.md",
+          "exists": true,
+          "size_bytes": 735
+        },
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_design_reference.html",
+          "exists": true,
+          "size_bytes": 25787
+        }
+      ],
+      "report_path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_regression_latest.json",
+      "markdown_report_path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_regression_latest.md",
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "unresolved": 0,
+        "overall": "PASS"
+      },
+      "html_path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_design_reference.html"
+    },
+    {
+      "id": "sigma_delta_adc",
+      "title": "Sigma-Delta ADC Indexed Design Reference",
+      "execution_mode": "design-snapshot",
+      "overall": "PASS",
+      "artifact_checks": [
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_regression_latest.json",
+          "exists": true,
+          "size_bytes": 2762
+        },
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_regression_latest.md",
+          "exists": true,
+          "size_bytes": 834
+        },
+        {
+          "path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_design_reference.html",
+          "exists": true,
+          "size_bytes": 26719
+        }
+      ],
+      "report_path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_regression_latest.json",
+      "markdown_report_path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_regression_latest.md",
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "unresolved": 0,
+        "overall": "PASS"
+      },
+      "html_path": "C:\\Users\\vinay\\My Simulator\\reports\\sigma_delta_adc_design_reference.html"
+    }
+  ],
+  "portfolio": {
+    "json_path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.json",
+    "markdown_path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.md",
+    "ppt_path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.pptx",
+    "artifact_checks": [
+      {
+        "path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.json",
+        "exists": true,
+        "size_bytes": 13153
+      },
+      {
+        "path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.md",
+        "exists": true,
+        "size_bytes": 2318
+      },
+      {
+        "path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.pptx",
+        "exists": true,
+        "size_bytes": 34317
+      }
+    ]
+  }
+}

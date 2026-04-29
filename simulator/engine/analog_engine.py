@@ -44,6 +44,7 @@ class AnalogEngine:
         self._models: Dict[str, dict] = {}
         self._num_nodes = 0
         self._num_vsources = 0
+        self._last_dc_converged: Optional[bool] = None
         
         # MNA matrices
         self._G = None  # Conductance matrix
@@ -861,6 +862,7 @@ class AnalogEngine:
         """Solve DC operating point with Newton-Raphson iteration for nonlinear devices."""
         # Check if we have nonlinear devices
         has_nonlinear = any(elem.name[0].upper() in ['M', 'Q', 'D'] for elem in self._elements)
+        converged = True
         
         if not has_nonlinear:
             # Linear circuit - direct solve
@@ -998,6 +1000,8 @@ class AnalogEngine:
             self._solution = v
             if not converged:
                 print(f"Warning: Newton-Raphson did not converge after source stepping")
+
+        self._last_dc_converged = converged
         
         # Extract node voltages
         results = {}

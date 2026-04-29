@@ -150,19 +150,20 @@ def _build_ldo_analog(**kwargs) -> dict[str, Any]:
 .SUBCKT LDO_ANALOG VIN VOUT GND VREF EN
 
 * Error amplifier (folded-cascode OTA)
+* VIN-facing PMOS devices must use the HV model because this rail is tied to VBAT.
 * Non-inverting: VREF, Inverting: feedback from VOUT divider
-M_D1 n_d1 n_d1 VIN VIN PMOS_3P3 W=10u L=1u
-M_D2 n_d2 n_d1 VIN VIN PMOS_3P3 W=10u L=1u
+M_D1 n_d1 n_d1 VIN VIN PMOS_HV W=10u L=1u
+M_D2 n_d2 n_d1 VIN VIN PMOS_HV W=10u L=1u
 M_D3 n_d1 VREF n_tail GND NMOS_3P3 W=20u L=1u
 M_D4 n_d2 n_fb n_tail GND NMOS_3P3 W=20u L=1u
 M_TAIL n_tail n_bias GND GND NMOS_3P3 W=10u L=2u
 
 * Bias current generation
 M_BIAS n_bias n_bias GND GND NMOS_3P3 W=5u L=4u
-R_BIAS n_bias VIN 200k
+R_BIAS n_bias VIN 300k
 
-* Pass transistor (PMOS - low dropout)
-M_PASS VOUT n_d2 VIN VIN PMOS_3P3 W=5000u L=0.5u
+* Pass transistor (HV PMOS - low dropout)
+M_PASS VOUT n_d2 VIN VIN PMOS_HV W=6000u L=0.8u
 
 * Output capacitor (external, modeled)
 C_OUT VOUT GND 1u

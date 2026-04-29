@@ -227,7 +227,7 @@ _ASIC_DIGITAL_BLOCKS: dict = {
         ),
         "test_type": "HIERARCHY",
         "spice_candidates": ["blocks/register_file.spice"],
-        "rtl_candidates": [],
+        "rtl_candidates": ["rtl/register_file.sv"],
     },
     "lin_controller": {
         "name": "LIN Controller",
@@ -253,7 +253,7 @@ _ASIC_DIGITAL_BLOCKS: dict = {
         ),
         "test_type": "MIXED",
         "spice_candidates": ["blocks/control_logic.spice"],
-        "rtl_candidates": [],
+        "rtl_candidates": ["rtl/control_logic.sv"],
     },
 }
 
@@ -261,6 +261,43 @@ _ASIC_DIGITAL_BLOCKS: dict = {
 def _asic_design_root() -> Path:
     """Return the repository path containing the LIN ASIC design files."""
     return Path(__file__).parent.parent.parent / "designs" / "lin_asic"
+
+
+def _asic_reports_root() -> Path:
+    """Return the reports directory used for ASIC regressions."""
+    reports_dir = Path(__file__).parent.parent.parent / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    return reports_dir
+
+
+def _asic_regression_report_paths() -> dict[str, Path]:
+    """Return the default JSON/Markdown report paths for ASIC regressions."""
+    reports_dir = _asic_reports_root()
+    return {
+        "json": reports_dir / "lin_asic_regression_latest.json",
+        "markdown": reports_dir / "lin_asic_regression_latest.md",
+        "log": reports_dir / "lin_asic_regression_latest.log",
+    }
+
+
+def _asic_test_plan_path() -> Path:
+    """Return the LIN ASIC test-plan document path."""
+    return _asic_design_root() / "LIN_ASIC_TESTPLAN.md"
+
+
+def _asic_architecture_doc_path() -> Path:
+    """Return the LIN ASIC architecture document path."""
+    return _asic_design_root() / "01_ARCHITECTURE.md"
+
+
+def _read_json_file(path: Path) -> Optional[dict]:
+    """Read a JSON file if it exists."""
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
 
 
 def _load_asic_architecture() -> dict:
@@ -435,6 +472,30 @@ def _append_api_request_entry(
             pass
 
     return entry
+
+
+def _call_on_gui_sync(func, timeout: float = 10.0):
+    """Run a callable on the GUI thread and wait for the return value."""
+    if _main_window is None or threading.current_thread() is threading.main_thread():
+        return func()
+
+    done = threading.Event()
+    result: dict[str, Any] = {}
+
+    def _invoke() -> None:
+        try:
+            result["value"] = func()
+        except Exception as exc:  # pragma: no cover - propagated below
+            result["error"] = exc
+        finally:
+            done.set()
+
+    _main_window.run_on_gui(_invoke)
+    if not done.wait(timeout):
+        raise TimeoutError("Timed out waiting for GUI thread")
+    if "error" in result:
+        raise result["error"]
+    return result.get("value")
 
 
 def _classify_error(entry: dict) -> dict:
@@ -1685,12 +1746,24 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         designs_dir = _asic_design_root()
         catalog = _get_asic_block_catalog()
 
-        loaded_tabs: list = []
+        loaded_tabs: list[dict] = []
 
         # Top-level tab first
         top_file = designs_dir / "lin_asic_top.spice"
         top_netlist = top_file.read_text() if top_file.exists() else ""
-        loaded_tabs.append(("★ LIN ASIC — Top Level", top_netlist, True))
+        top_tab_name = "★ LIN ASIC — Top Level"
+        loaded_tabs.append({
+            "tab_name": top_tab_name,
+            "netlist": top_netlist,
+            "hierarchical": True,
+            "block_key": None,
+            "parent_tab_name": None,
+            "block_aliases": ["lin_asic", "top_level"],
+            "domain": None,
+            "rtl_file": None,
+            "spice_file": "lin_asic_top.spice",
+            "display_name": "LIN ASIC Top Level",
+        })
 
         for block_name, spec in catalog.items():
             netlist = _read_asic_design_file(spec.get("spice_file"))
@@ -1700,17 +1773,40 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
             if spec.get("domain") == "mixed":
                 domain_tag = "MS"
             tab_label = f"[{domain_tag}:{spec['icon']}] {spec['name']}"
-            loaded_tabs.append((tab_label, netlist, False))
+            loaded_tabs.append({
+                "tab_name": tab_label,
+                "netlist": netlist,
+                "hierarchical": False,
+                "block_key": block_name,
+                "parent_tab_name": top_tab_name,
+                "block_aliases": [spec["name"]],
+                "domain": spec.get("domain"),
+                "rtl_file": spec.get("rtl_file"),
+                "spice_file": spec.get("spice_file"),
+                "display_name": spec["name"],
+            })
 
         def _load_on_gui():
             try:
-                for tab_name, netlist, hierarchical in loaded_tabs:
-                    _main_window.load_block_tab(tab_name, netlist, hierarchical=hierarchical)
+                for entry in loaded_tabs:
+                    _main_window.load_block_tab(
+                        entry["tab_name"],
+                        entry["netlist"],
+                        hierarchical=entry["hierarchical"],
+                        block_key=entry.get("block_key"),
+                        parent_tab_name=entry.get("parent_tab_name"),
+                        block_aliases=entry.get("block_aliases"),
+                        domain=entry.get("domain"),
+                        rtl_file=entry.get("rtl_file"),
+                        spice_file=entry.get("spice_file"),
+                        display_name=entry.get("display_name"),
+                    )
                 # Switch to the top-level tab (last index - len(tabs) + 1)
                 total = _main_window.schematic_tabs.count()
                 first_asic = total - len(loaded_tabs)
                 if first_asic >= 0:
                     _main_window.schematic_tabs.setCurrentIndex(first_asic)
+                _main_window.present_asic_demo_ui()
                 _main_window.statusbar.showMessage(
                     f"LIN ASIC loaded: {len(loaded_tabs)} tabs opened"
                 )
@@ -1720,7 +1816,7 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
         _main_window.run_on_gui(_load_on_gui)
         self._send_json({
             "status": "loading",
-            "tabs": [t[0] for t in loaded_tabs],
+            "tabs": [entry["tab_name"] for entry in loaded_tabs],
             "analog_block_count": sum(1 for spec in catalog.values() if spec.get("domain") != "digital"),
             "digital_block_count": sum(1 for spec in catalog.values() if spec.get("domain") == "digital"),
             "message": f"Scheduled {len(loaded_tabs)} block tabs on GUI thread",
@@ -1844,7 +1940,11 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
 
     def _handle_asic_test_report(self):
         """GET /api/asic/test-report — Structured pass/fail report."""
+        latest_regression = _read_json_file(_asic_regression_report_paths()["json"])
         if not _asic_test_results and not _asic_mixed_signal_report:
+            if latest_regression:
+                self._send_json(latest_regression)
+                return
             self._send_json(
                 {"error": "No ASIC simulation results yet. "
                           "Call POST /api/asic/simulate or POST /api/asic/mixed-signal-simulate first."}, 404
@@ -1885,8 +1985,378 @@ class SimulatorAPIHandler(BaseHTTPRequestHandler):
                 for e in _asic_test_results
             ],
             "mixed_signal": _asic_mixed_signal_report,
+            "regression": latest_regression,
         }
         self._send_json(report)
+
+    def _handle_asic_test_catalog(self):
+        """GET /api/asic/test-catalog — Return the LIN ASIC regression case list."""
+        from simulator.verification import build_lin_asic_test_catalog
+
+        tests = build_lin_asic_test_catalog()
+        self._send_json({
+            "chip": "LIN_ASIC",
+            "count": len(tests),
+            "tests": tests,
+        })
+
+    def _handle_asic_test_plan(self):
+        """GET /api/asic/test-plan — Return the detailed ASIC verification plan."""
+        path = _asic_test_plan_path()
+        if not path.exists():
+            self._send_json({"error": "ASIC test plan file not found"}, 404)
+            return
+
+        self._send_json({
+            "chip": "LIN_ASIC",
+            "path": str(path),
+            "content": path.read_text(encoding="utf-8"),
+        })
+
+    def _handle_asic_architecture_summary(self):
+        """GET /api/asic/architecture-summary — Return a compact chip/testbench overview."""
+        from simulator.verification import build_lin_asic_test_catalog
+
+        catalog = _get_asic_block_catalog()
+        grouped = {"analog": [], "digital": [], "mixed": []}
+        for block_key, spec in catalog.items():
+            domain = (spec.get("domain") or "mixed").lower()
+            if domain not in grouped:
+                domain = "mixed"
+            grouped[domain].append({
+                "block_key": block_key,
+                "name": spec.get("name"),
+                "domain": spec.get("domain"),
+                "description": spec.get("description"),
+                "rtl_file": spec.get("rtl_file"),
+                "spice_file": spec.get("spice_file"),
+                "test_type": spec.get("test_type"),
+            })
+
+        report_paths = _asic_regression_report_paths()
+        self._send_json({
+            "chip": "LIN_ASIC",
+            "protocol": "ISO 17987 / LIN 2.2A",
+            "architecture_doc": str(_asic_architecture_doc_path()),
+            "test_plan_doc": str(_asic_test_plan_path()),
+            "top_level_netlist": str(_asic_design_root() / "lin_asic_top.spice"),
+            "blocks": grouped,
+            "testbench_strategy": {
+                "analog": "Self-contained transient SPICE-style functional benches per block",
+                "digital": "Behavioral RTL tests executed through the internal RTLSimulator",
+                "mixed_signal": "Digital TXD drives the analog LIN bus and RXD is reconstructed back into logic",
+                "reporting": {
+                    "json": str(report_paths["json"]),
+                    "markdown": str(report_paths["markdown"]),
+                    "log": str(report_paths["log"]),
+                },
+            },
+            "test_cases": build_lin_asic_test_catalog(),
+            "api_demo": [
+                {"step": 1, "method": "POST", "path": "/api/asic/load", "purpose": "Load the top-level chip schematic and child block tabs"},
+                {"step": 2, "method": "POST", "path": "/api/gui/architecture/open", "purpose": "Open the architecture document"},
+                {"step": 3, "method": "POST", "path": "/api/gui/test-tracker/show", "purpose": "Open the regression tracker window"},
+                {"step": 4, "method": "POST", "path": "/api/verification/run-regression", "purpose": "Run the full ASIC regression in the GUI terminal"},
+                {"step": 5, "method": "GET", "path": "/api/verification/status", "purpose": "Poll pass/fail, coverage, and log/report paths"},
+                {"step": 6, "method": "GET", "path": "/api/verification/log", "purpose": "Read the full regression log"},
+            ],
+        })
+
+    def _handle_verification_log(self):
+        """GET /api/verification/log — Return the latest ASIC regression log."""
+        report_paths = _asic_regression_report_paths()
+        report = _read_json_file(report_paths["json"])
+        path = Path((report or {}).get("log_path") or report_paths["log"])
+        if not path.exists():
+            self._send_json({
+                "path": str(path),
+                "exists": False,
+                "content": "",
+            }, 404)
+            return
+
+        self._send_json({
+            "path": str(path),
+            "exists": True,
+            "size_bytes": path.stat().st_size,
+            "content": path.read_text(encoding="utf-8", errors="replace"),
+        })
+
+    def _handle_verification_status(self):
+        """GET /api/verification/status — Return tracker/report/coverage status."""
+        report_paths = _asic_regression_report_paths()
+        report = _read_json_file(report_paths["json"])
+
+        tracker_status = {
+            "report_path": str(report_paths["json"]),
+            "log_path": str(report_paths["log"]),
+            "test_plan_path": str(_asic_test_plan_path()),
+            "architecture_path": str(_asic_architecture_doc_path()),
+            "has_report": report is not None,
+            "summary": (report or {}).get("summary", {}),
+            "coverage": (report or {}).get("coverage", {}),
+            "running": False,
+            "active_command": "",
+            "tests": (report or {}).get("tests", []),
+        }
+
+        if _main_window and hasattr(_main_window, "get_test_tracker_status"):
+            tracker_status = _call_on_gui_sync(_main_window.get_test_tracker_status)
+            if report and not tracker_status.get("has_report"):
+                tracker_status["has_report"] = True
+                tracker_status["summary"] = report.get("summary", {})
+                tracker_status["coverage"] = report.get("coverage", {})
+                tracker_status["tests"] = report.get("tests", [])
+
+        self._send_json({
+            "chip": "LIN_ASIC",
+            "gui_available": _main_window is not None,
+            "tracker": tracker_status,
+            "report": report,
+        })
+
+    def _handle_gui_window_status(self):
+        """GET /api/gui/windows — Return open/visible GUI window state."""
+        if not _main_window or not hasattr(_main_window, "get_gui_window_status"):
+            self._send_json({
+                "gui_available": False,
+                "test_tracker_visible": False,
+                "api_monitor_visible": False,
+                "source_window_count": 0,
+                "source_windows": [],
+            })
+            return
+
+        status = _call_on_gui_sync(_main_window.get_gui_window_status)
+        status["gui_available"] = True
+        self._send_json(status)
+
+    def _handle_terminal_status(self):
+        """GET /api/terminal/status — Return integrated terminal status."""
+        if not _main_window or not hasattr(_main_window, "get_terminal_status"):
+            self._send_json({"error": "No GUI terminal is available"}, 503)
+            return
+
+        self._send_json(_call_on_gui_sync(_main_window.get_terminal_status))
+
+    def _handle_terminal_output(self):
+        """GET /api/terminal/output — Return the current integrated terminal buffer."""
+        if not _main_window or not hasattr(_main_window, "get_terminal_output"):
+            self._send_json({"error": "No GUI terminal is available"}, 503)
+            return
+
+        self._send_json({"output": _call_on_gui_sync(_main_window.get_terminal_output)})
+
+    def _handle_terminal_run(self, body: dict):
+        """POST /api/terminal/run — Run a command in the integrated GUI terminal."""
+        if not _main_window or not hasattr(_main_window, "run_terminal_command"):
+            self._send_json({"error": "No GUI terminal is available"}, 503)
+            return
+
+        command = (body.get("command") or "").strip()
+        if not command:
+            self._send_json({"error": "command is required"}, 400)
+            return
+
+        started = _call_on_gui_sync(lambda: _main_window.run_terminal_command(command))
+        if not started:
+            self._send_json({
+                "status": "busy",
+                "command": command,
+                "terminal": _call_on_gui_sync(_main_window.get_terminal_status),
+            }, 409)
+            return
+
+        self._send_json({
+            "status": "started",
+            "command": command,
+            "terminal": _call_on_gui_sync(_main_window.get_terminal_status),
+        })
+
+    def _handle_terminal_stop(self, _body: dict):
+        """POST /api/terminal/stop — Stop the active GUI terminal command."""
+        if not _main_window or not hasattr(_main_window, "stop_terminal_command"):
+            self._send_json({"error": "No GUI terminal is available"}, 503)
+            return
+
+        _call_on_gui_sync(_main_window.stop_terminal_command)
+        self._send_json({
+            "status": "stopped",
+            "terminal": _call_on_gui_sync(_main_window.get_terminal_status),
+        })
+
+    def _handle_verification_run_regression(self, _body: dict):
+        """POST /api/verification/run-regression — Launch the ASIC regression from the GUI."""
+        if not _main_window or not hasattr(_main_window, "get_terminal_status"):
+            self._send_json({"error": "No GUI is available for tracker/terminal regression control"}, 503)
+            return
+
+        def _run_regression() -> dict:
+            _main_window.show_test_tracker_window()
+            started = _main_window._run_asic_regression_from_terminal()
+            return {
+                "started": started,
+                "terminal": _main_window.get_terminal_status(),
+            }
+
+        result = _call_on_gui_sync(_run_regression)
+        terminal_status = result.get("terminal", {})
+        if not result.get("started", False):
+            self._send_json({
+                "status": "busy",
+                "command": terminal_status.get("active_command", ""),
+                "terminal": terminal_status,
+            }, 409)
+            return
+
+        self._send_json({
+            "status": "started",
+            "command": terminal_status.get("active_command", ""),
+            "terminal": terminal_status,
+        })
+
+    def _handle_gui_show_test_tracker(self, _body: dict):
+        """POST /api/gui/test-tracker/show — Present the standalone test tracker window."""
+        if not _main_window or not hasattr(_main_window, "show_test_tracker_window"):
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        _call_on_gui_sync(_main_window.show_test_tracker_window)
+        self._send_json({"status": "shown", "window": "test-tracker"})
+
+    def _handle_gui_close_test_tracker(self, _body: dict):
+        """POST /api/gui/test-tracker/close — Close the standalone test tracker window."""
+        if not _main_window or not hasattr(_main_window, "close_test_tracker_window"):
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        closed = _call_on_gui_sync(_main_window.close_test_tracker_window)
+        self._send_json({"status": "closed" if closed else "not-open", "window": "test-tracker"})
+
+    def _handle_gui_show_api_monitor(self, _body: dict):
+        """POST /api/gui/api-monitor/show — Present the API session monitor dock."""
+        if not _main_window:
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        _call_on_gui_sync(_main_window._show_api_session_monitor)
+        self._send_json({"status": "shown", "window": "api-session-monitor"})
+
+    def _handle_gui_hide_api_monitor(self, _body: dict):
+        """POST /api/gui/api-monitor/hide — Hide the API session monitor dock."""
+        if not _main_window or not hasattr(_main_window, "hide_api_session_monitor"):
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        _call_on_gui_sync(_main_window.hide_api_session_monitor)
+        self._send_json({"status": "hidden", "window": "api-session-monitor"})
+
+    def _handle_gui_open_test_plan(self, _body: dict):
+        """POST /api/gui/test-plan/open — Open the ASIC test plan in a source window."""
+        if not _main_window:
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        _call_on_gui_sync(_main_window._open_asic_test_plan)
+        self._send_json({"status": "shown", "window": "asic-test-plan"})
+
+    def _handle_gui_close_test_plan(self, _body: dict):
+        """POST /api/gui/test-plan/close — Close the ASIC test plan source window."""
+        if not _main_window or not hasattr(_main_window, "close_source_window"):
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        closed = _call_on_gui_sync(lambda: _main_window.close_source_window(str(_asic_test_plan_path())))
+        self._send_json({"status": "closed" if closed else "not-open", "window": "asic-test-plan"})
+
+    def _handle_gui_open_regression_log(self, _body: dict):
+        """POST /api/gui/regression-log/open — Open the ASIC regression log in a source window."""
+        if not _main_window:
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        _call_on_gui_sync(_main_window._open_asic_regression_log)
+        self._send_json({"status": "shown", "window": "asic-regression-log"})
+
+    def _handle_gui_close_regression_log(self, _body: dict):
+        """POST /api/gui/regression-log/close — Close the ASIC regression log source window."""
+        if not _main_window or not hasattr(_main_window, "close_source_window"):
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        closed = _call_on_gui_sync(lambda: _main_window.close_source_window(str(_asic_regression_report_paths()["log"])))
+        self._send_json({"status": "closed" if closed else "not-open", "window": "asic-regression-log"})
+
+    def _handle_gui_open_architecture(self, _body: dict):
+        """POST /api/gui/architecture/open — Open the ASIC architecture document."""
+        if not _main_window:
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        _call_on_gui_sync(_main_window._open_asic_architecture_overview)
+        self._send_json({"status": "shown", "window": "asic-architecture"})
+
+    def _handle_gui_close_architecture(self, _body: dict):
+        """POST /api/gui/architecture/close — Close the ASIC architecture source window."""
+        if not _main_window or not hasattr(_main_window, "close_source_window"):
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        closed = _call_on_gui_sync(lambda: _main_window.close_source_window(str(_asic_architecture_doc_path())))
+        self._send_json({"status": "closed" if closed else "not-open", "window": "asic-architecture"})
+
+    def _handle_gui_open_digital_source(self, body: dict):
+        """POST /api/gui/source-window — Open a digital block RTL source window."""
+        if not _main_window:
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        block = (body.get("block") or "").strip().lower()
+        catalog = _get_asic_block_catalog()
+        spec = catalog.get(block)
+        if not spec or spec.get("domain") != "digital":
+            self._send_json({"error": f"Unknown digital block: {block}"}, 404)
+            return
+
+        opened = _call_on_gui_sync(lambda: _main_window._open_digital_block_source(spec))
+        if not opened:
+            self._send_json({"error": f"No source file available for {block}"}, 404)
+            return
+
+        self._send_json({
+            "status": "shown",
+            "block": block,
+            "rtl_file": spec.get("rtl_file"),
+            "spice_file": spec.get("spice_file"),
+        })
+
+    def _handle_gui_close_digital_source(self, body: dict):
+        """POST /api/gui/source-window/close — Close a digital block RTL source window."""
+        if not _main_window or not hasattr(_main_window, "close_source_window"):
+            self._send_json({"error": "No GUI is available"}, 503)
+            return
+
+        block = (body.get("block") or "").strip().lower()
+        if not block:
+            closed = _call_on_gui_sync(lambda: _main_window.close_source_window())
+            self._send_json({"status": "closed" if closed else "not-open", "window": "latest-source"})
+            return
+
+        catalog = _get_asic_block_catalog()
+        spec = catalog.get(block)
+        if not spec or spec.get("domain") != "digital":
+            self._send_json({"error": f"Unknown digital block: {block}"}, 404)
+            return
+
+        relative_path = spec.get("rtl_file") or spec.get("spice_file")
+        if not relative_path:
+            self._send_json({"error": f"No source file is mapped for {block}"}, 404)
+            return
+
+        closed = _call_on_gui_sync(
+            lambda: _main_window.close_source_window(str(_asic_design_root() / relative_path))
+        )
+        self._send_json({"status": "closed" if closed else "not-open", "block": block})
 
     def _handle_asic_waveform_window(self, body: dict):
         """POST /api/asic/waveform-window — Show a block's waveform in a new window.
@@ -1943,6 +2413,9 @@ SimulatorAPIHandler._GET_ROUTES = {
     "/api/session/handshake":   SimulatorAPIHandler._handle_session_handshake,
     "/api/session/log":         SimulatorAPIHandler._handle_session_log,
     "/api/status":              SimulatorAPIHandler._handle_status,
+    "/api/gui/windows":         SimulatorAPIHandler._handle_gui_window_status,
+    "/api/terminal/status":     SimulatorAPIHandler._handle_terminal_status,
+    "/api/terminal/output":     SimulatorAPIHandler._handle_terminal_output,
     "/api/circuits":            SimulatorAPIHandler._handle_list_circuits,
     "/api/results":             SimulatorAPIHandler._handle_get_results,
     "/api/schematic/info":      SimulatorAPIHandler._handle_schematic_info,
@@ -1952,12 +2425,19 @@ SimulatorAPIHandler._GET_ROUTES = {
     "/api/errors":              SimulatorAPIHandler._handle_get_errors,
     "/api/errors/monitor":      SimulatorAPIHandler._handle_error_monitor_status,
     "/api/auto-design/blocks":  SimulatorAPIHandler._handle_list_blocks,
+    "/api/verification/log":    SimulatorAPIHandler._handle_verification_log,
+    "/api/verification/status": SimulatorAPIHandler._handle_verification_status,
     "/api/asic/info":           SimulatorAPIHandler._handle_asic_info,
+    "/api/asic/architecture-summary": SimulatorAPIHandler._handle_asic_architecture_summary,
     "/api/asic/test-report":    SimulatorAPIHandler._handle_asic_test_report,
+    "/api/asic/test-catalog":   SimulatorAPIHandler._handle_asic_test_catalog,
+    "/api/asic/test-plan":      SimulatorAPIHandler._handle_asic_test_plan,
 }
 SimulatorAPIHandler._POST_ROUTES = {
     "/api/circuits/load":         SimulatorAPIHandler._handle_load_circuit,
     "/api/simulate":              SimulatorAPIHandler._handle_simulate,
+    "/api/terminal/run":          SimulatorAPIHandler._handle_terminal_run,
+    "/api/terminal/stop":         SimulatorAPIHandler._handle_terminal_stop,
     "/api/schematic/component":   SimulatorAPIHandler._handle_add_component,
     "/api/schematic/clear":       SimulatorAPIHandler._handle_clear_schematic,
     "/api/netlist/load":          SimulatorAPIHandler._handle_load_netlist,
@@ -1968,10 +2448,23 @@ SimulatorAPIHandler._POST_ROUTES = {
     "/api/errors/scan":           SimulatorAPIHandler._handle_scan_errors,
     "/api/errors/monitor":        SimulatorAPIHandler._handle_error_monitor_control,
     "/api/auto-design":           SimulatorAPIHandler._handle_auto_design,
+    "/api/verification/run-regression": SimulatorAPIHandler._handle_verification_run_regression,
     "/api/asic/load":             SimulatorAPIHandler._handle_asic_load,
     "/api/asic/simulate":         SimulatorAPIHandler._handle_asic_simulate,
     "/api/asic/mixed-signal-simulate": SimulatorAPIHandler._handle_asic_mixed_signal_simulate,
     "/api/asic/waveform-window":  SimulatorAPIHandler._handle_asic_waveform_window,
+    "/api/gui/test-tracker/show": SimulatorAPIHandler._handle_gui_show_test_tracker,
+    "/api/gui/test-tracker/close": SimulatorAPIHandler._handle_gui_close_test_tracker,
+    "/api/gui/api-monitor/show":  SimulatorAPIHandler._handle_gui_show_api_monitor,
+    "/api/gui/api-monitor/hide":  SimulatorAPIHandler._handle_gui_hide_api_monitor,
+    "/api/gui/test-plan/open":    SimulatorAPIHandler._handle_gui_open_test_plan,
+    "/api/gui/test-plan/close":   SimulatorAPIHandler._handle_gui_close_test_plan,
+    "/api/gui/regression-log/open": SimulatorAPIHandler._handle_gui_open_regression_log,
+    "/api/gui/regression-log/close": SimulatorAPIHandler._handle_gui_close_regression_log,
+    "/api/gui/architecture/open": SimulatorAPIHandler._handle_gui_open_architecture,
+    "/api/gui/architecture/close": SimulatorAPIHandler._handle_gui_close_architecture,
+    "/api/gui/source-window":     SimulatorAPIHandler._handle_gui_open_digital_source,
+    "/api/gui/source-window/close": SimulatorAPIHandler._handle_gui_close_digital_source,
 }
 
 

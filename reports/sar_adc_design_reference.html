@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SAR ADC Indexed Design Reference</title>
+  <style>
+    :root {
+      --bg: #f2ede3;
+      --panel: rgba(11, 28, 41, 0.92);
+      --panel-soft: rgba(255, 248, 236, 0.88);
+      --ink: #0b1c29;
+      --ink-soft: #51606a;
+      --accent: #d17f2f;
+      --accent-deep: #8d4f0b;
+      --mint: #7ab7a5;
+      --line: rgba(11, 28, 41, 0.14);
+      --shadow: 0 18px 50px rgba(11, 28, 41, 0.16);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(209, 127, 47, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(122, 183, 165, 0.20), transparent 24%),
+        linear-gradient(180deg, #fbf7ef 0%, #efe6d7 55%, #f7f3ec 100%);
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    .shell {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 28px;
+      padding: 28px;
+    }
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      height: calc(100vh - 48px);
+      overflow: auto;
+      padding: 22px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: #eef6f2;
+      box-shadow: var(--shadow);
+    }
+    .sidebar h1 {
+      margin: 0 0 8px;
+      font-family: Georgia, Cambria, serif;
+      font-size: 2rem;
+      line-height: 1.05;
+    }
+    .sidebar p { color: rgba(238, 246, 242, 0.76); line-height: 1.5; }
+    .nav-group { display: grid; gap: 10px; margin-top: 22px; }
+    .nav-group a {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: background 120ms ease, transform 120ms ease;
+    }
+    .nav-group a:hover { background: rgba(255, 255, 255, 0.12); transform: translateX(3px); }
+    main { display: grid; gap: 24px; }
+    .hero {
+      padding: 34px;
+      border-radius: 32px;
+      background: linear-gradient(135deg, rgba(11, 28, 41, 0.95), rgba(17, 54, 58, 0.92));
+      color: #f8f4eb;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -50px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(209, 127, 47, 0.20);
+      filter: blur(12px);
+    }
+    .hero .eyebrow, .eyebrow {
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .hero h2 {
+      margin: 0 0 14px;
+      font-family: Georgia, Cambria, serif;
+      font-size: clamp(2.3rem, 4vw, 3.9rem);
+      line-height: 0.97;
+      max-width: 12ch;
+    }
+    .hero p {
+      max-width: 72ch;
+      line-height: 1.65;
+      color: rgba(248, 244, 235, 0.88);
+    }
+    .summary-grid, .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .summary-card, .panel, .step-card {
+      border-radius: 22px;
+      background: var(--panel-soft);
+      border: 1px solid rgba(11, 28, 41, 0.08);
+      box-shadow: var(--shadow);
+    }
+    .summary-card { padding: 20px; }
+    .summary-card h3 { margin: 0 0 8px; font-size: 0.9rem; text-transform: uppercase; color: var(--ink-soft); letter-spacing: 0.08em; }
+    .summary-card p { margin: 0; font-size: 1.08rem; line-height: 1.45; }
+    .panel { padding: 24px; }
+    .panel h3 { margin-top: 0; font-family: Georgia, Cambria, serif; font-size: 1.5rem; }
+    .lead { font-size: 1.08rem; color: var(--ink-soft); margin-top: 0; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(122, 183, 165, 0.16);
+      color: #12363f;
+      font-size: 0.82rem;
+      border: 1px solid rgba(122, 183, 165, 0.22);
+    }
+    .step-card { padding: 20px; position: relative; overflow: hidden; }
+    .step-index {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), #f0b068);
+      color: #20150b;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .step-card h4 { margin: 0 0 8px; font-size: 1.15rem; }
+    .step-card p { margin: 0; color: var(--ink-soft); line-height: 1.55; }
+    .block-section { display: grid; gap: 18px; }
+    .section-heading h2 { margin: 0; font-family: Georgia, Cambria, serif; font-size: 2rem; }
+    .formula-grid, .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .formula-card, .analysis-card {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(11, 28, 41, 0.08);
+    }
+    .formula-card h4, .analysis-card h4 { margin: 0 0 10px; }
+    pre, .code-block {
+      margin: 0;
+      padding: 14px;
+      border-radius: 16px;
+      background: #12212d;
+      color: #edf4ef;
+      overflow: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .table-wrap { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-soft); }
+    .bullet-list { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+    .bullet-list li { line-height: 1.55; }
+    .bullet-list span { display: block; color: var(--ink-soft); }
+    .muted { color: var(--ink-soft); }
+    .footer-note { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.65; }
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .status-pass { background: rgba(48, 128, 79, 0.16); color: #25633e; }
+    .status-fail { background: rgba(176, 0, 32, 0.14); color: #92112d; }
+    .status-warn { background: rgba(209, 127, 47, 0.16); color: #8d4f0b; }
+    .chart-shell {
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.64);
+      border: 1px solid rgba(11, 28, 41, 0.08);
+      overflow: auto;
+    }
+    .chart-svg { width: 100%; height: auto; display: block; }
+    .chart-grid-line { stroke: rgba(11, 28, 41, 0.12); stroke-width: 1; }
+    .chart-label { fill: #51606a; font-size: 12px; font-family: "Segoe UI", sans-serif; }
+    .chart-value { fill: #0b1c29; font-size: 12px; font-weight: 700; font-family: "Segoe UI", sans-serif; }
+    .chart-note { color: var(--ink-soft); font-size: 0.92rem; line-height: 1.55; }
+    @media (max-width: 1040px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="eyebrow">Indexed Design Reference</div>
+      <h1>SAR ADC Indexed Design Reference</h1>
+      <p>Indexed reference for a SAR ADC top-level design so imported converter netlists can participate in the same architecture and results flow as other AMS designs.</p>
+      <div class="nav-group"><a href="#overview">Overview</a><a href="#results">Measured Results</a><a href="#flow">Indexed Flow</a><a href="#analysis">Analysis Playbook</a><a href="#corners">Corner Closure</a><a href="#scripts">Script Index</a><a href="#sar_adc_top">SAR ADC Top Level</a></div>
+    </aside>
+    <main>
+      <section class="hero" id="overview">
+        <div class="eyebrow">Internal ADC architecture reference</div>
+        <h2>Reusable SAR ADC architecture, verification contract, and results wrapper.</h2>
+        <p>This manifest captures the reusable architecture intent for a top-level successive-approximation ADC. It preserves the design partition, the main sizing equations, the transient-oriented validation flow, and the file locations needed to regenerate the design-reference page and portfolio presentation.</p>
+        <div class="badge-row"><span class="badge">adc</span><span class="badge">sar</span><span class="badge">data converter</span><span class="badge">indexed methodology</span><span class="badge">technology portability</span></div>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary-card"><h3>Standard</h3><p>Internal ADC architecture reference</p></article><article class="summary-card"><h3>Technology</h3><p>generic180 baseline with portability to generic130, generic65, and bcd180 through TechMapper wrappers</p></article><article class="summary-card"><h3>Primary Rails</h3><p>3.3V supply and 2.5V reference feed the sampled-data conversion path.</p></article><article class="summary-card"><h3>Signoff Boundary</h3><p>Current validation is a reusable top-level snapshot on an imported reference design. Replace with block-level transistor implementations and foundry signoff flows for silicon work.</p></article>
+      </section>
+
+            
+
+      <section id="results" class="panel"><div class="section-heading"><div class="eyebrow">Measured Results</div><h3>Stored Validation Evidence</h3></div><p class="lead">Only one stored regression run for SAR ADC Indexed Design Reference is currently on disk, so this page can show the latest measured snapshot but not a multi-run trend yet. Additional regression JSON files matching reports/sar_adc_regression*.json will appear here automatically.</p><div class="summary-grid"><article class="summary-card"><h3>Stored Runs</h3><p>1</p></article><article class="summary-card"><h3>Latest Regression</h3><p>2026-04-30 00:49:23</p></article><article class="summary-card"><h3>Overall Status</h3><p>PASS</p></article><article class="summary-card"><h3>Coverage</h3><p>100.0% functional / 100.0% standards</p></article></div><div class="card-grid"><article class="panel"><h3>What This Page Is Charting</h3><ul class="bullet-list"><li><strong>Regression evidence table</strong><span>Shows the measured values and status outcomes from the latest saved regression run.</span></li></ul></article><article class="panel"><h3>Stored Run History</h3><div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Overall</th><th>Pass Count</th><th>Artifact</th></tr></thead><tbody><tr><td>2026-04-30 00:49:23</td><td><span class="status-chip status-pass">PASS</span></td><td>1/1</td><td>reports\sar_adc_regression_latest.json</td></tr></tbody></table></div></article></div><article class="panel"><h3>Latest Analog and Mixed-Signal Results</h3><div class="table-wrap"><table><thead><tr><th>Block</th><th>Status</th><th>Measured</th><th>Requirement Check</th></tr></thead><tbody><tr><td colspan="4">No analog measurements recorded.</td></tr></tbody></table></div></article></section>
+
+      <section class="panel">
+        <div class="section-heading"><div class="eyebrow">Architecture</div><h3>Power Tree and Control Partition</h3></div>
+        <p class="lead">Analog input is sampled, compared against a DAC trial voltage, and resolved bit by bit by SAR logic until the digital code converges. The indexed wrapper keeps this architecture reusable even when the underlying implementation file changes.</p>
+        <div class="table-wrap"><table><thead><tr><th>Domain</th><th>Voltage</th><th>Source</th><th>Drives</th></tr></thead><tbody><tr><td>VDD</td><td>3.3V</td><td>external analog/digital supply</td><td>sampling path, comparator model, SAR logic model</td></tr><tr><td>VREF</td><td>2.5V</td><td>reference input</td><td>DAC full-scale range</td></tr><tr><td>VIN</td><td>0V to 2.5V</td><td>analog input source</td><td>sample-and-hold input</td></tr></tbody></table></div>
+        <div class="card-grid">
+          <article class="panel"><h3>Bring-Up Order</h3><ul class="bullet-list"><li><span>Establish VREF before conversion starts so the DAC trial range is well-defined.</span></li><li><span>Sample the analog input and isolate it on the hold capacitor before bit cycling.</span></li><li><span>Run the SAR loop from MSB to LSB until the code converges.</span></li></ul></article>
+          <article class="panel"><h3>Control Path</h3><ul class="bullet-list"><li><strong>Sample phase</strong><span>The front-end captures the analog input on the hold node.</span></li><li><strong>Bit trial phase</strong><span>SAR logic drives DAC trial codes and the comparator decides whether to keep each bit.</span></li><li><strong>Code output phase</strong><span>The final digital code represents the closest available quantized value.</span></li></ul></article>
+        </div>
+      </section>
+
+      <section id="flow" class="panel">
+        <div class="section-heading"><div class="eyebrow">Flow</div><h3>Indexed Design Flow</h3></div>
+        <p class="lead">The SAR ADC follows the same indexed flow as the ASIC designs: capture architecture, define verification settings, run a reproducible snapshot, and publish the result in HTML and portfolio outputs.</p>
+        <div class="card-grid"><article class="step-card"><div class="step-index">01</div><h4>Capture converter architecture</h4><p>Freeze the sample/hold, comparator, DAC, and SAR control partition before discussing timing or accuracy.</p><div class="badge-row"><span class="badge">01_ARCHITECTURE.md</span><span class="badge">architecture.yaml</span></div></article><article class="step-card"><div class="step-index">02</div><h4>Import or generate implementation</h4><p>Wrap the chosen converter source file into the indexed design flow so reporting and reuse do not depend on where the implementation originated.</p><div class="badge-row"><span class="badge">blocks/sar_adc_top/spec.yaml</span><span class="badge">examples/standard_circuits/sar_adc.spice</span></div></article><article class="step-card"><div class="step-index">03</div><h4>Run the top-level snapshot</h4><p>Execute the transient snapshot and save a normalized regression JSON for presentation and review.</p><div class="badge-row"><span class="badge">reports/sar_adc_regression_latest.json</span></div></article><article class="step-card"><div class="step-index">04</div><h4>Publish reusable reference</h4><p>Generate the standalone HTML page and fold the result into the portfolio presentation.</p><div class="badge-row"><span class="badge">reports/sar_adc_design_reference.html</span><span class="badge">reports/design_portfolio_overview.pptx</span></div></article></div>
+      </section>
+
+      <section id="analysis" class="panel">
+        <div class="section-heading"><div class="eyebrow">Verification</div><h3>DC, AC, PSRR, and Debug Structure</h3></div>
+        <p class="lead">Primary validation is transient-oriented because the converter behavior depends on sampled timing, internal trial voltages, and conversion sequencing rather than a single DC operating point.</p>
+        <div class="analysis-grid"><article class="analysis-card"><div class="eyebrow">transient</div><h4>Top-level conversion snapshot</h4><p>Capture the analog input waveform and internal trial nodes during conversion.</p><div class="code-block">python designs/framework/scripts/run_design_snapshot.py --design sar_adc --block sar_adc_top</div><p><strong>Pass criteria:</strong> Transient results include the analog input and at least one internal conversion node with sufficient time samples.</p><p><strong>Tweak first:</strong> Source waveform, internal DAC node, hold node, and comparator activity.</p></article><article class="analysis-card"><div class="eyebrow">presentation</div><h4>Portfolio publication</h4><p>Surface the converter in the cross-design architecture and results presentation.</p><div class="code-block">python designs/framework/scripts/generate_portfolio_presentation.py</div><p><strong>Pass criteria:</strong> The design appears in JSON, Markdown, and PPT outputs with its latest status.</p><p><strong>Tweak first:</strong> Manifest completeness and saved regression artifact naming.</p></article></div>
+      </section>
+
+      <section id="corners" class="panel">
+        <div class="section-heading"><div class="eyebrow">Corners</div><h3>Corner Closure Strategy</h3></div>
+        <p class="lead">No PVT closure is claimed yet. This wrapper only records the intended structure for future technology-specific converter work.</p>
+        <div class="card-grid">
+          <article class="panel">
+            <h3>Matrix</h3>
+            <div class="table-wrap"><table><thead><tr><th>Process</th><th>Voltage</th><th>Temperature</th></tr></thead><tbody><tr><td>generic180 baseline today; future TT/FF/SS and foundry corners</td><td>nominal 3.3V today; future min/nom/max</td><td>room only today; future -40, 27, 125</td></tr></tbody></table></div>
+          </article>
+          <article class="panel">
+            <h3>Closure Order</h3>
+            <ul class="bullet-list"><li><span>Close transient conversion behavior before claiming any dynamic accuracy metric.</span></li><li><span>Add comparator, DAC, and logic sub-block verification before PVT closure.</span></li><li><span>Promote the imported reference into a technology-specific implementation only after architecture is stable.</span></li></ul>
+          </article>
+        </div>
+        <div class="card-grid">
+          <article class="panel"><h3>Pass Rule</h3><p>Current pass means the imported top-level source executed with the required visibility for architecture review. It does not mean silicon signoff closure.</p></article>
+          <article class="panel"><h3>Model Note</h3><p>Technology portability is architecture-driven today. Swap in PDK blocks and extracted models for real converter implementation work.</p></article>
+        </div>
+      </section>
+
+      <section id="scripts" class="panel">
+        <div class="section-heading"><div class="eyebrow">Automation</div><h3>Script Index</h3></div>
+        <p class="lead">Use the snapshot script to turn a block spec into a normalized regression artifact, then render the HTML page or portfolio PPT from the saved results.</p>
+        <div class="table-wrap"><table><thead><tr><th>Script</th><th>Purpose</th><th>Command</th></tr></thead><tbody><tr><td>Run top-level snapshot</td><td>Create a normalized regression JSON from spec.yaml verification settings.</td><td>python designs/framework/scripts/run_design_snapshot.py --design sar_adc --block sar_adc_top</td></tr><tr><td>Generate SAR ADC webpage</td><td>Render the indexed SAR ADC reference as a standalone HTML page.</td><td>python designs/framework/scripts/generate_design_reference.py --input designs/sar_adc/design_reference.json --output reports/sar_adc_design_reference.html</td></tr><tr><td>Generate portfolio PPT</td><td>Include the SAR ADC in the overall architecture and results presentation.</td><td>python designs/framework/scripts/generate_portfolio_presentation.py</td></tr></tbody></table></div>
+      </section>
+
+      <section id="sar_adc_top" class="block-section"><div class="section-heading"><div class="eyebrow">mixed</div><h2>SAR ADC Top Level</h2></div><p class="lead">Converts an analog input into a digital code using sampled-data comparison and successive approximation.</p><div class="card-grid"><article class="panel"><h3>Latest Stored Validation</h3><p><span class="status-chip status-pass">PASS</span> TOP-SAR-ADC</p><p class="muted">signal_count=33, time_points=3887, input_span_v=0.07848814941164206</p><p class="muted">Top-level transient snapshot for the imported SAR ADC reference design.; time_points=3887; signals=33</p></article></div><div class="card-grid"><article class="panel"><h3>Architecture</h3><p>The imported top-level reference models the sample-and-hold, trial DAC, comparator, and SAR decision flow in one reusable netlist.</p><ul class="bullet-list"><li><strong>Capture the analog sample</strong><span>The analog input is sampled onto the hold node before bit trials begin.</span></li><li><strong>Drive trial DAC codes</strong><span>The internal DAC reconstructs the tentative analog voltage for each SAR bit decision.</span></li><li><strong>Resolve the code</strong><span>The comparator and SAR logic keep or clear each bit until the final code is reached.</span></li></ul></article><article class="panel"><h3>Primary Specs</h3><div class="table-wrap"><table><thead><tr><th>Spec</th><th>Target</th><th>Reason</th></tr></thead><tbody><tr><td>Resolution</td><td>8 bits</td><td>Defines quantization depth and code space.</td></tr><tr><td>Sample rate</td><td>1 MSPS class reference</td><td>Sets the expected conversion-window timing.</td></tr><tr><td>Input range</td><td>0V to 2.5V</td><td>Matches the DAC full-scale reference.</td></tr></tbody></table></div></article></div><article class="panel"><h3>Sizing Formulas</h3><div class="formula-grid"><article class="formula-card"><h4>LSB size</h4><pre>LSB = VREF / 2^N</pre><p>Defines the quantization step for an N-bit SAR ADC.</p><div class="badge-row"><span class="badge">VREF</span><span class="badge">N</span></div></article><article class="formula-card"><h4>Conversion time</h4><pre>TCONV ~= N / fCLK</pre><p>A simple SAR approximation: one major decision per bit clock.</p><div class="badge-row"><span class="badge">N</span><span class="badge">fCLK</span></div></article></div></article><article class="panel"><h3>DC Operating Points</h3><div class="table-wrap"><table><thead><tr><th>Node or Signal</th><th>Target</th><th>How Set</th><th>Why</th></tr></thead><tbody><tr><td>analog_in</td><td>0V to 2.5V sinusoidal input</td><td>Input source inside the imported reference netlist</td><td>Provides the conversion stimulus.</td></tr><tr><td>dac_out</td><td>Tracks trial code against VREF range</td><td>Internal DAC reconstruction from SAR bit decisions</td><td>Comparator reference for each bit trial.</td></tr><tr><td>sh_out</td><td>Held sample during conversion window</td><td>Sample switch and hold capacitor</td><td>Keeps the analog sample stable during bit cycling.</td></tr></tbody></table></div></article><article class="panel"><h3>Analysis Plan</h3><div class="analysis-grid"><article class="analysis-card"><div class="eyebrow">transient</div><h4>Top-level converter snapshot</h4><p>Observe input sampling and internal SAR node activity over a conversion window.</p><div class="code-block">python designs/framework/scripts/run_design_snapshot.py --design sar_adc --block sar_adc_top</div><p><strong>Pass criteria:</strong> Input waveform, internal conversion nodes, and sufficient time samples are all present.</p><p><strong>Tweak first:</strong> analog_in, sh_out, dac_out, comp_out</p></article></div></article><div class="card-grid"><article class="panel"><h3>Corner Focus</h3><div class="table-wrap"><table><thead><tr><th>Condition</th><th>Risk</th><th>Primary Knob</th></tr></thead><tbody><tr><td>Future PVT closure</td><td>Comparator delay, DAC settling, and logic timing can all shift differently across technologies.</td><td>Technology-specific sub-block implementation and timing budgets</td></tr></tbody></table></div></article><article class="panel"><h3>Tuning Knobs</h3><ul class="bullet-list"><li><strong>VREF</strong><span>Moves full-scale range and the effective LSB size.</span></li><li><strong>Clock period</strong><span>Controls the available settling and decision time per bit.</span></li></ul></article></div><article class="panel"><h3>Referenced Files</h3><div class="table-wrap"><table><thead><tr><th>Path</th><th>Role</th></tr></thead><tbody><tr><td>designs/sar_adc/blocks/sar_adc_top/spec.yaml</td><td>Top-level verification contract for the SAR ADC wrapper</td></tr><tr><td>examples/standard_circuits/sar_adc.spice</td><td>Imported SAR ADC source netlist</td></tr><tr><td>reports/sar_adc_regression_latest.json</td><td>Latest normalized top-level snapshot report</td></tr></tbody></table></div></article></section>
+
+      <section class="panel">
+        <div class="section-heading"><div class="eyebrow">Debug</div><h3>Debug Playbook</h3></div>
+        <ul class="bullet-list"><li><strong>If no internal nodes appear</strong><span>Check whether the imported source still exposes the DAC, hold, or comparator nodes expected by the snapshot checks.</span></li><li><strong>If transient coverage is too short</strong><span>Increase tstop or reduce tstep until one full conversion window is visible.</span></li></ul>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading"><div class="eyebrow">Reuse</div><h3>How to Reuse for the Next Design</h3></div>
+        <ul class="bullet-list"><li><strong>Swap in a different SAR implementation</strong><span>Only the source path and verification settings need to change when retargeting the wrapper to another SAR ADC design.</span></li><li><strong>Retarget technology</strong><span>Keep the indexed architecture and update the implementation source plus technology metadata for the next node.</span></li></ul>
+        <p class="footer-note">Source manifest: C:\Users\vinay\My Simulator\designs\sar_adc\design_reference.json</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

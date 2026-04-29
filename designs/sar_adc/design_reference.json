@@ -1,0 +1,277 @@
+{
+  "design": {
+    "id": "sar_adc",
+    "title": "SAR ADC Indexed Design Reference",
+    "headline": "Reusable SAR ADC architecture, verification contract, and results wrapper.",
+    "summary": "Indexed reference for a SAR ADC top-level design so imported converter netlists can participate in the same architecture and results flow as other AMS designs.",
+    "narrative": "This manifest captures the reusable architecture intent for a top-level successive-approximation ADC. It preserves the design partition, the main sizing equations, the transient-oriented validation flow, and the file locations needed to regenerate the design-reference page and portfolio presentation.",
+    "standard": "Internal ADC architecture reference",
+    "technology": "generic180 baseline with portability to generic130, generic65, and bcd180 through TechMapper wrappers",
+    "signoff_boundary": "Current validation is a reusable top-level snapshot on an imported reference design. Replace with block-level transistor implementations and foundry signoff flows for silicon work.",
+    "tags": [
+      "adc",
+      "sar",
+      "data converter",
+      "indexed methodology",
+      "technology portability"
+    ]
+  },
+  "flow_summary": "The SAR ADC follows the same indexed flow as the ASIC designs: capture architecture, define verification settings, run a reproducible snapshot, and publish the result in HTML and portfolio outputs.",
+  "analysis_summary": "Primary validation is transient-oriented because the converter behavior depends on sampled timing, internal trial voltages, and conversion sequencing rather than a single DC operating point.",
+  "script_summary": "Use the snapshot script to turn a block spec into a normalized regression artifact, then render the HTML page or portfolio PPT from the saved results.",
+  "architecture": {
+    "summary": "Analog input is sampled, compared against a DAC trial voltage, and resolved bit by bit by SAR logic until the digital code converges. The indexed wrapper keeps this architecture reusable even when the underlying implementation file changes.",
+    "power_tree_summary": "3.3V supply and 2.5V reference feed the sampled-data conversion path.",
+    "domains": [
+      {
+        "name": "VDD",
+        "voltage": "3.3V",
+        "source": "external analog/digital supply",
+        "drives": "sampling path, comparator model, SAR logic model"
+      },
+      {
+        "name": "VREF",
+        "voltage": "2.5V",
+        "source": "reference input",
+        "drives": "DAC full-scale range"
+      },
+      {
+        "name": "VIN",
+        "voltage": "0V to 2.5V",
+        "source": "analog input source",
+        "drives": "sample-and-hold input"
+      }
+    ],
+    "power_sequence": [
+      "Establish VREF before conversion starts so the DAC trial range is well-defined.",
+      "Sample the analog input and isolate it on the hold capacitor before bit cycling.",
+      "Run the SAR loop from MSB to LSB until the code converges."
+    ],
+    "control_path": [
+      {
+        "title": "Sample phase",
+        "description": "The front-end captures the analog input on the hold node."
+      },
+      {
+        "title": "Bit trial phase",
+        "description": "SAR logic drives DAC trial codes and the comparator decides whether to keep each bit."
+      },
+      {
+        "title": "Code output phase",
+        "description": "The final digital code represents the closest available quantized value."
+      }
+    ]
+  },
+  "indexed_flow": [
+    {
+      "index": "01",
+      "title": "Capture converter architecture",
+      "description": "Freeze the sample/hold, comparator, DAC, and SAR control partition before discussing timing or accuracy.",
+      "outputs": ["01_ARCHITECTURE.md", "architecture.yaml"]
+    },
+    {
+      "index": "02",
+      "title": "Import or generate implementation",
+      "description": "Wrap the chosen converter source file into the indexed design flow so reporting and reuse do not depend on where the implementation originated.",
+      "outputs": ["blocks/sar_adc_top/spec.yaml", "examples/standard_circuits/sar_adc.spice"]
+    },
+    {
+      "index": "03",
+      "title": "Run the top-level snapshot",
+      "description": "Execute the transient snapshot and save a normalized regression JSON for presentation and review.",
+      "outputs": ["reports/sar_adc_regression_latest.json"]
+    },
+    {
+      "index": "04",
+      "title": "Publish reusable reference",
+      "description": "Generate the standalone HTML page and fold the result into the portfolio presentation.",
+      "outputs": ["reports/sar_adc_design_reference.html", "reports/design_portfolio_overview.pptx"]
+    }
+  ],
+  "analysis_playbook": [
+    {
+      "type": "transient",
+      "name": "Top-level conversion snapshot",
+      "purpose": "Capture the analog input waveform and internal trial nodes during conversion.",
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design sar_adc --block sar_adc_top",
+      "pass_criteria": "Transient results include the analog input and at least one internal conversion node with sufficient time samples.",
+      "debug_focus": "Source waveform, internal DAC node, hold node, and comparator activity."
+    },
+    {
+      "type": "presentation",
+      "name": "Portfolio publication",
+      "purpose": "Surface the converter in the cross-design architecture and results presentation.",
+      "command": "python designs/framework/scripts/generate_portfolio_presentation.py",
+      "pass_criteria": "The design appears in JSON, Markdown, and PPT outputs with its latest status.",
+      "debug_focus": "Manifest completeness and saved regression artifact naming."
+    }
+  ],
+  "corner_closure": {
+    "summary": "No PVT closure is claimed yet. This wrapper only records the intended structure for future technology-specific converter work.",
+    "matrix": {
+      "process": "generic180 baseline today; future TT/FF/SS and foundry corners",
+      "voltage": "nominal 3.3V today; future min/nom/max",
+      "temperature_c": "room only today; future -40, 27, 125"
+    },
+    "closure_order": [
+      "Close transient conversion behavior before claiming any dynamic accuracy metric.",
+      "Add comparator, DAC, and logic sub-block verification before PVT closure.",
+      "Promote the imported reference into a technology-specific implementation only after architecture is stable."
+    ],
+    "pass_rule": "Current pass means the imported top-level source executed with the required visibility for architecture review. It does not mean silicon signoff closure.",
+    "model_note": "Technology portability is architecture-driven today. Swap in PDK blocks and extracted models for real converter implementation work."
+  },
+  "script_index": [
+    {
+      "name": "Run top-level snapshot",
+      "purpose": "Create a normalized regression JSON from spec.yaml verification settings.",
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design sar_adc --block sar_adc_top"
+    },
+    {
+      "name": "Generate SAR ADC webpage",
+      "purpose": "Render the indexed SAR ADC reference as a standalone HTML page.",
+      "command": "python designs/framework/scripts/generate_design_reference.py --input designs/sar_adc/design_reference.json --output reports/sar_adc_design_reference.html"
+    },
+    {
+      "name": "Generate portfolio PPT",
+      "purpose": "Include the SAR ADC in the overall architecture and results presentation.",
+      "command": "python designs/framework/scripts/generate_portfolio_presentation.py"
+    }
+  ],
+  "debug_playbook": [
+    {
+      "title": "If no internal nodes appear",
+      "description": "Check whether the imported source still exposes the DAC, hold, or comparator nodes expected by the snapshot checks."
+    },
+    {
+      "title": "If transient coverage is too short",
+      "description": "Increase tstop or reduce tstep until one full conversion window is visible."
+    }
+  ],
+  "future_design_reuse": [
+    {
+      "title": "Swap in a different SAR implementation",
+      "description": "Only the source path and verification settings need to change when retargeting the wrapper to another SAR ADC design."
+    },
+    {
+      "title": "Retarget technology",
+      "description": "Keep the indexed architecture and update the implementation source plus technology metadata for the next node."
+    }
+  ],
+  "blocks": [
+    {
+      "block_key": "sar_adc_top",
+      "name": "SAR ADC Top Level",
+      "domain": "mixed",
+      "aliases": ["sar_adc_top", "sar_adc"],
+      "role": "Converts an analog input into a digital code using sampled-data comparison and successive approximation.",
+      "architecture": "The imported top-level reference models the sample-and-hold, trial DAC, comparator, and SAR decision flow in one reusable netlist.",
+      "implementation_steps": [
+        {
+          "title": "Capture the analog sample",
+          "description": "The analog input is sampled onto the hold node before bit trials begin."
+        },
+        {
+          "title": "Drive trial DAC codes",
+          "description": "The internal DAC reconstructs the tentative analog voltage for each SAR bit decision."
+        },
+        {
+          "title": "Resolve the code",
+          "description": "The comparator and SAR logic keep or clear each bit until the final code is reached."
+        }
+      ],
+      "primary_specs": [
+        {
+          "name": "Resolution",
+          "target": "8 bits",
+          "reason": "Defines quantization depth and code space."
+        },
+        {
+          "name": "Sample rate",
+          "target": "1 MSPS class reference",
+          "reason": "Sets the expected conversion-window timing."
+        },
+        {
+          "name": "Input range",
+          "target": "0V to 2.5V",
+          "reason": "Matches the DAC full-scale reference."
+        }
+      ],
+      "sizing_formulas": [
+        {
+          "title": "LSB size",
+          "formula": "LSB = VREF / 2^N",
+          "explanation": "Defines the quantization step for an N-bit SAR ADC.",
+          "variables": ["VREF", "N"]
+        },
+        {
+          "title": "Conversion time",
+          "formula": "TCONV ~= N / fCLK",
+          "explanation": "A simple SAR approximation: one major decision per bit clock.",
+          "variables": ["N", "fCLK"]
+        }
+      ],
+      "dc_operating_points": [
+        {
+          "node": "analog_in",
+          "target": "0V to 2.5V sinusoidal input",
+          "how_set": "Input source inside the imported reference netlist",
+          "why": "Provides the conversion stimulus."
+        },
+        {
+          "node": "dac_out",
+          "target": "Tracks trial code against VREF range",
+          "how_set": "Internal DAC reconstruction from SAR bit decisions",
+          "why": "Comparator reference for each bit trial."
+        },
+        {
+          "node": "sh_out",
+          "target": "Held sample during conversion window",
+          "how_set": "Sample switch and hold capacitor",
+          "why": "Keeps the analog sample stable during bit cycling."
+        }
+      ],
+      "analysis_steps": [
+        {
+          "type": "transient",
+          "name": "Top-level converter snapshot",
+          "purpose": "Observe input sampling and internal SAR node activity over a conversion window.",
+          "command": "python designs/framework/scripts/run_design_snapshot.py --design sar_adc --block sar_adc_top",
+          "pass_criteria": "Input waveform, internal conversion nodes, and sufficient time samples are all present.",
+          "debug_focus": "analog_in, sh_out, dac_out, comp_out"
+        }
+      ],
+      "corner_focus": [
+        {
+          "condition": "Future PVT closure",
+          "risk": "Comparator delay, DAC settling, and logic timing can all shift differently across technologies.",
+          "primary_knob": "Technology-specific sub-block implementation and timing budgets"
+        }
+      ],
+      "tuning_knobs": [
+        {
+          "title": "VREF",
+          "description": "Moves full-scale range and the effective LSB size."
+        },
+        {
+          "title": "Clock period",
+          "description": "Controls the available settling and decision time per bit."
+        }
+      ],
+      "files": [
+        {
+          "path": "designs/sar_adc/blocks/sar_adc_top/spec.yaml",
+          "role": "Top-level verification contract for the SAR ADC wrapper"
+        },
+        {
+          "path": "examples/standard_circuits/sar_adc.spice",
+          "role": "Imported SAR ADC source netlist"
+        },
+        {
+          "path": "reports/sar_adc_regression_latest.json",
+          "role": "Latest normalized top-level snapshot report"
+        }
+      ]
+    }
+  ]
+}

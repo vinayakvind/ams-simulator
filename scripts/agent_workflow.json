@@ -1,0 +1,83 @@
+{
+  "name": "daily autonomous chip improvement loop",
+  "goal": "Run validation and reporting, then feed the next concrete improvement batch back into the CLI agent without needing a fresh manual prompt.",
+  "focus_areas": [
+    "Use the latest strict autopilot and chip-catalog reports to decide the next implementation batch.",
+    "Prefer improvements that expand reusable chip IP, VIP, and technology coverage.",
+    "Keep the workflow resumable so the next cycle continues cleanly after token or context limits."
+  ],
+  "priority_build_targets": {
+    "reusable_ips": [
+      "bandgap",
+      "ldo_analog",
+      "ldo_digital",
+      "ldo_lin",
+      "lin_transceiver",
+      "sample_hold_frontend",
+      "dac_r2r_4bit",
+      "comparator_cmos",
+      "buck_converter",
+      "sar_adc_top",
+      "sigma_delta_adc_top"
+    ],
+    "verification_ips": [
+      "spi_vip",
+      "lin_vip",
+      "power_sequence_vip",
+      "analog_snapshot_vip",
+      "adc_transient_vip",
+      "mixed_signal_bridge_vip"
+    ],
+    "chip_profiles": [
+      "lin_node_asic",
+      "sar_adc_macro",
+      "sigma_delta_macro",
+      "mixed_signal_sensor_hub",
+      "power_management_unit"
+    ]
+  },
+  "steps": [
+    {
+      "id": "verify-project-status",
+      "title": "Verify major project deliverables",
+      "command": "\"{python}\" scripts/verify_project_status.py",
+      "continue_on_failure": true
+    },
+    {
+      "id": "generate-chip-catalog-all",
+      "title": "Generate overall chip catalog report",
+      "command": "\"{python}\" designs/framework/scripts/generate_chip_catalog_report.py",
+      "continue_on_failure": true
+    },
+    {
+      "id": "generate-chip-catalog-generic130",
+      "title": "Generate generic130 chip catalog report",
+      "command": "\"{python}\" designs/framework/scripts/generate_chip_catalog_report.py --technology generic130",
+      "continue_on_failure": true
+    },
+    {
+      "id": "generate-chip-catalog-generic65",
+      "title": "Generate generic65 chip catalog report",
+      "command": "\"{python}\" designs/framework/scripts/generate_chip_catalog_report.py --technology generic65",
+      "continue_on_failure": true
+    },
+    {
+      "id": "generate-chip-catalog-bcd180",
+      "title": "Generate bcd180 chip catalog report",
+      "command": "\"{python}\" designs/framework/scripts/generate_chip_catalog_report.py --technology bcd180",
+      "continue_on_failure": true
+    },
+    {
+      "id": "run-strict-autopilot",
+      "title": "Run strict indexed design autopilot",
+      "command": "\"{python}\" designs/framework/scripts/run_autopilot.py --strict --quiet",
+      "continue_on_failure": true
+    },
+    {
+      "id": "repo-backup-report",
+      "title": "Report current repo change size",
+      "command": "\"{python}\" scripts/repo_backup_guard.py --report",
+      "continue_on_failure": true
+    }
+  ]
+}

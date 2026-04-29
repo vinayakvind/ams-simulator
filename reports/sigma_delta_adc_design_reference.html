@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sigma-Delta ADC Indexed Design Reference</title>
+  <style>
+    :root {
+      --bg: #f2ede3;
+      --panel: rgba(11, 28, 41, 0.92);
+      --panel-soft: rgba(255, 248, 236, 0.88);
+      --ink: #0b1c29;
+      --ink-soft: #51606a;
+      --accent: #d17f2f;
+      --accent-deep: #8d4f0b;
+      --mint: #7ab7a5;
+      --line: rgba(11, 28, 41, 0.14);
+      --shadow: 0 18px 50px rgba(11, 28, 41, 0.16);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(209, 127, 47, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(122, 183, 165, 0.20), transparent 24%),
+        linear-gradient(180deg, #fbf7ef 0%, #efe6d7 55%, #f7f3ec 100%);
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    .shell {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 28px;
+      padding: 28px;
+    }
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      height: calc(100vh - 48px);
+      overflow: auto;
+      padding: 22px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: #eef6f2;
+      box-shadow: var(--shadow);
+    }
+    .sidebar h1 {
+      margin: 0 0 8px;
+      font-family: Georgia, Cambria, serif;
+      font-size: 2rem;
+      line-height: 1.05;
+    }
+    .sidebar p { color: rgba(238, 246, 242, 0.76); line-height: 1.5; }
+    .nav-group { display: grid; gap: 10px; margin-top: 22px; }
+    .nav-group a {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: background 120ms ease, transform 120ms ease;
+    }
+    .nav-group a:hover { background: rgba(255, 255, 255, 0.12); transform: translateX(3px); }
+    main { display: grid; gap: 24px; }
+    .hero {
+      padding: 34px;
+      border-radius: 32px;
+      background: linear-gradient(135deg, rgba(11, 28, 41, 0.95), rgba(17, 54, 58, 0.92));
+      color: #f8f4eb;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -50px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(209, 127, 47, 0.20);
+      filter: blur(12px);
+    }
+    .hero .eyebrow, .eyebrow {
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .hero h2 {
+      margin: 0 0 14px;
+      font-family: Georgia, Cambria, serif;
+      font-size: clamp(2.3rem, 4vw, 3.9rem);
+      line-height: 0.97;
+      max-width: 12ch;
+    }
+    .hero p {
+      max-width: 72ch;
+      line-height: 1.65;
+      color: rgba(248, 244, 235, 0.88);
+    }
+    .summary-grid, .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .summary-card, .panel, .step-card {
+      border-radius: 22px;
+      background: var(--panel-soft);
+      border: 1px solid rgba(11, 28, 41, 0.08);
+      box-shadow: var(--shadow);
+    }
+    .summary-card { padding: 20px; }
+    .summary-card h3 { margin: 0 0 8px; font-size: 0.9rem; text-transform: uppercase; color: var(--ink-soft); letter-spacing: 0.08em; }
+    .summary-card p { margin: 0; font-size: 1.08rem; line-height: 1.45; }
+    .panel { padding: 24px; }
+    .panel h3 { margin-top: 0; font-family: Georgia, Cambria, serif; font-size: 1.5rem; }
+    .lead { font-size: 1.08rem; color: var(--ink-soft); margin-top: 0; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(122, 183, 165, 0.16);
+      color: #12363f;
+      font-size: 0.82rem;
+      border: 1px solid rgba(122, 183, 165, 0.22);
+    }
+    .step-card { padding: 20px; position: relative; overflow: hidden; }
+    .step-index {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), #f0b068);
+      color: #20150b;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .step-card h4 { margin: 0 0 8px; font-size: 1.15rem; }
+    .step-card p { margin: 0; color: var(--ink-soft); line-height: 1.55; }
+    .block-section { display: grid; gap: 18px; }
+    .section-heading h2 { margin: 0; font-family: Georgia, Cambria, serif; font-size: 2rem; }
+    .formula-grid, .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .formula-card, .analysis-card {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(11, 28, 41, 0.08);
+    }
+    .formula-card h4, .analysis-card h4 { margin: 0 0 10px; }
+    pre, .code-block {
+      margin: 0;
+      padding: 14px;
+      border-radius: 16px;
+      background: #12212d;
+      color: #edf4ef;
+      overflow: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .table-wrap { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-soft); }
+    .bullet-list { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+    .bullet-list li { line-height: 1.55; }
+    .bullet-list span { display: block; color: var(--ink-soft); }
+    .muted { color: var(--ink-soft); }
+    .footer-note { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.65; }
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .status-pass { background: rgba(48, 128, 79, 0.16); color: #25633e; }
+    .status-fail { background: rgba(176, 0, 32, 0.14); color: #92112d; }
+    .status-warn { background: rgba(209, 127, 47, 0.16); color: #8d4f0b; }
+    .chart-shell {
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.64);
+      border: 1px solid rgba(11, 28, 41, 0.08);
+      overflow: auto;
+    }
+    .chart-svg { width: 100%; height: auto; display: block; }
+    .chart-grid-line { stroke: rgba(11, 28, 41, 0.12); stroke-width: 1; }
+    .chart-label { fill: #51606a; font-size: 12px; font-family: "Segoe UI", sans-serif; }
+    .chart-value { fill: #0b1c29; font-size: 12px; font-weight: 700; font-family: "Segoe UI", sans-serif; }
+    .chart-note { color: var(--ink-soft); font-size: 0.92rem; line-height: 1.55; }
+    @media (max-width: 1040px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="eyebrow">Indexed Design Reference</div>
+      <h1>Sigma-Delta ADC Indexed Design Reference</h1>
+      <p>Indexed reference for a Sigma-Delta ADC top-level design so imported oversampled converter netlists can participate in the same architecture and presentation flow as other AMS designs.</p>
+      <div class="nav-group"><a href="#overview">Overview</a><a href="#results">Measured Results</a><a href="#flow">Indexed Flow</a><a href="#analysis">Analysis Playbook</a><a href="#corners">Corner Closure</a><a href="#scripts">Script Index</a><a href="#sigma_delta_adc_top">Sigma-Delta ADC Top Level</a></div>
+    </aside>
+    <main>
+      <section class="hero" id="overview">
+        <div class="eyebrow">Internal ADC architecture reference</div>
+        <h2>Reusable Sigma-Delta ADC architecture, verification contract, and results wrapper.</h2>
+        <p>This manifest captures the reusable architecture intent for a Sigma-Delta ADC reference design. It records the modulator partition, the core equations behind oversampling and noise shaping, the transient-oriented validation flow, and the file locations needed to regenerate both the design-reference page and the portfolio presentation.</p>
+        <div class="badge-row"><span class="badge">adc</span><span class="badge">sigma-delta</span><span class="badge">oversampling</span><span class="badge">data converter</span><span class="badge">indexed methodology</span><span class="badge">technology portability</span></div>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary-card"><h3>Standard</h3><p>Internal ADC architecture reference</p></article><article class="summary-card"><h3>Technology</h3><p>generic180 baseline with portability to generic130, generic65, and bcd180 through TechMapper wrappers</p></article><article class="summary-card"><h3>Primary Rails</h3><p>3.3V supply and 0V/2.5V references establish the first-order Sigma-Delta operating range.</p></article><article class="summary-card"><h3>Signoff Boundary</h3><p>Current validation is a reusable top-level snapshot on an imported reference design. Replace with explicit sub-block implementations and foundry signoff flows for silicon work.</p></article>
+      </section>
+
+            
+
+      <section id="results" class="panel"><div class="section-heading"><div class="eyebrow">Measured Results</div><h3>Stored Validation Evidence</h3></div><p class="lead">Only one stored regression run for Sigma-Delta ADC Indexed Design Reference is currently on disk, so this page can show the latest measured snapshot but not a multi-run trend yet. Additional regression JSON files matching reports/sigma_delta_adc_regression*.json will appear here automatically.</p><div class="summary-grid"><article class="summary-card"><h3>Stored Runs</h3><p>1</p></article><article class="summary-card"><h3>Latest Regression</h3><p>2026-04-30 00:50:23</p></article><article class="summary-card"><h3>Overall Status</h3><p>PASS</p></article><article class="summary-card"><h3>Coverage</h3><p>100.0% functional / 100.0% standards</p></article></div><div class="card-grid"><article class="panel"><h3>What This Page Is Charting</h3><ul class="bullet-list"><li><strong>Regression evidence table</strong><span>Shows the measured values and status outcomes from the latest saved regression run.</span></li></ul></article><article class="panel"><h3>Stored Run History</h3><div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Overall</th><th>Pass Count</th><th>Artifact</th></tr></thead><tbody><tr><td>2026-04-30 00:50:23</td><td><span class="status-chip status-pass">PASS</span></td><td>1/1</td><td>reports\sigma_delta_adc_regression_latest.json</td></tr></tbody></table></div></article></div><article class="panel"><h3>Latest Analog and Mixed-Signal Results</h3><div class="table-wrap"><table><thead><tr><th>Block</th><th>Status</th><th>Measured</th><th>Requirement Check</th></tr></thead><tbody><tr><td colspan="4">No analog measurements recorded.</td></tr></tbody></table></div></article></section>
+
+      <section class="panel">
+        <div class="section-heading"><div class="eyebrow">Architecture</div><h3>Power Tree and Control Partition</h3></div>
+        <p class="lead">Analog input is integrated against a one-bit feedback DAC, quantized into a bitstream, and then low-pass filtered or decimated to reconstruct the in-band signal. The indexed wrapper keeps that architecture reusable across future implementations and technologies.</p>
+        <div class="table-wrap"><table><thead><tr><th>Domain</th><th>Voltage</th><th>Source</th><th>Drives</th></tr></thead><tbody><tr><td>VDD</td><td>3.3V</td><td>external supply</td><td>integrator, quantizer, DAC model, decimation path</td></tr><tr><td>VIN</td><td>analog stimulus centered in converter range</td><td>analog input source</td><td>modulator summing node</td></tr><tr><td>VREF</td><td>0V to 2.5V</td><td>internal or external reference pair</td><td>one-bit feedback DAC swing</td></tr></tbody></table></div>
+        <div class="card-grid">
+          <article class="panel"><h3>Bring-Up Order</h3><ul class="bullet-list"><li><span>Establish the reference endpoints before enabling the modulator loop.</span></li><li><span>Start the sampling clock so the integrator and quantizer enter a stable noise-shaping regime.</span></li><li><span>Observe the bitstream and filtered output over a long enough time window to assess behavior.</span></li></ul></article>
+          <article class="panel"><h3>Control Path</h3><ul class="bullet-list"><li><strong>Summing path</strong><span>Analog input and feedback DAC output form the modulator error signal.</span></li><li><strong>Noise-shaping path</strong><span>The integrator accumulates low-frequency error while the one-bit quantizer emits the high-rate bitstream.</span></li><li><strong>Reconstruction path</strong><span>The filtered or decimated output estimates the in-band analog value.</span></li></ul></article>
+        </div>
+      </section>
+
+      <section id="flow" class="panel">
+        <div class="section-heading"><div class="eyebrow">Flow</div><h3>Indexed Design Flow</h3></div>
+        <p class="lead">The Sigma-Delta ADC uses the same indexed flow as the rest of the framework: capture architecture, define verification settings, save a normalized snapshot result, and publish HTML plus portfolio outputs.</p>
+        <div class="card-grid"><article class="step-card"><div class="step-index">01</div><h4>Capture oversampled converter architecture</h4><p>Freeze the summing, integrating, quantizing, feedback, and filtering roles before implementation details change.</p><div class="badge-row"><span class="badge">01_ARCHITECTURE.md</span><span class="badge">architecture.yaml</span></div></article><article class="step-card"><div class="step-index">02</div><h4>Import or generate implementation</h4><p>Wrap the chosen Sigma-Delta source file into the indexed flow so reporting and reuse stay stable.</p><div class="badge-row"><span class="badge">blocks/sigma_delta_adc_top/spec.yaml</span><span class="badge">examples/standard_circuits/sigma_delta_adc.spice</span></div></article><article class="step-card"><div class="step-index">03</div><h4>Run the top-level snapshot</h4><p>Execute the transient snapshot and save a normalized regression JSON for later presentation.</p><div class="badge-row"><span class="badge">reports/sigma_delta_adc_regression_latest.json</span></div></article><article class="step-card"><div class="step-index">04</div><h4>Publish reusable reference</h4><p>Generate the standalone HTML page and include the converter in the overall portfolio presentation.</p><div class="badge-row"><span class="badge">reports/sigma_delta_adc_design_reference.html</span><span class="badge">reports/design_portfolio_overview.pptx</span></div></article></div>
+      </section>
+
+      <section id="analysis" class="panel">
+        <div class="section-heading"><div class="eyebrow">Verification</div><h3>DC, AC, PSRR, and Debug Structure</h3></div>
+        <p class="lead">Primary validation is transient-oriented because the key behavior is oversampled bitstream generation, feedback DAC interaction, and filtered-output evolution over time.</p>
+        <div class="analysis-grid"><article class="analysis-card"><div class="eyebrow">transient</div><h4>Top-level modulator snapshot</h4><p>Capture analog input, bitstream activity, and filtered-output behavior over an oversampled window.</p><div class="code-block">python designs/framework/scripts/run_design_snapshot.py --design sigma_delta_adc --block sigma_delta_adc_top</div><p><strong>Pass criteria:</strong> Transient results include analog input, bitstream activity, at least one filtered or internal node, and sufficient sample depth.</p><p><strong>Tweak first:</strong> analog_in, bitstream, int_out, dec_filt, fb_dac</p></article><article class="analysis-card"><div class="eyebrow">presentation</div><h4>Portfolio publication</h4><p>Surface the converter in the cross-design architecture and results presentation.</p><div class="code-block">python designs/framework/scripts/generate_portfolio_presentation.py</div><p><strong>Pass criteria:</strong> The design appears in JSON, Markdown, and PPT outputs with its latest status.</p><p><strong>Tweak first:</strong> Manifest completeness and saved regression artifact naming.</p></article></div>
+      </section>
+
+      <section id="corners" class="panel">
+        <div class="section-heading"><div class="eyebrow">Corners</div><h3>Corner Closure Strategy</h3></div>
+        <p class="lead">No PVT closure is claimed yet. This wrapper records the intended architecture and validation contract for future technology-specific Sigma-Delta work.</p>
+        <div class="card-grid">
+          <article class="panel">
+            <h3>Matrix</h3>
+            <div class="table-wrap"><table><thead><tr><th>Process</th><th>Voltage</th><th>Temperature</th></tr></thead><tbody><tr><td>generic180 baseline today; future TT/FF/SS and foundry corners</td><td>nominal 3.3V today; future min/nom/max</td><td>room only today; future -40, 27, 125</td></tr></tbody></table></div>
+          </article>
+          <article class="panel">
+            <h3>Closure Order</h3>
+            <ul class="bullet-list"><li><span>Confirm bitstream and filtered-output visibility before claiming in-band performance.</span></li><li><span>Add explicit integrator, quantizer, DAC, and decimator verification before PVT closure.</span></li><li><span>Promote the imported reference into a technology-specific implementation only after architecture is frozen.</span></li></ul>
+          </article>
+        </div>
+        <div class="card-grid">
+          <article class="panel"><h3>Pass Rule</h3><p>Current pass means the imported top-level source executed with the required visibility for architecture review. It does not mean silicon signoff closure.</p></article>
+          <article class="panel"><h3>Model Note</h3><p>Technology portability is architecture-driven today. Replace the imported reference with block-level implementations and foundry models for real development.</p></article>
+        </div>
+      </section>
+
+      <section id="scripts" class="panel">
+        <div class="section-heading"><div class="eyebrow">Automation</div><h3>Script Index</h3></div>
+        <p class="lead">Use the snapshot script to normalize the top-level run and the portfolio generator to publish architecture and status across designs.</p>
+        <div class="table-wrap"><table><thead><tr><th>Script</th><th>Purpose</th><th>Command</th></tr></thead><tbody><tr><td>Run top-level snapshot</td><td>Create a normalized regression JSON from spec.yaml verification settings.</td><td>python designs/framework/scripts/run_design_snapshot.py --design sigma_delta_adc --block sigma_delta_adc_top</td></tr><tr><td>Generate Sigma-Delta webpage</td><td>Render the indexed Sigma-Delta reference as a standalone HTML page.</td><td>python designs/framework/scripts/generate_design_reference.py --input designs/sigma_delta_adc/design_reference.json --output reports/sigma_delta_adc_design_reference.html</td></tr><tr><td>Generate portfolio PPT</td><td>Include the Sigma-Delta ADC in the overall architecture and results presentation.</td><td>python designs/framework/scripts/generate_portfolio_presentation.py</td></tr></tbody></table></div>
+      </section>
+
+      <section id="sigma_delta_adc_top" class="block-section"><div class="section-heading"><div class="eyebrow">mixed</div><h2>Sigma-Delta ADC Top Level</h2></div><p class="lead">Converts an analog input into a noise-shaped bitstream and filtered low-rate estimate using oversampling.</p><div class="card-grid"><article class="panel"><h3>Latest Stored Validation</h3><p><span class="status-chip status-pass">PASS</span> TOP-SIGMA-DELTA-ADC</p><p class="muted">signal_count=28, time_points=157955, input_span_v=1.999999999973439</p><p class="muted">Top-level transient snapshot for the imported Sigma-Delta ADC reference design.; time_points=157955; signals=28</p></article></div><div class="card-grid"><article class="panel"><h3>Architecture</h3><p>The imported top-level reference models a first-order integrator, one-bit quantizer, feedback DAC, and simple output filtering in one reusable netlist.</p><ul class="bullet-list"><li><strong>Form the modulator error</strong><span>Subtract feedback DAC output from the analog input at the summing node.</span></li><li><strong>Integrate and quantize</strong><span>The integrator accumulates low-frequency error and the quantizer emits the one-bit bitstream.</span></li><li><strong>Reconstruct the signal</strong><span>Filter or decimate the bitstream to recover the in-band output estimate.</span></li></ul></article><article class="panel"><h3>Primary Specs</h3><div class="table-wrap"><table><thead><tr><th>Spec</th><th>Target</th><th>Reason</th></tr></thead><tbody><tr><td>Modulator order</td><td>1st order reference</td><td>Defines the noise-shaping slope and architecture complexity.</td></tr><tr><td>Oversampling ratio</td><td>64x</td><td>Sets the relationship between sampling rate and in-band noise shaping.</td></tr><tr><td>Signal bandwidth</td><td>20 kHz class reference</td><td>Defines the in-band region for the filtered output.</td></tr></tbody></table></div></article></div><article class="panel"><h3>Sizing Formulas</h3><div class="formula-grid"><article class="formula-card"><h4>Oversampling ratio</h4><pre>OSR = fS / (2 * BW)</pre><p>Relates sample rate to target signal bandwidth.</p><div class="badge-row"><span class="badge">fS</span><span class="badge">BW</span></div></article><article class="formula-card"><h4>First-order SNR trend</h4><pre>SNR improves as oversampling pushes quantization noise out of band</pre><p>The first-order loop trades time-domain bit density for improved in-band resolution after filtering.</p><div class="badge-row"><span class="badge">OSR</span></div></article></div></article><article class="panel"><h3>DC Operating Points</h3><div class="table-wrap"><table><thead><tr><th>Node or Signal</th><th>Target</th><th>How Set</th><th>Why</th></tr></thead><tbody><tr><td>analog_in</td><td>Centered analog sinusoid within converter range</td><td>Input source inside the imported reference netlist</td><td>Provides the modulator stimulus.</td></tr><tr><td>bitstream</td><td>High-rate one-bit output with density proportional to input</td><td>Quantizer output from the integrator state</td><td>Primary Sigma-Delta observable.</td></tr><tr><td>dec_filt</td><td>Smoothed estimate of the in-band input</td><td>Simple reconstruction filter in the imported reference</td><td>Readable low-rate output estimate for validation.</td></tr></tbody></table></div></article><article class="panel"><h3>Analysis Plan</h3><div class="analysis-grid"><article class="analysis-card"><div class="eyebrow">transient</div><h4>Top-level modulator snapshot</h4><p>Observe input, feedback, bitstream, and filtered-output behavior over an oversampled window.</p><div class="code-block">python designs/framework/scripts/run_design_snapshot.py --design sigma_delta_adc --block sigma_delta_adc_top</div><p><strong>Pass criteria:</strong> Input waveform, bitstream, and at least one internal or filtered node are present with enough time samples.</p><p><strong>Tweak first:</strong> analog_in, bitstream, dec_filt, fb_dac, int_out</p></article></div></article><div class="card-grid"><article class="panel"><h3>Corner Focus</h3><div class="table-wrap"><table><thead><tr><th>Condition</th><th>Risk</th><th>Primary Knob</th></tr></thead><tbody><tr><td>Future PVT closure</td><td>Integrator gain, comparator threshold, and decimation timing will all move differently across technologies.</td><td>Technology-specific sub-block implementation and timing budgets</td></tr></tbody></table></div></article><article class="panel"><h3>Tuning Knobs</h3><ul class="bullet-list"><li><strong>Sampling rate</strong><span>Directly changes OSR and the amount of shaped out-of-band noise.</span></li><li><strong>Loop filter constant</strong><span>Sets the effective integrator strength and therefore the bitstream density response.</span></li></ul></article></div><article class="panel"><h3>Referenced Files</h3><div class="table-wrap"><table><thead><tr><th>Path</th><th>Role</th></tr></thead><tbody><tr><td>designs/sigma_delta_adc/blocks/sigma_delta_adc_top/spec.yaml</td><td>Top-level verification contract for the Sigma-Delta wrapper</td></tr><tr><td>examples/standard_circuits/sigma_delta_adc.spice</td><td>Imported Sigma-Delta ADC source netlist</td></tr><tr><td>reports/sigma_delta_adc_regression_latest.json</td><td>Latest normalized top-level snapshot report</td></tr></tbody></table></div></article></section>
+
+      <section class="panel">
+        <div class="section-heading"><div class="eyebrow">Debug</div><h3>Debug Playbook</h3></div>
+        <ul class="bullet-list"><li><strong>If the bitstream is missing</strong><span>Check that the imported source still exposes the quantizer output node expected by the snapshot checks.</span></li><li><strong>If the time window is too short</strong><span>Increase the transient stop time so the oversampled loop and filtered output have enough time to develop.</span></li></ul>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading"><div class="eyebrow">Reuse</div><h3>How to Reuse for the Next Design</h3></div>
+        <ul class="bullet-list"><li><strong>Swap in a different Sigma-Delta implementation</strong><span>Only the source path and verification settings need to change when retargeting the wrapper to another oversampled ADC design.</span></li><li><strong>Retarget technology</strong><span>Keep the indexed architecture and update the implementation source plus technology metadata for the next node.</span></li></ul>
+        <p class="footer-note">Source manifest: C:\Users\vinay\My Simulator\designs\sigma_delta_adc\design_reference.json</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,684 @@
+{
+  "design": {
+    "id": "lin_asic",
+    "title": "LIN ASIC Indexed Design Reference",
+    "headline": "One indexed playbook for architecture, sizing, corners, and debug.",
+    "summary": "Structured reference for the LIN mixed-signal ASIC so future designs can reuse the same architecture, sizing logic, operating-point targets, corner strategy, and debug order.",
+    "narrative": "This reference keeps the whole LIN ASIC design flow in one place: the chip architecture, the analog and digital block intent, the sizing formulas, the DC operating points, the AC and PSRR checks, the corner-closure order, and the exact scripts used to reproduce the analysis. The goal is not only to explain this design, but to leave behind a template that can be reused for the next regulator, transceiver, or mixed-signal interface without starting from a blank page.",
+    "standard": "ISO 17987 / LIN 2.2A",
+    "technology": "BCD 180nm for target architecture, generic180 for current simulation framework",
+    "signoff_boundary": "Current scripts use generic process and temperature scalers for early closure. Replace them with foundry PDK corner decks for final silicon signoff.",
+    "tags": [
+      "mixed-signal",
+      "bandgap",
+      "ldo",
+      "lin transceiver",
+      "spi",
+      "corner closure",
+      "debug reuse"
+    ]
+  },
+  "flow_summary": "The design is organized as an indexed flow so architecture, implementation, verification, and debug knowledge are captured in the same order the design was closed.",
+  "analysis_summary": "Each analog block is checked in the same sequence: DC operating point first, AC shape and loop strength second, PSRR third, transient and load movement fourth, then PVT closure. Digital blocks use reset-state inspection, functional stimulus, and control-path reachability instead of small-signal checks.",
+  "script_summary": "These commands are the operational entry points for retrieving the methodology, generating the webpage, and running block-level checks across operating conditions.",
+  "architecture": {
+    "summary": "VBAT feeds the high-voltage LIN rail and the analog rail. The 3.3V analog rail feeds the bandgap and becomes the source for the 1.8V digital rail. Digital configuration arrives through SPI, lands in the register file, then fans into the control logic and LIN controller.",
+    "power_tree_summary": "VBAT -> LDO_LIN -> 5.0V LIN rail; VBAT -> LDO_ANA -> 3.3V analog rail; 3.3V analog rail -> LDO_DIG -> 1.8V digital rail; Bandgap 1.2V -> all LDO references",
+    "domains": [
+      {
+        "name": "VBAT",
+        "voltage": "8V to 18V",
+        "source": "external battery / LIN bus supply",
+        "drives": "ldo_lin, ldo_analog, LIN pull-up network"
+      },
+      {
+        "name": "VDD_LIN",
+        "voltage": "5.0V",
+        "source": "ldo_lin",
+        "drives": "lin_transceiver analog bus driver and wake path"
+      },
+      {
+        "name": "VDD_ANA",
+        "voltage": "3.3V",
+        "source": "ldo_analog",
+        "drives": "bandgap_ref, analog bias, I/O-facing analog circuitry"
+      },
+      {
+        "name": "VDD_DIG",
+        "voltage": "1.8V",
+        "source": "ldo_digital",
+        "drives": "spi_slave, register_file, lin_controller, control_logic"
+      }
+    ],
+    "power_sequence": [
+      "Enable and settle the bandgap before allowing any regulator loop to close.",
+      "Bring up the 3.3V analog LDO next so the bandgap and analog bias always have a clean rail.",
+      "Bring up the 1.8V digital LDO only after the 3.3V rail is valid, so digital logic never sees an undefined parent rail.",
+      "Enable the 5V LIN LDO and the LIN transceiver last, because the bus interface is the noisiest block and should not corrupt reference startup."
+    ],
+    "control_path": [
+      {
+        "title": "SPI programming path",
+        "description": "SPI slave decodes host writes and forwards register transactions into the register file."
+      },
+      {
+        "title": "Register decode path",
+        "description": "Register bits map into bandgap enable, LDO enables, sleep mode, LIN mode, and baud divider settings."
+      },
+      {
+        "title": "Sequencing path",
+        "description": "Control logic staggers enable assertions and POR release so the analog and digital rails appear in a safe order."
+      }
+    ]
+  },
+  "indexed_flow": [
+    {
+      "index": "01",
+      "title": "Freeze the chip architecture",
+      "description": "Lock the power domains, the control path, the LIN-facing external interfaces, and the ownership of each rail before sizing any transistor.",
+      "outputs": ["01_ARCHITECTURE.md", "architecture.yaml", "lin_asic_architecture.json"]
+    },
+    {
+      "index": "02",
+      "title": "Close the reference path first",
+      "description": "Design the bandgap and define the 1.2V reference target because every downstream regulator inherits its accuracy, startup behavior, and PSRR from this block.",
+      "outputs": ["bandgap.spice", "VREF target", "startup strategy"]
+    },
+    {
+      "index": "03",
+      "title": "Size each regulator from the required rail",
+      "description": "Use the output target, dropout target, max load current, and stability requirement to size the divider, OTA, pass device, and compensation for each LDO.",
+      "outputs": ["ldo_analog", "ldo_digital", "ldo_lin"]
+    },
+    {
+      "index": "04",
+      "title": "Close the physical interface",
+      "description": "Design the LIN transceiver bus thresholds, slew control, and pull-up network after the rails are defined so the analog PHY can be referenced to the right supplies and thresholds.",
+      "outputs": ["lin_transceiver", "bus threshold plan"]
+    },
+    {
+      "index": "05",
+      "title": "Close the digital control plane",
+      "description": "Implement the SPI access path, register file, LIN protocol state machine, and the sequencer so software-visible control matches the analog bring-up assumptions.",
+      "outputs": ["spi_slave.v", "register_file.sv", "lin_controller.v", "control_logic.sv"]
+    },
+    {
+      "index": "06",
+      "title": "Capture closure and debug knowledge",
+      "description": "Record formulas, node targets, corner risks, pass criteria, and tuning knobs so future designs can reuse the same playbook.",
+      "outputs": ["design_reference.json", "HTML design reference", "queryable scripts"]
+    }
+  ],
+  "analysis_playbook": [
+    {
+      "type": "dc",
+      "name": "DC operating point",
+      "purpose": "Verify that every analog node biases where the architecture expects before asking the loop to deliver gain or rejection.",
+      "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis dc",
+      "pass_criteria": "Reference and feedback nodes bias correctly, pass device stays in the intended region, and the rail lands inside the nominal window.",
+      "debug_focus": "If DC is wrong, fix reference level, divider ratio, bias current, or pass-device headroom before running AC or PSRR."
+    },
+    {
+      "type": "ac",
+      "name": "AC small-signal inspection",
+      "purpose": "Inspect loop strength, pole/zero placement, and output-node behavior across frequency before running large-signal transients.",
+      "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis ac --fstart 10 --fstop 1e7 --points 60",
+      "pass_criteria": "Gain shape and dominant-pole placement support the intended phase margin once the output capacitor and compensation network are included.",
+      "debug_focus": "If AC rolls off too early, increase OTA gm or reduce excess loading. If peaking appears, revisit compensation capacitor, ESR zero, or pass-gate pole placement."
+    },
+    {
+      "type": "psrr",
+      "name": "PSRR extraction",
+      "purpose": "Inject a 1V AC ripple at the supply source and compute how much reaches the regulated output or reference node.",
+      "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis psrr --fstart 10 --fstop 1e7 --points 60",
+      "pass_criteria": "Meet the target dB rejection at low frequency and keep the roll-off understandable as the loop bandwidth is crossed.",
+      "debug_focus": "If PSRR fails at low frequency, raise loop gain or bias accuracy. If it fails at high frequency, improve local decoupling, compensation, or the feedthrough path through the pass device."
+    },
+    {
+      "type": "corner",
+      "name": "Corner closure sweep",
+      "purpose": "Repeat the analysis on TT, FF, SS, FS, and SF plus cold, room, and hot temperature points so the same block is checked against worst-case speed, threshold, and resistor drift.",
+      "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis dc --corner FF --temperature 125",
+      "pass_criteria": "All required specs stay inside guard bands at every corner or the failing corner is tied to one explicit tuning knob and closed deliberately.",
+      "debug_focus": "Never tune multiple knobs blindly. Note the failing corner, change one dominant knob, rerun, and record why the change worked."
+    }
+  ],
+  "corner_closure": {
+    "summary": "The closure flow starts with reference accuracy, then regulator headroom and stability, then bus threshold integrity, and finally the digital control path. The same matrix is reused for every future block so failures are easy to compare across designs.",
+    "matrix": {
+      "process": "TT, FF, SS, FS, SF",
+      "voltage": "VIN min / nominal / max according to each block domain",
+      "temperature_c": "-40, 27, 125"
+    },
+    "closure_order": [
+      "Close the bandgap over temperature before trusting any LDO output target.",
+      "Close each LDO at minimum input headroom and maximum load current before optimizing nominal behavior.",
+      "Check AC and PSRR after the DC operating point is correct, not before.",
+      "Run transceiver dominant and recessive thresholds across VBAT min and max after the 5V rail is stable.",
+      "Run digital reset and control-path checks after the rail sequence is frozen so firmware-visible behavior matches power reality."
+    ],
+    "pass_rule": "A block is considered closed only when the required spec stays inside limits across the full matrix or when a tighter implementation assumption is written down explicitly and becomes part of the architecture contract.",
+    "model_note": "The current framework corner mode scales generic model parameters to expose sensitivity early. Final signoff must switch to foundry corner libraries and extracted parasitics."
+  },
+  "script_index": [
+    {
+      "name": "Query the full design summary",
+      "purpose": "Read the indexed manifest without opening the webpage.",
+      "command": "python designs/framework/scripts/query_design_reference.py --input designs/lin_asic/design_reference.json"
+    },
+    {
+      "name": "List all recorded blocks",
+      "purpose": "See which blocks have structured methodology entries.",
+      "command": "python designs/framework/scripts/query_design_reference.py --input designs/lin_asic/design_reference.json --list-blocks"
+    },
+    {
+      "name": "Inspect one block formulas",
+      "purpose": "Fetch only the sizing formulas for a target block.",
+      "command": "python designs/framework/scripts/query_design_reference.py --input designs/lin_asic/design_reference.json --block ldo_analog --section sizing_formulas"
+    },
+    {
+      "name": "Generate the webpage",
+      "purpose": "Render the JSON manifest into a standalone HTML page for review and reuse.",
+      "command": "python designs/framework/scripts/generate_design_reference.py --input designs/lin_asic/design_reference.json --output reports/lin_asic_design_reference.html"
+    },
+    {
+      "name": "Run DC on one block",
+      "purpose": "Check node bias and output target under one operating corner.",
+      "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis dc --corner TT --temperature 27"
+    },
+    {
+      "name": "Run AC on one block",
+      "purpose": "Inspect small-signal behavior around the intended loop bandwidth.",
+      "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis ac --corner TT --temperature 27 --fstart 10 --fstop 1e7 --points 60"
+    },
+    {
+      "name": "Run PSRR on one block",
+      "purpose": "Inject supply ripple and calculate rejection in dB.",
+      "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis psrr --corner FF --temperature 125 --fstart 10 --fstop 1e7 --points 60"
+    }
+  ],
+  "debug_playbook": [
+    {
+      "title": "If DC fails first",
+      "description": "Fix reference voltage, bias current, divider ratio, or headroom before trying transient, AC, or PSRR tuning."
+    },
+    {
+      "title": "If only hot corners fail",
+      "description": "Look for lost gm, excessive resistor drift, or pass-device overdrive collapse before widening devices indiscriminately."
+    },
+    {
+      "title": "If only cold fast corners fail",
+      "description": "Look for too much loop bandwidth, reduced phase margin, or threshold shifts that overdrive the pass path."
+    },
+    {
+      "title": "If PSRR fails but DC is correct",
+      "description": "Separate low-frequency loop-gain problems from high-frequency feedthrough problems so the wrong knob is not adjusted."
+    },
+    {
+      "title": "If digital control disagrees with analog expectations",
+      "description": "Check reset defaults, register mapping, and enable sequencing before assuming the analog block is wrong."
+    }
+  ],
+  "future_design_reuse": [
+    {
+      "title": "Copy the manifest structure",
+      "description": "Start the next design with the same top-level sections and only replace the block list, formulas, and file paths."
+    },
+    {
+      "title": "Keep one tuning knob per failure",
+      "description": "When a corner fails, record the one parameter that moved the failure back into spec so the next design inherits the lesson."
+    },
+    {
+      "title": "Keep the webpage generated",
+      "description": "The JSON file is the source of truth, but the HTML page is the fastest way for designers and reviewers to debug together."
+    }
+  ],
+  "blocks": [
+    {
+      "block_key": "bandgap_ref",
+      "name": "Bandgap Reference",
+      "domain": "analog",
+      "role": "Generates the 1.2V reference that sets every downstream LDO output target and startup ordering decision.",
+      "architecture": "Brokaw-style bandgap with a startup assist, a cascode-like PMOS mirror, an area-ratio BJT pair, emitter resistors for delta-VBE generation, and a PMOS output buffer.",
+      "implementation_steps": [
+        {
+          "title": "Create a guaranteed startup path",
+          "description": "The startup transistors inject current into the bias node so the bandgap does not sit in the zero-current metastable state."
+        },
+        {
+          "title": "Generate PTAT using delta-VBE",
+          "description": "Q1 and Q2 use an 8:1 area ratio so delta-VBE is proportional to thermal voltage and rises with temperature."
+        },
+        {
+          "title": "Sum PTAT and CTAT",
+          "description": "VBE provides the CTAT term and the resistor-scaled delta-VBE provides the PTAT term so the sum lands near zero tempco around room temperature."
+        }
+      ],
+      "primary_specs": [
+        {"name": "VREF nominal", "target": "1.2V", "reason": "Drives all LDO dividers and bias targets."},
+        {"name": "Tempco", "target": "< 50 ppm/C", "reason": "Prevents every rail from drifting with temperature."},
+        {"name": "PSRR", "target": "> 60 dB at 1 kHz", "reason": "Reference ripple directly appears on every regulated output if this fails."},
+        {"name": "Supply current", "target": "~50 uA", "reason": "Keeps always-on bias cost low."}
+      ],
+      "sizing_formulas": [
+        {
+          "title": "PTAT voltage",
+          "formula": "DeltaVBE = VT * ln(N), where N = emitter area ratio = 8",
+          "explanation": "This sets the slope of the temperature-proportional term.",
+          "variables": ["VT", "N"]
+        },
+        {
+          "title": "Bandgap sum",
+          "formula": "VREF ~= VBE + (R3 / R2) * DeltaVBE",
+          "explanation": "Choose the resistor ratio so the PTAT and CTAT slopes cancel near the desired operating temperature.",
+          "variables": ["VBE", "R3", "R2", "DeltaVBE"]
+        },
+        {
+          "title": "Branch current",
+          "formula": "Ibranch ~= DeltaVBE / R1",
+          "explanation": "Emitter resistor value sets the current level and therefore the mirror and buffer bias conditions.",
+          "variables": ["DeltaVBE", "R1"]
+        }
+      ],
+      "dc_operating_points": [
+        {"node": "VREF", "target": "1.20V nominal", "how_set": "PTAT plus CTAT sum through Q1/Q2 and the resistor network", "why": "This is the master reference for all regulators."},
+        {"node": "n_bp", "target": "stable PMOS mirror bias node", "how_set": "Startup path pushes the mirror away from the zero-current state", "why": "Without this node settling, the bandgap can latch into the off state."},
+        {"node": "n_e1 / n_e2", "target": "current density ratio of 1:8", "how_set": "Emitter resistors and BJT area ratio enforce delta-VBE", "why": "Defines the PTAT term."}
+      ],
+      "analysis_steps": [
+        {
+          "type": "dc",
+          "name": "Reference bias check",
+          "purpose": "Confirm startup leaves the zero-current state and the reference settles around 1.2V.",
+          "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block bandgap --analysis dc",
+          "pass_criteria": "VREF stays inside 1.14V to 1.26V and the mirror bias is non-zero.",
+          "debug_focus": "Startup strength, mirror bias resistance, resistor ratio R3/R2."
+        },
+        {
+          "type": "ac",
+          "name": "Reference stiffness",
+          "purpose": "Inspect how much the output node moves with small-signal perturbation at the supply.",
+          "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block bandgap --analysis ac --fstart 10 --fstop 1e7 --points 60",
+          "pass_criteria": "Output pole and buffer loading stay well controlled over the reference bandwidth.",
+          "debug_focus": "Output buffer size, output filter capacitor, mirror resistance."
+        },
+        {
+          "type": "psrr",
+          "name": "Bandgap PSRR",
+          "purpose": "Inject AC on VDD to see how much supply ripple leaks into VREF.",
+          "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block bandgap --analysis psrr --fstart 10 --fstop 1e7 --points 60",
+          "pass_criteria": "Low-frequency rejection meets or exceeds 60 dB where the regulators rely on reference quietness.",
+          "debug_focus": "Mirror ro, buffer feedthrough, output filtering."
+        }
+      ],
+      "corner_focus": [
+        {"condition": "SS hot", "risk": "Low delta-VBE current and loss of startup margin", "primary_knob": "Startup strength and branch current"},
+        {"condition": "FF cold", "risk": "Too much current and excess output drift", "primary_knob": "R1 and mirror sizing"}
+      ],
+      "tuning_knobs": [
+        {"title": "R3 / R2 ratio", "description": "Moves the absolute VREF target and the PTAT-to-CTAT cancellation balance."},
+        {"title": "Startup transistor strength", "description": "Improves cold-start certainty but should not corrupt settled bias."},
+        {"title": "Mirror device length", "description": "Raises output resistance and improves PSRR at the cost of headroom."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/blocks/bandgap/bandgap.spice", "role": "Transistor-level bandgap subcircuit"},
+        {"path": "designs/lin_asic/blocks/bandgap/spec.yaml", "role": "Per-block spec placeholder"},
+        {"path": "designs/lin_asic/blocks/bandgap/simulate.py", "role": "Standalone block runner"}
+      ]
+    },
+    {
+      "block_key": "ldo_analog",
+      "name": "LDO Analog 3.3V",
+      "domain": "analog",
+      "role": "Generates the 3.3V analog rail from VBAT and feeds the bandgap, analog biasing, and the parent rail for the digital regulator.",
+      "architecture": "Folded-cascode OTA compares VREF against the feedback node, drives a large PMOS pass device, and stabilizes the closed loop with Miller compensation plus an output capacitor and ESR zero.",
+      "implementation_steps": [
+        {"title": "Set divider ratio from the 1.2V reference", "description": "The feedback divider is chosen first so the OTA always regulates to the right closed-loop output."},
+        {"title": "Size the pass PMOS from load and dropout", "description": "Pass width is chosen to hold the worst-case current while keeping Vov small enough to meet dropout."},
+        {"title": "Shape the loop with compensation", "description": "C_COMP, R_COMP, C_COMP2, and the output capacitor set the dominant pole, pole splitting, and ESR zero placement."}
+      ],
+      "primary_specs": [
+        {"name": "Output", "target": "3.3V", "reason": "Feeds bandgap, analog I/O, and the digital LDO input."},
+        {"name": "Max load", "target": "50 mA", "reason": "Covers analog bias plus downstream rail demand."},
+        {"name": "Dropout", "target": "< 300 mV", "reason": "Maintains regulation near VBAT minimum."},
+        {"name": "PSRR", "target": "> 50 dB at 1 kHz", "reason": "Prevents battery ripple from polluting the analog rail."}
+      ],
+      "sizing_formulas": [
+        {"title": "Closed-loop output target", "formula": "VOUT = VREF * (1 + R1 / R2)", "explanation": "With VREF = 1.2V and VOUT = 3.3V, R1/R2 ~= 1.75.", "variables": ["VOUT", "VREF", "R1", "R2"]},
+        {"title": "Pass-device minimum width", "formula": "W/L >= 2 * ILOAD / (Kp * VOV^2)", "explanation": "Choose the PMOS width so the pass device can source worst-case load at the allowed overdrive and dropout.", "variables": ["ILOAD", "Kp", "VOV", "W/L"]},
+        {"title": "Pass-device transconductance", "formula": "gm_pass ~= sqrt(2 * Kp * (W/L) * ILOAD)", "explanation": "This sets the loop gain and the output pole interaction.", "variables": ["Kp", "W/L", "ILOAD"]},
+        {"title": "Loop gain estimate", "formula": "Aloop ~= gm_ota * ro_ota * gm_pass * (ro_pass || RLOAD)", "explanation": "Use this to see whether low-frequency regulation and PSRR are plausible before running full AC.", "variables": ["gm_ota", "ro_ota", "gm_pass", "ro_pass", "RLOAD"]},
+        {"title": "Dominant output pole", "formula": "p_out ~= 1 / (2 * pi * Rout * Cout)", "explanation": "This pole must be positioned with compensation so phase margin remains healthy across load.", "variables": ["Rout", "Cout"]},
+        {"title": "PSRR extraction", "formula": "PSRR(dB) = -20 * log10(|VOUT_ac / VIN_ac|)", "explanation": "The framework uses a 1V AC ripple on the supply source, so the output ripple directly maps into PSRR.", "variables": ["VOUT_ac", "VIN_ac"]}
+      ],
+      "dc_operating_points": [
+        {"node": "VOUT", "target": "3.30V", "how_set": "Feedback divider forces n_fb to match the 1.2V reference", "why": "Main supply target for all analog circuitry."},
+        {"node": "n_fb", "target": "1.20V", "how_set": "R_FB1 and R_FB2 divide VOUT down to the reference", "why": "The OTA regulates around this equality point."},
+        {"node": "n_bias", "target": "stable OTA tail-bias node", "how_set": "R_BIAS and M_BIAS create the operating current for the OTA", "why": "If this node moves, gm and phase margin move with it."},
+        {"node": "M_PASS gate (n_d2)", "target": "low enough below VIN to source max load", "how_set": "OTA output drives the PMOS gate until VOUT closes the loop", "why": "Determines dropout and load regulation."}
+      ],
+      "analysis_steps": [
+        {"type": "dc", "name": "Nominal DC regulation", "purpose": "Check the divider ratio, OTA bias, and the steady-state rail.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis dc", "pass_criteria": "VOUT inside 3.1V to 3.5V and feedback node near 1.2V.", "debug_focus": "Divider ratio, pass width, bias resistor."},
+        {"type": "ac", "name": "Small-signal stability shape", "purpose": "Inspect how the loop rolls off before transient load tests are trusted.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis ac --fstart 10 --fstop 1e7 --points 60", "pass_criteria": "No aggressive peaking near the unity-gain region and a controllable pole/zero sequence.", "debug_focus": "C_COMP, R_COMP, output capacitor ESR, OTA gm."},
+        {"type": "psrr", "name": "Supply ripple rejection", "purpose": "Inject battery ripple and measure how much reaches the 3.3V rail.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis psrr --fstart 10 --fstop 1e7 --points 60", "pass_criteria": "At least 50 dB rejection at 1 kHz and understandable degradation above loop bandwidth.", "debug_focus": "OTA gain, pass-device feedthrough, local decoupling."},
+        {"type": "corner", "name": "PVT rail closure", "purpose": "Run TT, FF, SS, FS, and SF across cold, room, and hot for the same checks.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_analog --analysis dc --corner FF --temperature 125", "pass_criteria": "Output remains inside the rail window and the bias nodes remain valid under the worst headroom case.", "debug_focus": "Pass width first, OTA bias second, compensation third."}
+      ],
+      "corner_focus": [
+        {"condition": "SS hot with low VIN headroom", "risk": "Pass device loses gm and dropout rises", "primary_knob": "Increase M_PASS width or reduce VOV target"},
+        {"condition": "FF cold", "risk": "Loop bandwidth can run too fast and phase margin shrinks", "primary_knob": "Increase compensation or reduce excess OTA gm"}
+      ],
+      "tuning_knobs": [
+        {"title": "M_PASS width", "description": "Primary knob for dropout, DC regulation under load, and pass-device gm."},
+        {"title": "R_FB1 / R_FB2", "description": "Moves the absolute output target; use only after the reference is trusted."},
+        {"title": "C_COMP / R_COMP", "description": "Primary knobs for phase-margin cleanup once DC is already correct."},
+        {"title": "R_BIAS and OTA sizing", "description": "Moves OTA gm and therefore low-frequency loop gain and PSRR."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/blocks/ldo_analog/ldo_analog.spice", "role": "Analog 3.3V regulator subcircuit"},
+        {"path": "designs/lin_asic/blocks/ldo_analog/testbench.spice", "role": "Standalone testbench shell"},
+        {"path": "designs/lin_asic/blocks/ldo_analog/simulate.py", "role": "Block-local simulation script"}
+      ]
+    },
+    {
+      "block_key": "ldo_digital",
+      "name": "LDO Digital 1.8V",
+      "domain": "analog",
+      "role": "Generates the 1.8V core rail from the 3.3V analog rail and is tuned for digital load movement.",
+      "architecture": "Two-stage error amplifier with a PMOS pass device, large output decoupling, a 1.8V divider, and simpler compensation than the 3.3V analog LDO.",
+      "implementation_steps": [
+        {"title": "Derive the divider from the same 1.2V reference", "description": "For 1.8V output, the divider uses a 0.5 ratio so the feedback node still lands at 1.2V."},
+        {"title": "Bias for digital load steps", "description": "Output capacitance is made intentionally large to absorb fast core transients while the loop catches up."},
+        {"title": "Keep the loop simple", "description": "This regulator favors robust transient behavior and easy closure over elaborate high-gain analog shaping."}
+      ],
+      "primary_specs": [
+        {"name": "Output", "target": "1.8V", "reason": "Digital core rail for RTL blocks."},
+        {"name": "Max load", "target": "30 mA", "reason": "Matches controller, register, and interface demand."},
+        {"name": "Dropout", "target": "< 200 mV", "reason": "Keeps the 1.8V domain alive as the 3.3V rail moves."},
+        {"name": "Transient robustness", "target": "output cap emphasized", "reason": "Digital load steps are sharper than analog bias movement."}
+      ],
+      "sizing_formulas": [
+        {"title": "Divider target", "formula": "VOUT = 1.2V * (1 + R1 / R2) -> choose R1 = 50k, R2 = 100k", "explanation": "The divider is intentionally simple so the digital core target is easy to audit.", "variables": ["VOUT", "R1", "R2"]},
+        {"title": "Pass width sizing", "formula": "W/L >= 2 * ILOAD / (Kp * VOV^2)", "explanation": "Same pass-device rule as the analog LDO, but tuned for lower output voltage and lower max load.", "variables": ["ILOAD", "Kp", "VOV"]},
+        {"title": "Output pole", "formula": "p_out ~= 1 / (2 * pi * RLOAD * COUT)", "explanation": "Large output capacitance pushes the output pole low enough to tame digital load shocks.", "variables": ["RLOAD", "COUT"]},
+        {"title": "PSRR extraction", "formula": "PSRR(dB) = -20 * log10(|VOUT_ac / VIN_ac|)", "explanation": "Use the same injection method as the analog LDO and compare the 1.8V output ripple directly.", "variables": ["VOUT_ac", "VIN_ac"]}
+      ],
+      "dc_operating_points": [
+        {"node": "VOUT", "target": "1.80V", "how_set": "Divider and OTA close the loop around 1.2V feedback", "why": "Defines digital timing and logic swing margins."},
+        {"node": "n_fb", "target": "1.20V", "how_set": "50k / 100k divider ratio from VOUT to ground", "why": "Direct loop comparison node."},
+        {"node": "n_bias", "target": "OTA bias established from VIN through R_BIAS", "how_set": "Bias transistor and resistor create a stable tail current", "why": "Sets gain and dynamic response."}
+      ],
+      "analysis_steps": [
+        {"type": "dc", "name": "Digital rail target", "purpose": "Confirm the rail lands near 1.8V and the divider biases properly.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_digital --analysis dc", "pass_criteria": "VOUT inside 1.7V to 1.9V.", "debug_focus": "Divider ratio, pass width, bias strength."},
+        {"type": "ac", "name": "Digital-rail loop shape", "purpose": "Make sure the larger output capacitor does not hide an unstable loop.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_digital --analysis ac --fstart 10 --fstop 1e7 --points 60", "pass_criteria": "Controlled response without large peaking near the crossover region.", "debug_focus": "C_COMP, C_OUT, OTA gm."},
+        {"type": "psrr", "name": "Core-rail PSRR", "purpose": "Measure how much 3.3V rail ripple reaches the 1.8V core.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_digital --analysis psrr --fstart 10 --fstop 1e7 --points 60", "pass_criteria": "Enough rejection that digital noise and parent-rail noise do not collapse timing margin.", "debug_focus": "OTA gain and output decoupling."}
+      ],
+      "corner_focus": [
+        {"condition": "FF cold", "risk": "Very fast loop with reduced phase margin under light load", "primary_knob": "Compensation capacitance"},
+        {"condition": "SS hot", "risk": "Loss of load regulation under peak current", "primary_knob": "Pass-device width"}
+      ],
+      "tuning_knobs": [
+        {"title": "C_OUT", "description": "First knob for digital load-step containment."},
+        {"title": "C_COMP", "description": "Primary phase-margin knob when the output pole shifts with load."},
+        {"title": "M_PASS width", "description": "Restores dropout and DC accuracy at slow hot corners."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/blocks/ldo_digital/ldo_digital.spice", "role": "Digital 1.8V regulator subcircuit"},
+        {"path": "designs/lin_asic/blocks/ldo_digital/testbench.spice", "role": "Standalone testbench shell"},
+        {"path": "designs/lin_asic/blocks/ldo_digital/simulate.py", "role": "Block-local simulation script"}
+      ]
+    },
+    {
+      "block_key": "ldo_lin",
+      "name": "LDO LIN 5.0V",
+      "domain": "analog",
+      "role": "Generates the 5V LIN transceiver rail from VBAT and must tolerate the widest supply span and the strongest bus-driver disturbances.",
+      "architecture": "High-voltage PMOS pass device with a VBAT-capable input stage, divider set for 5V, explicit output capacitor, and compensation chosen for a bus-driver load rather than a quiet bias rail.",
+      "implementation_steps": [
+        {"title": "Use an HV pass path", "description": "The pass transistor and its input-facing devices must tolerate 8V to 18V without losing margin."},
+        {"title": "Set the 5V divider", "description": "With 1.2V reference, the divider ratio is roughly 3.167 to reach the LIN rail target."},
+        {"title": "Close against the noisiest consumer", "description": "The regulator is sized and compensated for the LIN transceiver, which is more impulsive than the bandgap or digital core."}
+      ],
+      "primary_specs": [
+        {"name": "Output", "target": "5.0V", "reason": "Primary supply for the LIN physical layer."},
+        {"name": "VIN range", "target": "8V to 18V", "reason": "Battery / automotive supply spread."},
+        {"name": "Dropout", "target": "< 500 mV", "reason": "Maintains line-driver margin near low battery."},
+        {"name": "Max load", "target": "100 mA design intent", "reason": "Covers dominant-state driver surges and interface biasing."}
+      ],
+      "sizing_formulas": [
+        {"title": "5V divider ratio", "formula": "R1 / R2 = 5.0 / 1.2 - 1 ~= 3.167", "explanation": "This ratio is implemented by 316.7k over 100k in the current netlist.", "variables": ["R1", "R2"]},
+        {"title": "HV pass-device sizing", "formula": "W/L >= 2 * ILOAD / (Kp_hv * VOV^2)", "explanation": "The high-voltage PMOS has lower effective transconductance than the core device, so width must grow accordingly.", "variables": ["ILOAD", "Kp_hv", "VOV"]},
+        {"title": "PSRR extraction", "formula": "PSRR(dB) = -20 * log10(|VOUT_ac / VIN_ac|)", "explanation": "Supply ripple on VBAT should not become logic threshold movement in the LIN receiver through the 5V rail.", "variables": ["VOUT_ac", "VIN_ac"]}
+      ],
+      "dc_operating_points": [
+        {"node": "VOUT", "target": "5.00V", "how_set": "OTA and HV pass device regulate until the divider feedback equals VREF", "why": "Defines the analog PHY operating headroom."},
+        {"node": "n_fb", "target": "1.20V", "how_set": "316.7k / 100k divider from the 5V rail", "why": "Direct loop comparison node."},
+        {"node": "n_bias", "target": "stable even at VBAT max", "how_set": "High-value bias resistor from VIN establishes the OTA current without excess power burn", "why": "Prevents hot-battery overbias."}
+      ],
+      "analysis_steps": [
+        {"type": "dc", "name": "5V rail regulation", "purpose": "Check the rail at nominal and worst-case battery headroom.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_lin --analysis dc", "pass_criteria": "VOUT inside 4.75V to 5.25V.", "debug_focus": "HV pass-device width and divider ratio."},
+        {"type": "ac", "name": "5V loop shape", "purpose": "Inspect the pole movement caused by the bus-facing load and the 2.2u output capacitor.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_lin --analysis ac --fstart 10 --fstop 1e7 --points 60", "pass_criteria": "Controlled roll-off without unstable peaking.", "debug_focus": "C_COMP, R_COMP, output-cap sizing."},
+        {"type": "psrr", "name": "VBAT ripple rejection", "purpose": "Measure how much battery ripple leaks into the 5V transceiver rail.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block ldo_lin --analysis psrr --fstart 10 --fstop 1e7 --points 60", "pass_criteria": "Rejection is high enough that receiver thresholds and bus-drive behavior remain stable.", "debug_focus": "Low-frequency loop gain and direct pass-device feedthrough."}
+      ],
+      "corner_focus": [
+        {"condition": "SS hot at VBAT min", "risk": "Largest dropout and weakest pass path", "primary_knob": "HV pass-device width"},
+        {"condition": "FF cold at VBAT max", "risk": "Loop can become too aggressive and overshoot the 5V target", "primary_knob": "Compensation network"}
+      ],
+      "tuning_knobs": [
+        {"title": "HV M_PASS width", "description": "Primary control of low-battery regulation and dominant-state current reserve."},
+        {"title": "R_COMP plus compensation caps", "description": "Phase-margin correction when the transceiver load changes the pole map."},
+        {"title": "Bias resistor", "description": "Balances OTA current against VBAT power loss."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/blocks/ldo_lin/ldo_lin.spice", "role": "5V LIN regulator subcircuit"},
+        {"path": "designs/lin_asic/blocks/ldo_lin/testbench.spice", "role": "Standalone testbench shell"},
+        {"path": "designs/lin_asic/blocks/ldo_lin/simulate.py", "role": "Block-local simulation script"}
+      ]
+    },
+    {
+      "block_key": "lin_transceiver",
+      "name": "LIN Transceiver",
+      "domain": "mixed",
+      "role": "Implements the single-wire physical layer: dominant pull-down, recessive pull-up, slew control, hysteretic receive path, sleep gating, and wake detection.",
+      "architecture": "Open-drain dominant driver with RC-shaped predriver, VBAT pull-up plus diode, resistor-generated receiver thresholds around 0.4 and 0.6 of VBAT, and positive feedback for hysteresis.",
+      "implementation_steps": [
+        {"title": "Set bus thresholds from VBAT", "description": "The resistor ladder creates nominal thresholds near 0.4 * VBAT and 0.6 * VBAT for dominant and recessive decisions."},
+        {"title": "Limit dV/dt for EMC", "description": "The predriver RC and gate-shaping devices slow the large bus transistor enough to land inside LIN slew expectations."},
+        {"title": "Gate the analog path in sleep", "description": "Sleep-mode devices shut off TX and RX bias paths to save current while the wake detector keeps monitoring the bus."}
+      ],
+      "primary_specs": [
+        {"name": "Dominant bus level", "target": "< 2V", "reason": "Meets LIN physical-layer low-state requirement."},
+        {"name": "Recessive bus level", "target": "> 10V at VBAT nominal", "reason": "Meets LIN physical-layer high-state requirement."},
+        {"name": "Slew rate", "target": "1 to 4 V/us", "reason": "EMC and bus-shape compliance."},
+        {"name": "Sleep current", "target": "< 10 uA intent", "reason": "Automotive standby power."}
+      ],
+      "sizing_formulas": [
+        {"title": "Receiver thresholds", "formula": "VTH_LOW ~= 0.4 * VBAT, VTH_HIGH ~= 0.6 * VBAT", "explanation": "The divider and hysteresis network are chosen around the LIN receive windows.", "variables": ["VBAT", "VTH_LOW", "VTH_HIGH"]},
+        {"title": "Driver strength", "formula": "I_PULLDOWN ~= 0.5 * K_n * (W/L) * VOV^2", "explanation": "Use the dominant-state current target to size the high-voltage NMOS bus device.", "variables": ["K_n", "W/L", "VOV"]},
+        {"title": "Slew approximation", "formula": "dV/dt ~= I_gate / C_bus", "explanation": "The RC predriver deliberately limits gate current so the bus edge stays controlled.", "variables": ["I_gate", "C_bus"]}
+      ],
+      "dc_operating_points": [
+        {"node": "LIN_BUS recessive", "target": "near VBAT through pull-up network", "how_set": "R_PU and diode pull the bus high when the driver is off", "why": "Defines logic 1 on the bus."},
+        {"node": "LIN_BUS dominant", "target": "near ground under M_DRV", "how_set": "High-voltage NMOS pulls the bus low in dominant state", "why": "Defines logic 0 on the bus."},
+        {"node": "n_th_h / n_th_l", "target": "0.6*VBAT and 0.4*VBAT", "how_set": "Threshold resistor ladder from VBAT to ground", "why": "Sets receiver decisions and hysteresis center."},
+        {"node": "n_rx_bias", "target": "receiver bias active only when not in sleep", "how_set": "Bias resistor and sleep gating transistors", "why": "Cuts standby current while preserving wake detection."}
+      ],
+      "analysis_steps": [
+        {"type": "dc", "name": "Static bus states", "purpose": "Check dominant and recessive levels against LIN expectations.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block lin_transceiver --analysis dc", "pass_criteria": "Bus high above 10V nominal and bus low below 2V nominal.", "debug_focus": "M_DRV size, pull-up network, diode drop."},
+        {"type": "tran", "name": "Slew and wake behavior", "purpose": "Observe bus transition shape and sleep-to-wake behavior in time domain.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block lin_transceiver --analysis tran --tstop 50e-6 --tstep 20e-9", "pass_criteria": "Edges stay controlled and sleep gating behaves predictably.", "debug_focus": "R_SR1, C_SR, wake detector path."},
+        {"type": "corner", "name": "Threshold robustness", "purpose": "Check the threshold ladder and hysteresis path across VBAT, process, and temperature movement.", "command": "python designs/framework/scripts/simulate_block.py --design lin_asic --block lin_transceiver --analysis dc --corner SS --temperature 125", "pass_criteria": "Threshold spacing and bus voltage windows still map to dominant/recessive decisions.", "debug_focus": "Threshold resistors, hysteresis transistor, receiver bias."}
+      ],
+      "corner_focus": [
+        {"condition": "VBAT min with SS hot", "risk": "Dominant pull-down loses margin", "primary_knob": "M_DRV width"},
+        {"condition": "VBAT max with FF cold", "risk": "Edge rate becomes too sharp and thresholds shift", "primary_knob": "Slew-control RC and threshold ladder"}
+      ],
+      "tuning_knobs": [
+        {"title": "M_DRV width", "description": "Primary dominant-level and current-drive knob."},
+        {"title": "R_SR1 / C_SR", "description": "Primary EMC and edge-rate knob."},
+        {"title": "Threshold ladder", "description": "Moves receiver high and low decision levels."},
+        {"title": "M_HYS", "description": "Controls hysteresis window width and noise immunity."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/blocks/lin_transceiver/lin_transceiver.spice", "role": "LIN physical-layer analog subcircuit"},
+        {"path": "designs/lin_asic/lin_asic_top.spice", "role": "Top-level integration anchor for the transceiver"}
+      ]
+    },
+    {
+      "block_key": "spi_controller",
+      "name": "SPI Slave Controller",
+      "domain": "digital",
+      "role": "Provides the software-visible write and read entry point into the chip configuration and status registers.",
+      "architecture": "Mode-0 SPI slave with synchronized SCLK and CS_N edges, a 16-bit frame, separate shift-in and shift-out paths, and decoded register read/write strobes.",
+      "implementation_steps": [
+        {"title": "Synchronize external edges", "description": "SCLK and CS_N are synchronized into the core clock domain before decode so the rest of the logic sees clean events."},
+        {"title": "Decode the 16-bit frame", "description": "The first byte carries R/W plus address, and the second byte carries write data or readback payload timing."},
+        {"title": "Isolate read and write strobes", "description": "reg_rd and reg_wr pulse only at the intended frame boundaries so the register file stays deterministic."}
+      ],
+      "primary_specs": [
+        {"name": "Protocol", "target": "SPI mode 0", "reason": "Host interface assumption."},
+        {"name": "Frame", "target": "16 bits", "reason": "1 R/W bit plus 7-bit address plus 8-bit payload."},
+        {"name": "Outputs", "target": "reg_addr, reg_wdata, reg_wr, reg_rd", "reason": "These signals drive the full digital control plane."}
+      ],
+      "sizing_formulas": [
+        {"title": "Transaction length", "formula": "Tframe = 16 / fSCLK", "explanation": "Use this to size firmware access bandwidth and verify decode timing budget.", "variables": ["Tframe", "fSCLK"]},
+        {"title": "Sampling margin", "formula": "fSCLK should stay well below the core clock edge-detect rate used by the synchronizers", "explanation": "The synchronizer depth and core clock determine the safe SPI envelope.", "variables": ["fSCLK", "fCLK"]}
+      ],
+      "dc_operating_points": [
+        {"node": "CS_N idle", "target": "1", "how_set": "External host keeps chip-select high between transactions", "why": "Frame counter and strobes remain idle."},
+        {"node": "bit_cnt", "target": "0 outside an active frame", "how_set": "CS_N falling edge resets the counter and CS_N rising edge terminates the transfer", "why": "Avoids partial-frame decode."},
+        {"node": "reg_wr / reg_rd", "target": "single-cycle pulses", "how_set": "Decode only at the 8-bit and 16-bit boundaries", "why": "Protects the register file from repeated writes."}
+      ],
+      "analysis_steps": [
+        {"type": "functional", "name": "Frame decode", "purpose": "Check that address and data land on the expected outputs.", "command": "python scripts/run_lin_asic_regression.py", "pass_criteria": "DIG-SPI-DECODE passes and the decoded address/control handoff matches the frame.", "debug_focus": "Edge synchronizers, bit counter, RW decode."}
+      ],
+      "corner_focus": [
+        {"condition": "Fast external SCLK relative to core clock", "risk": "Edge detector misses or double-counts transitions", "primary_knob": "Synchronizer strategy and allowed SCLK ratio"}
+      ],
+      "tuning_knobs": [
+        {"title": "Synchronizer depth", "description": "Improves CDC robustness if the host clock approaches the local clock domain too closely."},
+        {"title": "Frame decode boundaries", "description": "Useful when debugging off-by-one address or payload handoff errors."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/rtl/spi_slave.v", "role": "SPI slave RTL"}
+      ]
+    },
+    {
+      "block_key": "register_file",
+      "name": "Register File",
+      "domain": "digital",
+      "role": "Stores configuration and status fields for enables, sleep mode, baud divider, payload staging, and IRQ masking.",
+      "architecture": "Addressed register bank with reset defaults, write decode, combinational read mux, and decoded control outputs that directly feed the analog and protocol control paths.",
+      "implementation_steps": [
+        {"title": "Define reset defaults", "description": "The reset image intentionally enables the base power mask so the design boots into a known state."},
+        {"title": "Keep control decode transparent", "description": "Control bits fan out directly into bgr_en and the LDO enables so the relationship between software and hardware is easy to debug."},
+        {"title": "Separate status from control", "description": "Status fields are updated from runtime observations while control fields remain software-owned."}
+      ],
+      "primary_specs": [
+        {"name": "CTRL reset value", "target": "0x0F", "reason": "Boots with base power enables asserted."},
+        {"name": "LIN_CTRL reset value", "target": "0x80", "reason": "Default LIN enable state captured in RTL."},
+        {"name": "Baud divider", "target": "16-bit register pair", "reason": "Feeds the LIN controller bit timing."}
+      ],
+      "sizing_formulas": [
+        {"title": "Baud divider combine", "formula": "baud_div = {baud_div_h_reg, baud_div_l_reg}", "explanation": "This is the exact register-to-timing mapping used by the RTL.", "variables": ["baud_div_h_reg", "baud_div_l_reg"]},
+        {"title": "Power mask decode", "formula": "CTRL[3:0] -> BGR_EN, LDO_LIN_EN, LDO_DIG_EN, LDO_ANA_EN", "explanation": "The default mask and software writes directly define the analog bring-up behavior.", "variables": ["CTRL"]}
+      ],
+      "dc_operating_points": [
+        {"node": "ctrl_reg after reset", "target": "0x0F", "how_set": "Reset branch of the sequential block", "why": "Defines the power-on default enable mask."},
+        {"node": "sleep_mode", "target": "0 until software requests sleep", "how_set": "CTRL bit 4 decode", "why": "Controls the sequencer and LIN enable path."},
+        {"node": "baud_div", "target": "register-programmed", "how_set": "Concatenate high and low divider bytes", "why": "Feeds the protocol timing engine."}
+      ],
+      "analysis_steps": [
+        {"type": "functional", "name": "Reset and write path", "purpose": "Check defaults, write behavior, and fanout into the enable outputs.", "command": "python scripts/run_lin_asic_regression.py", "pass_criteria": "DIG-REGFILE-CONTROL passes with the expected default mask and baud divider writeback.", "debug_focus": "Address decode, sequential write block, combinational output mapping."}
+      ],
+      "corner_focus": [
+        {"condition": "Reset release timing stress", "risk": "Software-visible defaults do not match hardware expectation", "primary_knob": "Reset timing and register initialization order"}
+      ],
+      "tuning_knobs": [
+        {"title": "Reset values", "description": "First place to fix any mismatch between intended startup order and observed control outputs."},
+        {"title": "Register map addresses", "description": "Use when software and hardware disagree on which field is being touched."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/rtl/register_file.sv", "role": "Register-file RTL"}
+      ]
+    },
+    {
+      "block_key": "lin_controller",
+      "name": "LIN Protocol Controller",
+      "domain": "digital",
+      "role": "Implements LIN protocol framing, break handling, sync byte handling, PID parity, checksum calculation, UART shifting, and IRQ generation.",
+      "architecture": "State machine wrapped around UART TX/RX primitives with break detection, PID generation, enhanced checksum logic, and master or slave behavior selected by control registers.",
+      "implementation_steps": [
+        {"title": "Generate a baud tick from baud_div", "description": "The controller converts the programmed divider into the timing base for TX, RX, and break detection."},
+        {"title": "Map protocol phases to explicit states", "description": "Break, sync, PID, data, checksum, sleep, wake, and error states are all separated so protocol reachability can be checked directly."},
+        {"title": "Keep parity and checksum local", "description": "The PID and checksum logic stay inside the controller so framing bugs are isolated from the register path."}
+      ],
+      "primary_specs": [
+        {"name": "Break detection", "target": "13 or more dominant bits", "reason": "Core LIN framing requirement."},
+        {"name": "Sync byte", "target": "0x55", "reason": "Core LIN framing requirement."},
+        {"name": "PID parity", "target": "LIN 2.2A equations", "reason": "Protocol integrity."},
+        {"name": "Checksum", "target": "enhanced mode support", "reason": "Protocol compatibility."}
+      ],
+      "sizing_formulas": [
+        {"title": "Baud tick", "formula": "baud_tick when baud_cnt >= baud_div", "explanation": "This is the exact timing primitive used by the controller.", "variables": ["baud_cnt", "baud_div"]},
+        {"title": "PID parity bits", "formula": "P0 = ID0 xor ID1 xor ID2 xor ID4; P1 = ~(ID1 xor ID3 xor ID4 xor ID5)", "explanation": "These parity equations are implemented directly in the RTL function.", "variables": ["ID0", "ID1", "ID2", "ID3", "ID4", "ID5"]},
+        {"title": "Enhanced checksum", "formula": "checksum = bitwise_not(sum(PID + data bytes with carry wrap-around))", "explanation": "Carry wrap-around preserves LIN checksum semantics.", "variables": ["PID", "data bytes"]}
+      ],
+      "dc_operating_points": [
+        {"node": "state after reset", "target": "idle path / reset-defined startup state", "how_set": "Sequential reset block initializes state and key outputs", "why": "Makes the protocol path deterministic at startup."},
+        {"node": "txd idle", "target": "recessive high", "how_set": "UART transmitter defaults txd to 1 when not busy", "why": "Matches LIN bus idle behavior."},
+        {"node": "irq", "target": "0 until enabled flags assert", "how_set": "IRQ is OR reduction of flags and enables", "why": "Prevents false interrupts."}
+      ],
+      "analysis_steps": [
+        {"type": "functional", "name": "State-machine readiness", "purpose": "Check reset, master/slave readiness, and key control-path behavior.", "command": "python scripts/run_lin_asic_regression.py", "pass_criteria": "DIG-LIN-CTRL passes and the controller reaches the expected states under regression stimulus.", "debug_focus": "baud_tick generation, break counter, PID function, checksum task."}
+      ],
+      "corner_focus": [
+        {"condition": "Clock-divider extremes", "risk": "Protocol timing slips if the divider or reset defaults are wrong", "primary_knob": "baud_div handling and state transitions"}
+      ],
+      "tuning_knobs": [
+        {"title": "baud_div programming", "description": "First timing knob when sync or frame length looks wrong."},
+        {"title": "State transition conditions", "description": "Use when master/slave handoff or break handling does not match the protocol plan."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/rtl/lin_controller.v", "role": "LIN protocol-controller RTL"}
+      ]
+    },
+    {
+      "block_key": "control_logic",
+      "name": "Control Logic",
+      "domain": "digital",
+      "role": "Sequences bandgap, LDOs, POR release, LIN enable, and clock gating so the control plane respects the analog bring-up order.",
+      "architecture": "Counter-based sequencer that asserts enables in a staged order, releases POR late, and disables LIN output activity in sleep mode.",
+      "implementation_steps": [
+        {"title": "Hold everything low on reset", "description": "The reset branch clears every enable and POR output so the chip boots from a known zero state."},
+        {"title": "Use count thresholds instead of combinational guesses", "description": "The sequencer waits for defined count values before turning on each rail or releasing POR."},
+        {"title": "Gate LIN in sleep", "description": "The sleep-mode path explicitly turns off LIN enable even if a previous request was active."}
+      ],
+      "primary_specs": [
+        {"name": "Order", "target": "BGR -> ANA -> DIG -> LIN", "reason": "Analog dependencies and bus-noise containment."},
+        {"name": "POR release", "target": "after sequence count >= 8", "reason": "Digital logic should only run after rails are valid."},
+        {"name": "Sleep behavior", "target": "LIN disabled in sleep", "reason": "Low-power and safe bus behavior."}
+      ],
+      "sizing_formulas": [
+        {"title": "Enable time", "formula": "t_enable = threshold_count / fclk", "explanation": "The count threshold turns directly into a programmable or architecture-level delay budget.", "variables": ["threshold_count", "fclk"]},
+        {"title": "POR release point", "formula": "por_n asserted when por_count >= 8", "explanation": "This is the current RTL condition for releasing the rest of the chip.", "variables": ["por_count"]}
+      ],
+      "dc_operating_points": [
+        {"node": "bgr_en / ldo_* after reset", "target": "0", "how_set": "Reset branch drives every enable low", "why": "Guarantees deterministic bring-up order."},
+        {"node": "por_n", "target": "0 until sequence completes", "how_set": "Counter threshold logic", "why": "Prevents digital logic from running too early."},
+        {"node": "clk_out", "target": "follows clk_in unless sleep_mode is asserted", "how_set": "Combinational assignment inside the sequential block", "why": "Avoids toggling logic in sleep mode."}
+      ],
+      "analysis_steps": [
+        {"type": "functional", "name": "Enable sequencing", "purpose": "Verify the staged order, POR release timing, and LIN disable in sleep.", "command": "python scripts/run_lin_asic_regression.py", "pass_criteria": "DIG-CTRL-SEQUENCE passes and all enables appear in the expected order.", "debug_focus": "por_count thresholds and sleep handling."}
+      ],
+      "corner_focus": [
+        {"condition": "Reset timing stress", "risk": "Enable order breaks if reset or requests arrive unexpectedly", "primary_knob": "count thresholds and reset qualification"}
+      ],
+      "tuning_knobs": [
+        {"title": "Threshold counts", "description": "Primary bring-up timing knob."},
+        {"title": "Sleep override", "description": "First place to inspect if the bus stays active in low-power mode."}
+      ],
+      "files": [
+        {"path": "designs/lin_asic/rtl/control_logic.sv", "role": "Power-sequencing RTL"}
+      ]
+    }
+  ]
+}

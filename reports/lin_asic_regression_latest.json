@@ -1,0 +1,234 @@
+{
+  "chip": "LIN_ASIC",
+  "generated_at": "2026-04-30T00:49:21.695580",
+  "standard": "ISO 17987 / LIN 2.2A",
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "overall": "PASS"
+  },
+  "coverage": {
+    "functional_percent": 100.0,
+    "standards_percent": 50.0
+  },
+  "tests": [
+    {
+      "case_id": "ANA-BGR-STARTUP",
+      "block": "bandgap",
+      "status": "PASS",
+      "details": "VREF startup and settling when VDD powers on from 0\u2009V. Verifies nominal output (1.2\u2009V \u00b1\u20095\u00a0%) Mean=1.200V.",
+      "measurements": {
+        "output_peak": 1.199923327304928,
+        "output_valley": 0.0,
+        "output_final": 1.199923327304928,
+        "output_steady_mean": 1.1995376854081294,
+        "output_steady_std": 0.0003672564817803106,
+        "settling_time_ns": 634.6346346346346
+      },
+      "elapsed_ms": 73.9
+    },
+    {
+      "case_id": "ANA-LDO-3V3",
+      "block": "ldo_analog",
+      "status": "PASS",
+      "details": "Output regulation when 12 V supply powers on. Verifies VOUT = 3.3\u2009V \u00b1\u20095\u00a0% Mean=3.300V.",
+      "measurements": {
+        "output_peak": 3.300330027467641,
+        "output_valley": 0.0,
+        "output_final": 3.300330027467641,
+        "output_steady_mean": 3.300329635271439,
+        "output_steady_std": 5.714956128458279e-07,
+        "settling_time_ns": 465.0
+      },
+      "elapsed_ms": 37.7
+    },
+    {
+      "case_id": "ANA-LDO-1V8",
+      "block": "ldo_digital",
+      "status": "PASS",
+      "details": "Output regulation when 3.3 V supply powers on. Verifies VOUT = 1.8\u2009V \u00b1\u20095\u00a0% Mean=1.800V.",
+      "measurements": {
+        "output_peak": 1.8003273322422015,
+        "output_valley": 0.0,
+        "output_final": 1.8003273322422015,
+        "output_steady_mean": 1.8003273322038105,
+        "output_steady_std": 7.507567416272978e-11,
+        "settling_time_ns": 300.0
+      },
+      "elapsed_ms": 39.1
+    },
+    {
+      "case_id": "ANA-LDO-5V0",
+      "block": "ldo_lin",
+      "status": "PASS",
+      "details": "Output regulation for LIN bus driver power-up. Verifies VOUT = 5.0\u2009V \u00b1\u20095\u00a0% Mean=5.000V.",
+      "measurements": {
+        "output_peak": 4.999999744592293,
+        "output_valley": 0.0,
+        "output_final": 4.999999744592293,
+        "output_steady_mean": 4.999992138657321,
+        "output_steady_std": 9.841580766016615e-06,
+        "settling_time_ns": 555.0
+      },
+      "elapsed_ms": 40.6
+    },
+    {
+      "case_id": "ANA-LIN-BUS-SWING",
+      "block": "lin_transceiver",
+      "status": "PASS",
+      "details": "Bus voltage swing between dominant and recessive states. Verifies V_bus_high > 10\u2009V and V_bus_low < 2\u2009V High=11.486V Low=1.091V.",
+      "measurements": {
+        "output_peak": 11.48578913981755,
+        "output_valley": 1.090909090909091,
+        "output_final": 1.3088110787949285,
+        "output_steady_mean": 6.8855270703249385,
+        "output_steady_std": 3.941066135232677
+      },
+      "elapsed_ms": 22.3
+    },
+    {
+      "case_id": "DIG-SPI-DECODE",
+      "block": "spi_controller",
+      "status": "PASS",
+      "details": "SPI slave transaction decode from SCLK/MOSI/CS_N into register address/control handoff",
+      "measurements": {
+        "decoded_reg_addr": 6,
+        "decoded_reg_wdata": 0,
+        "reg_wr_final": 0,
+        "frame_bits": 16
+      }
+    },
+    {
+      "case_id": "DIG-REGFILE-CONTROL",
+      "block": "register_file",
+      "status": "PASS",
+      "details": "Reset defaults, CTRL register write, and baud-divisor fanout were exercised (mask=0x0F, baud_div=0x0234).",
+      "measurements": {
+        "default_power_mask": 15,
+        "lin_en_after_reset": 1,
+        "sleep_mode_after_write": 1,
+        "baud_div_after_write": 564
+      }
+    },
+    {
+      "case_id": "DIG-LIN-CTRL",
+      "block": "lin_controller",
+      "status": "PASS",
+      "details": "Behavioral RTL reset, state-machine bring-up, and LIN master break/sync control-path readiness",
+      "measurements": {
+        "state_after_reset": 1,
+        "txd_after_reset": 0,
+        "irq_after_reset": 0,
+        "master_mode": 1
+      }
+    },
+    {
+      "case_id": "DIG-CTRL-SEQUENCE",
+      "block": "control_logic",
+      "status": "PASS",
+      "details": "Power sequence advanced through BGR, analog LDO, digital LDO, LIN enable, then de-asserted LIN in sleep mode.",
+      "measurements": {
+        "bgr_en": 1,
+        "ldo_ana_en": 1,
+        "ldo_dig_en": 1,
+        "ldo_lin_en": 1,
+        "lin_en": 1,
+        "por_n": 1,
+        "clk_out": 1,
+        "lin_en_in_sleep": 0
+      }
+    },
+    {
+      "case_id": "TOP-MS-BRIDGE",
+      "block": "lin_mixed_signal_interface",
+      "status": "PASS",
+      "details": "Digital TXD logic level drives the analog LIN bus, and the analog bus is thresholded back into RXD logic",
+      "measurements": {
+        "bus_high_v": 11.48578913981755,
+        "bus_low_v": 1.090909090909091,
+        "txd_logic_high_v": 1.8,
+        "txd_logic_low_v": 0.0,
+        "rxd_logic_high_v": 1.8,
+        "rxd_logic_low_v": 0.0,
+        "logic_transitions": 6
+      }
+    }
+  ],
+  "test_cases": [
+    {
+      "case_id": "ANA-BGR-STARTUP",
+      "block": "Bandgap Reference",
+      "category": "Analog",
+      "standard": "Internal analog spec",
+      "description": "VREF startup from power-on; 1.14V to 1.26V steady-state target."
+    },
+    {
+      "case_id": "ANA-LDO-3V3",
+      "block": "LDO Analog Supply",
+      "category": "Analog",
+      "standard": "Internal power-tree spec",
+      "description": "12V to 3.3V regulation during startup and steady-state."
+    },
+    {
+      "case_id": "ANA-LDO-1V8",
+      "block": "LDO Digital Supply",
+      "category": "Analog",
+      "standard": "Internal power-tree spec",
+      "description": "3.3V to 1.8V regulation for digital core domain."
+    },
+    {
+      "case_id": "ANA-LDO-5V0",
+      "block": "LDO LIN Supply",
+      "category": "Analog",
+      "standard": "LIN PHY supply requirement",
+      "description": "12V to 5V LIN supply startup and steady-state regulation."
+    },
+    {
+      "case_id": "ANA-LIN-BUS-SWING",
+      "block": "LIN Transceiver",
+      "category": "Mixed",
+      "standard": "ISO 17987 / LIN 2.2A",
+      "description": "Dominant and recessive bus voltage swing on the single-wire LIN bus."
+    },
+    {
+      "case_id": "DIG-SPI-DECODE",
+      "block": "SPI Controller",
+      "category": "Digital",
+      "standard": "SPI slave protocol",
+      "description": "Command framing and register address/data decode from the SPI slave RTL."
+    },
+    {
+      "case_id": "DIG-REGFILE-CONTROL",
+      "block": "Register File",
+      "category": "Digital",
+      "standard": "LIN ASIC register map",
+      "description": "Reset defaults, write/read decode, and control-output fanout from the register bank."
+    },
+    {
+      "case_id": "DIG-LIN-CTRL",
+      "block": "LIN Controller",
+      "category": "Digital",
+      "standard": "ISO 17987 / LIN 2.2A",
+      "description": "Reset path, master/slave readiness, and break/sync state-machine reachability."
+    },
+    {
+      "case_id": "DIG-CTRL-SEQUENCE",
+      "block": "Control Logic",
+      "category": "Digital",
+      "standard": "Internal startup-sequencing spec",
+      "description": "POR release and staged enable sequencing for BGR/LDO/LIN blocks."
+    },
+    {
+      "case_id": "TOP-MS-BRIDGE",
+      "block": "LIN Mixed-Signal Interface",
+      "category": "Top",
+      "standard": "ISO 17987 / LIN 2.2A",
+      "description": "Digital TXD drives analog LIN bus and analog LIN bus reconstructs RXD logic."
+    }
+  ],
+  "report_path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.json",
+  "markdown_report_path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.md",
+  "log_path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.log",
+  "test_plan_path": "C:\\Users\\vinay\\My Simulator\\designs\\lin_asic\\LIN_ASIC_TESTPLAN.md"
+}

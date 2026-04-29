@@ -1,0 +1,70 @@
+{
+  "design": "sar_adc",
+  "generated_at": "2026-04-30T00:49:23.794297",
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "unresolved": 0,
+    "overall": "PASS"
+  },
+  "coverage": {
+    "functional_percent": 100.0,
+    "standards_percent": 100.0
+  },
+  "tests": [
+    {
+      "case_id": "TOP-SAR-ADC",
+      "block": "sar_adc_top",
+      "status": "PASS",
+      "category": "Top",
+      "details": "Top-level transient snapshot for the imported SAR ADC reference design.; time_points=3887; signals=33",
+      "measurements": {
+        "signal_count": 33,
+        "time_points": 3887,
+        "input_span_v": 0.07848814941164206,
+        "input_mean_v": 1.2885320682818846,
+        "output_span_v": 0.3021346708039474,
+        "output_final_v": 1.2507,
+        "tracked_signals": "I(a$poly$e_dac), I(ae_b5), I(ae_b6), I(ae_b7), V(analog_in)"
+      },
+      "checks": [
+        {
+          "test": "Analog input waveform captured",
+          "value": "V(analog_in)",
+          "pass": true,
+          "unresolved": false
+        },
+        {
+          "test": "Internal SAR conversion nodes are present",
+          "value": "V(dac_out)",
+          "pass": true,
+          "unresolved": false
+        },
+        {
+          "test": "Transient simulation produced enough samples",
+          "value": "time length=3887",
+          "pass": true,
+          "unresolved": false
+        }
+      ],
+      "source_path": "C:\\Users\\vinay\\My Simulator\\examples\\standard_circuits\\sar_adc.spice",
+      "raw_results_path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_sar_adc_top_transient_latest_raw.json"
+    }
+  ],
+  "test_cases": [
+    {
+      "case_id": "TOP-SAR-ADC",
+      "block": "Sar Adc Top",
+      "category": "Top",
+      "standard": "Internal ADC architecture spec",
+      "description": "Top-level transient snapshot for the imported SAR ADC reference design."
+    }
+  ],
+  "report_path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_regression_latest.json",
+  "markdown_report_path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_regression_latest.md",
+  "raw_results_paths": [
+    "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_sar_adc_top_transient_latest_raw.json"
+  ],
+  "raw_results_path": "C:\\Users\\vinay\\My Simulator\\reports\\sar_adc_sar_adc_top_transient_latest_raw.json"
+}

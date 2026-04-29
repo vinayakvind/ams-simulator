@@ -1,0 +1,44 @@
+chip:
+  name: SAR_ADC
+  technology: generic180
+  supply:
+    vdd_io: 3.3
+    vref: 2.5
+    vss: 0.0
+
+blocks:
+  - name: sar_adc_top
+    type: mixed
+    source: examples/standard_circuits/sar_adc.spice
+    ports: [vdd, vref, analog_in, clk]
+    verification:
+      case_id: TOP-SAR-ADC
+      category: Top
+      standard: Internal ADC architecture spec
+      description: Top-level transient snapshot for the imported SAR ADC reference design.
+      analysis: transient
+      settings:
+        tstop: 100e-6
+        tstep: 100e-9
+      checks:
+        - type: has_key
+          key: V(analog_in)
+          description: Analog input waveform captured
+        - type: has_any_key
+          keys: [V(dac_out), V(sh_out), V(comp_out)]
+          description: Internal SAR conversion nodes are present
+        - type: min_length
+          key: time
+          min: 100
+          description: Transient simulation produced enough samples
+
+connectivity:
+  - from: analog_in
+    to: [sar_adc_top]
+
+pad_ring:
+  - {name: VDD, type: power, voltage: 3.3}
+  - {name: VREF, type: analog_ref, voltage: 2.5}
+  - {name: VIN, type: analog_input}
+  - {name: CLK, type: digital_input}
+  - {name: GND, type: ground}
