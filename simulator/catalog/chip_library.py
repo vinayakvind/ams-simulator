@@ -2831,7 +2831,57 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
                                     "safety_sram (512B dedicated) holds fault log with ECC protection"],
                 "cross_domain_handshakes": "Synchronized with 2-stage flip-flops and parity checkers on critical signals"
             }
-        ]
+        ],
+        "validation_matrix": {
+            "analog_domain_validation": [
+                "bandgap DC accuracy: ±0.5% across -40°C to +125°C, 4.5-5.5V supply range",
+                "ldo_analog ripple: <1mVpp at 100kHz, PSRR >60dB, load regulation <2%",
+                "ldo_digital ripple: <500µVpp under 200mA load step, PSRR >65dB at 1MHz",
+                "power sequence timing: 1ms stagger margin between rail ramp-ups, soft-start <100µs"
+            ],
+            "digital_domain_validation": [
+                "control_logic SRAM retention: <1% data corruption at 1.2V over 1000h",
+                "register_file address decode: 100% fault coverage at design corners",
+                "interrupt controller latency: <2 clock cycles from IRQ pin to ISR entry",
+                "watchdog recovery: 99%+ detection of stuck processors, reset margin >10s timeout"
+            ],
+            "i2s_audio_validation": [
+                "frame synchronization jitter: <50ps RMS on 48kHz @ ±1ppm accuracy",
+                "audio THD+N @ 1kHz: <0.5% (S=60dB), SNR @ 20Hz-20kHz >90dB",
+                "DMA pre-fetch: 4ms minimum audio buffer before underrun, dynamic allocation",
+                "clock-to-data skew: <200ps max across L/R channels and frame edges"
+            ],
+            "can_transceiver_validation": [
+                "message filter accuracy: 100% CAN ID match with no false positives",
+                "arbitration throughput: 100 msg/sec sustained at 500kbps, 1000 msg bursts @ 1Mbps",
+                "failsafe biasing: VCan differential >0.5V nominal, <50mV noise tolerance",
+                "isolation level: >2kV HBM on all CAN pins, latch-up hold >100mA"
+            ],
+            "ethernet_phy_validation": [
+                "link negotiation: auto-detect 10/100Mbps with <500ms lock time",
+                "differential impedance: 100Ω nominal, skew <5mm across PCB pairs",
+                "eye diagram margin: >30% opening after AC coupling, 50mV to 200mV threshold",
+                "MDI auto-correction: polarity reversal detection with no frame loss"
+            ],
+            "safety_validation": [
+                "watchdog independence: dedicated internal oscillator with ±10% accuracy",
+                "fault injection coverage: 99%+ detection of stuck bits in safety_sram",
+                "ASIL-B partitioning: 0 cross-domain data corruption in 1M cycle simulation",
+                "diagnostic access: full UDS memory read/write with CRC16-CCITT protection"
+            ],
+            "thermal_management_validation": [
+                "on-die sensor calibration: ±2°C accuracy across -40°C to +125°C",
+                "derate response: <100ms latency from threshold crossing to throttle apply",
+                "throttle accuracy: audio DSP 80% at 85°C, 50% at 105°C with ±5% margin",
+                "recovery hysteresis: 5°C window to prevent oscillation around threshold"
+            ],
+            "multi_rail_validation": [
+                "cross-rail isolation: >60dB attenuation from VDD_CORE noise to VDD_ANA",
+                "power-down sequencing: core → I/O → CAN with 1ms hold-time between rails",
+                "inrush current limiting: soft-start on each rail limits di/dt < 100mA/µs",
+                "brown-out detection: independent monitors on each rail with <50mV hysteresis"
+            ]
+        }
     },
     "industrial_iot_gateway": {
         "name": "Industrial IoT Gateway",
@@ -2951,7 +3001,63 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
                              "105-125°C: AES encryption disabled, HMAC-only for protocol handshakes",
                              ">125°C: gateway enters monitoring-only mode, no forwarding"]
             }
-        ]
+        ],
+        "validation_matrix": {
+            "profibus_interface_validation": [
+                "token-pass accuracy: 100% token inheritance on PROFIBUS slave nodes, <1% timing drift over 1000 messages",
+                "CRC validation: PROFIBUS CRC16 polynomial coverage >99%, no false positives on single-bit errors",
+                "baud rate accuracy: ±0.5% at 12Mbps, <50ns timing margin with 200pF capacitive load",
+                "failsafe biasing: A/B line differential >0.2V nominal, <10mV noise immunity"
+            ],
+            "canopen_validation": [
+                "protocol compliance: CANopen DS301/DS402 state machine transitions verified >99% coverage",
+                "arbitration throughput: 11-bit and 29-bit identifiers with 1000 msg/sec @ 1Mbps sustained",
+                "SDO/PDO mapping: object dictionary access <10ms roundtrip latency, 64-bit payload alignment",
+                "NMT state machine: all 5 states (INIT→PRE-OP→OP↔STOPPED) with proper guard time handling"
+            ],
+            "ethernet_routing_validation": [
+                "multiprotocol forwarding: PROFIBUS→Ethernet, CAN→Ethernet with <5ms latency per packet",
+                "VLAN tagging: IEEE 802.1Q VLAN insertion/removal at 100Mbps line rate, priority queue arbitration",
+                "MAC address learning: 4K MAC entry table with >99% hit rate, LRU replacement on table full",
+                "IPv4 routing: 256 route entries with longest-prefix-match, TTL decrement and checksum recomputation"
+            ],
+            "crypto_acceleration_validation": [
+                "AES-256-GCM throughput: >100 Mbps at line rate with variable plaintext/key sizes",
+                "SHA-512 throughput: >200 Mbps with 64-byte block streaming, padding auto-insertion",
+                "key storage: OTP-based key derivation with SHA-256 HKDF, <1µs key ready time",
+                "side-channel hardening: constant-time implementation verified via power/timing analysis"
+            ],
+            "dma_validation": [
+                "concurrent streams: 3 independent DMA units (PROFIBUS→SRAM, CAN→SRAM, ETH→SRAM) at full bandwidth",
+                "coherency: no stale reads within 1-clock synchronization, ECC protection on critical buffers",
+                "descriptor queuing: up to 256 descriptors per channel with auto-chaining and interrupt coalescing",
+                "memory ordering: FIFO per-channel, 0% packet loss under 100% utilization + burst traffic"
+            ],
+            "security_validation": [
+                "CRC32 Ethernet FCS: 100% detection of random bit errors <32-bit payloads, polynomial coverage",
+                "authentication: HMAC-SHA512 message authentication with replay attack prevention (sequence numbers)",
+                "encryption: AES-GCM authenticated encryption with per-packet IV and 96-bit nonce",
+                "key rotation: OTP-based secure key derivation with no plaintext key storage on external buses"
+            ],
+            "failover_validation": [
+                "PROFIBUS timeout: token-pass timeout >100ms triggers failover flag and alarm interrupt",
+                "CAN error counting: >1000 error frames/sec or arbitration failures triggers redundant-bus switch",
+                "Ethernet monitoring: link-down or >1% frame loss for 5 seconds triggers CAN-only fallback",
+                "switchover latency: <50ms reconfiguration time with buffered packet preservation"
+            ],
+            "thermal_management_validation": [
+                "temperature sensor: ±2°C accuracy across 0-125°C, 10ms conversion time on 5-sample averaging",
+                "throttle latency: <100ms from temp threshold crossing to crypto workload reduction apply",
+                "multi-level derate: 100% crypto at 0-85°C, 50% fast-path at 85-105°C, HMAC-only at 105-125°C",
+                "recovery: 5°C hysteresis to prevent oscillation, smooth ramp-down of workload"
+            ],
+            "protocol_compliance_validation": [
+                "IEC 61131-3: standard function block compatibility, SIL1/SIL2 safe-state machines",
+                "packet tracing: end-to-end frame timestamp injection with microsecond accuracy over 168-hour duration",
+                "latency budgeting: per-packet <5ms end-to-end from ingress to egress, DMA context-switch overhead minimized",
+                "conformance testing: 168-hour stress with 0.1-1% injected packet loss on each interface, zero data corruption"
+            ]
+        }
     },
     "isolated_power_supply_controller": {
         "name": "Isolated Power Supply Controller",
