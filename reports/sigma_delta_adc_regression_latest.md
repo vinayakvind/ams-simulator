@@ -1,6 +1,6 @@
 # Regression Report - sigma_delta_adc
 
-Generated: 2026-05-02T19:29:56.862279
+Generated: 2026-05-02T19:32:51.711624
 Overall: PASS
 
 ## Summary

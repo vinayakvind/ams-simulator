@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-02T19:29:22.863131",
+  "generated_at": "2026-05-02T19:32:14.208806",
   "technology_filter": "generic130",
   "summary": {
     "technology_count": 4,
@@ -2087,27 +2087,38 @@
       "name": "CANopen VIP",
       "protocol": "CANopen",
       "checks": [
-        "SDO transfer",
-        "PDO mapping",
-        "NMT state machine",
-        "heartbeat",
-        "emergency messages"
+        "CAN frame structure (CAN 2.0A/2.0B)",
+        "SDO transfer sequence (download/upload, expedited/segmented)",
+        "PDO mapping and triggering",
+        "NMT state machine (BOOT -> OPERATIONAL -> STOPPED)",
+        "heartbeat producer/consumer timing",
+        "emergency (EMCY) message generation",
+        "synchronization (SYNC) frame handling",
+        "arbitration field collision resolution",
+        "transceiver differential signaling integrity",
+        "error frame detection and transmission"
       ],
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
-      "description": "Validates CANopen protocol stack including object dictionary access and state management.",
+      "description": "Validates CANopen protocol stack including object dictionary access, state management, signal integrity, and automotive-grade timing compliance.",
       "key": "canopen_vip"
     },
     {
       "name": "Clock Gating VIP",
       "protocol": "Clock gating control",
       "checks": [
-        "gating latency",
-        "enable synchronization",
-        "glitch immunity",
-        "clock tree propagation"
+        "gating latency from enable to clock shutdown (<2ns typ)",
+        "enable signal synchronization to clock edge",
+        "glitch immunity (no spurious clock edges)",
+        "clock tree propagation delay matching",
+        "setup/hold time verification at gating point",
+        "enable signal timing margin analysis",
+        "multi-level gating cascade verification",
+        "power gating interaction with clock gating",
+        "enable signal metastability analysis",
+        "duty cycle preservation through gating"
       ],
       "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
-      "description": "Validates clock gating cells for correct enable timing and glitch-free operation.",
+      "description": "Validates clock gating cells for correct enable timing, glitch-free operation, and critical path implications in low-power designs.",
       "key": "clock_gating_vip"
     },
     {
@@ -2179,14 +2190,18 @@
       "name": "Ethernet VIP",
       "protocol": "Ethernet 10/100 Base-T",
       "checks": [
-        "frame format",
-        "CRC validation",
-        "link detection",
-        "collision detection",
-        "MDI signaling"
+        "frame format validation (destination, source, type, data, FCS)",
+        "CRC validation for frame integrity",
+        "link detection and auto-negotiation (10/100 Mbps)",
+        "collision detection and backoff timing",
+        "MDI signaling (Manchester encoding)",
+        "interframe gap (IFG) compliance",
+        "jitter and timing margin analysis",
+        "transmit/receive signal integrity at PHY interface",
+        "power consumption during active transmission"
       ],
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
-      "description": "Validates Ethernet PHY compliance with IEEE 802.3 standards and frame integrity.",
+      "description": "Validates Ethernet PHY compliance with IEEE 802.3 standards including signal integrity, protocol timing, and mixed-signal interface characterization.",
       "key": "ethernet_vip"
     },
     {
@@ -2374,14 +2389,18 @@
       "name": "PROFIBUS VIP",
       "protocol": "PROFIBUS PA/DP",
       "checks": [
-        "bit timing",
-        "frame format",
-        "addressing",
-        "CRC validation",
-        "collision handling"
+        "bit timing and baud rate accuracy (9.6 kbps - 12 Mbps)",
+        "frame format (start, address, data length, data, CRC, end)",
+        "slave address and collision handling",
+        "CRC validation (CCITT-16)",
+        "collision detection and resolution (CSMA/CD-like)",
+        "idle line detection and silence detection",
+        "transceiver failsafe biasing",
+        "electromagnetic immunity (conducted and radiated)",
+        "power consumption in different operational modes"
       ],
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
-      "description": "Validates PROFIBUS transceiver protocol compliance for industrial fieldbus networks.",
+      "description": "Validates PROFIBUS transceiver protocol compliance for industrial fieldbus networks including timing, signal integrity, EMI/EMC, and mixed-signal biasing.",
       "key": "profibus_vip"
     },
     {
@@ -2547,7 +2566,7 @@
         "clock_divider",
         "interrupt_controller"
       ],
-      "description": "Integrated clock gating and domain control for multi-frequency clock generation and distribution.",
+      "description": "Integrated clock gating and domain control for multi-frequency clock generation, distribution, and energy-efficient gating. Includes glitch-free enable logic, setup/hold verification, and multi-level gating cascade support. Integration rules: clock gates must preserve duty cycle, enable signals require CDC (clock domain crossing) synchronization, output clock must not exceed input frequency.",
       "technology_support": [
         "generic180",
         "generic130",
@@ -2584,7 +2603,7 @@
         "interrupt_controller",
         "control_logic"
       ],
-      "description": "Complete Ethernet PHY control and management interface subsystem for networked applications.",
+      "description": "Complete Ethernet PHY control and management interface subsystem for networked applications. Features real-time frame processing, link status monitoring, MDI transceiver control, and multi-protocol configuration through UART/SPI. Integration rules: Ethernet PHY must provide differential signaling (LVDS), RX/TX data path must meet 10/100 Mbps timing, CRC validation must be hardware-accelerated.",
       "technology_support": [
         "generic130",
         "generic65",
@@ -2640,7 +2659,7 @@
         "interrupt_controller",
         "control_logic"
       ],
-      "description": "Multimedia and human-machine interface subsystem with I2S audio, I2C, and UART support.",
+      "description": "Multimedia and human-machine interface subsystem with I2S audio, I2C, and UART support for in-vehicle infotainment systems. Handles stereo audio streaming, multi-node I2C sensor aggregation, and serial console access. Integration rules: I2S timing must align frame sync with data, I2C bus requires open-drain arbitration (not push-pull), UART baud rate generator must support automotive standard rates (9.6k, 115.2k, 1M baud).",
       "technology_support": [
         "generic180",
         "generic130",
@@ -2791,7 +2810,7 @@
         "control_logic",
         "reset_generator"
       ],
-      "description": "Safety-critical monitoring subsystem with watchdog, temperature, and system reset coordination.",
+      "description": "Safety-critical monitoring subsystem with watchdog, temperature, and system reset coordination for functional safety (ISO 26262) compliance. Provides periodic health checks, autonomous reset generation on fault, and interrupt-based alert mechanisms. Integration rules: watchdog timeout must be verified independent of system clock, temperature thresholds require hysteresis to prevent chatter, reset assertion must be asynchronous and synchronized with safety domains.",
       "technology_support": [
         "generic180",
         "generic130",
@@ -3068,7 +3087,7 @@
       "name": "Automotive Infotainment SoC",
       "summary": "Advanced in-vehicle infotainment system with multi-protocol connectivity, audio interface, and safety monitoring.",
       "headline": "Integrated automotive SoC for multimedia and telematics with safety-critical features.",
-      "narrative": "This profile creates a complete automotive infotainment chip combining I2S audio interfaces, multi-protocol connectivity (CAN, Ethernet), safety monitoring, and robust power management for in-vehicle entertainment and navigation systems.",
+      "narrative": "This profile creates a complete automotive infotainment chip combining I2S audio interfaces, multi-protocol connectivity (CAN, Ethernet), safety monitoring, and robust power management for in-vehicle entertainment and navigation systems. Reference design includes full schematic, layout floorplan with power distribution, thermal simulation model, and AUTOSAR software scaffolding.",
       "standard": "ISO 26262 ASIL-B, AUTOSAR 4.x compatible",
       "tags": [
         "automotive",
@@ -3197,7 +3216,7 @@
       "name": "Ethernet Sensor Hub",
       "summary": "Networked sensor aggregation node with Ethernet PHY, multi-channel I2C/SPI, and precision analog.",
       "headline": "Industrial sensor hub with Ethernet connectivity for distributed measurement systems.",
-      "narrative": "This profile assembles a complete sensor aggregation and networking device combining Ethernet connectivity, multi-protocol sensor interfaces (I2C, SPI), precision analog front-ends, and data buffering for industrial process monitoring and control.",
+      "narrative": "This profile assembles a complete sensor aggregation and networking device combining Ethernet connectivity, multi-protocol sensor interfaces (I2C, SPI), precision analog front-ends, and data buffering for industrial process monitoring and control. Reference implementation includes calibration framework, timestamp synchronization with IEEE 1588 PTP, and deterministic packet scheduling for time-critical measurements.",
       "standard": "IEEE 802.3, Ethernet TSN-capable, IEC 61588 (PTP) compatible",
       "tags": [
         "sensor",
@@ -3289,7 +3308,7 @@
       "name": "Industrial IoT Gateway",
       "summary": "Multi-protocol industrial gateway with PROFIBUS, CANopen, Ethernet, and security acceleration.",
       "headline": "Comprehensive industrial edge node for protocol translation and secure data aggregation.",
-      "narrative": "This profile assembles a complete industrial IoT gateway from multiple protocol interfaces (PROFIBUS, CANopen, Ethernet), cryptographic security acceleration, and robust power management for distributed industrial control and data collection.",
+      "narrative": "This profile assembles a complete industrial IoT gateway from multiple protocol interfaces (PROFIBUS, CANopen, Ethernet), cryptographic security acceleration, and robust power management for distributed industrial control and data collection. Includes reference integration with protocol stacks, DMA-based packet handling, and ECC error correction for memory-critical data paths.",
       "standard": "IEC 61131-3, PROFIBUS PA/DP, CANopen, EtherCAT-capable",
       "tags": [
         "industrial",
@@ -3391,7 +3410,7 @@
       "name": "Isolated Power Supply Controller",
       "summary": "Isolated PMIC with multiple isolated rails, boost/buck converters, and high-side gate drivers.",
       "headline": "Industrial-grade multi-isolated power management IC for modular and resilient systems.",
-      "narrative": "This profile creates a comprehensive isolated power controller combining multiple LDO rails with galvanic isolation, boost/buck conversion, high-side gate drivers, and power sequencing for industrial equipment requiring multiple isolated supplies.",
+      "narrative": "This profile creates a comprehensive isolated power controller combining multiple LDO rails with galvanic isolation, boost/buck conversion, high-side gate drivers, and power sequencing for industrial equipment requiring multiple isolated supplies. Design collateral includes fault protection logic, isolated measurement circuits, and automated burn-in test patterns.",
       "standard": "IEC 61010-1, ISO 13849-1 SIL-rated capable",
       "tags": [
         "isolated",

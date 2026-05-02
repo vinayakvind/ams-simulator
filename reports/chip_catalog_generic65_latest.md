@@ -1,6 +1,6 @@
 # Chip Assembly Catalog Report
 
-Generated: 2026-05-02T19:29:24.294458
+Generated: 2026-05-02T19:32:15.516681
 Technology filter: generic65
 
 ## Summary
@@ -136,14 +136,14 @@ Technology filter: generic65
 | ble_vip | BLE 5.0 | advertising sequence, connection establishment, attribute exchange, security handshake |
 | bms_vip | Battery monitoring | cell voltage monitoring, temperature thresholds, charge balancing, fault detection |
 | can_vip | CAN | arbitration, frame format, bit stuffing, CRC validation, acknowledgment |
-| canopen_vip | CANopen | SDO transfer, PDO mapping, NMT state machine, heartbeat, emergency messages |
-| clock_gating_vip | Clock gating control | gating latency, enable synchronization, glitch immunity, clock tree propagation |
+| canopen_vip | CANopen | CAN frame structure (CAN 2.0A/2.0B), SDO transfer sequence (download/upload, expedited/segmented), PDO mapping and triggering, NMT state machine (BOOT -> OPERATIONAL -> STOPPED), heartbeat producer/consumer timing, emergency (EMCY) message generation, synchronization (SYNC) frame handling, arbitration field collision resolution, transceiver differential signaling integrity, error frame detection and transmission |
+| clock_gating_vip | Clock gating control | gating latency from enable to clock shutdown (<2ns typ), enable signal synchronization to clock edge, glitch immunity (no spurious clock edges), clock tree propagation delay matching, setup/hold time verification at gating point, enable signal timing margin analysis, multi-level gating cascade verification, power gating interaction with clock gating, enable signal metastability analysis, duty cycle preservation through gating |
 | clock_monitoring_vip | Clock/Oscillator | frequency accuracy, phase continuity, jitter metrics, duty cycle |
 | crypto_vip | AES, SHA, crypto | key expansion, encryption/decryption, hash computation, side-channel timing |
 | current_consumption_vip | Power monitoring | quiescent current, dynamic current, power sequencing, inrush limiting |
 | digital_subsystem_vip | Digital verification | timing compliance, reset sequencing, state machine coverage, functional correctness |
 | emc_compliance_vip | Electromagnetic compatibility | EMI immunity, conducted emissions, radiated immunity, ESD margin |
-| ethernet_vip | Ethernet 10/100 Base-T | frame format, CRC validation, link detection, collision detection, MDI signaling |
+| ethernet_vip | Ethernet 10/100 Base-T | frame format validation (destination, source, type, data, FCS), CRC validation for frame integrity, link detection and auto-negotiation (10/100 Mbps), collision detection and backoff timing, MDI signaling (Manchester encoding), interframe gap (IFG) compliance, jitter and timing margin analysis, transmit/receive signal integrity at PHY interface, power consumption during active transmission |
 | frequency_accuracy_vip | Oscillator/Clock accuracy | frequency tolerance, temperature drift, supply sensitivity, long-term stability |
 | high_speed_signal_vip | High-speed signaling | rise/fall time, overshoot/undershoot, jitter analysis, crosstalk immunity, impedance matching |
 | i2c_vip | I2C | start and stop conditions, acknowledge handshake, data framing, clock stretching |
@@ -158,7 +158,7 @@ Technology filter: generic65
 | power_sequence_vip | Power-up sequencing | rail order, enable staging, reset release |
 | power_supply_vip | Power supply quality | ripple and noise, PSRR, transient response, regulation accuracy, ramp rate |
 | precision_dac_vip | DAC conversion | DNL/INL analysis, settling time, output impedance, linearity, code transition |
-| profibus_vip | PROFIBUS PA/DP | bit timing, frame format, addressing, CRC validation, collision handling |
+| profibus_vip | PROFIBUS PA/DP | bit timing and baud rate accuracy (9.6 kbps - 12 Mbps), frame format (start, address, data length, data, CRC, end), slave address and collision handling, CRC validation (CCITT-16), collision detection and resolution (CSMA/CD-like), idle line detection and silence detection, transceiver failsafe biasing, electromagnetic immunity (conducted and radiated), power consumption in different operational modes |
 | spi_vip | SPI | transaction decode, register access, reset defaults |
 | temperature_corner_vip | Temperature characterization | cold corner performance, hot corner performance, gradient effects, thermal coupling |
 | thermal_monitoring_vip | Temperature monitoring | temp sensor accuracy, shutdown threshold, hysteresis, rise time |
