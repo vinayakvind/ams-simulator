@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-04-30T01:20:38.253414",
-  "technology_filter": null,
+  "generated_at": "2026-05-02T18:46:51.920461",
+  "technology_filter": "all",
   "summary": {
     "technology_count": 4,
-    "reusable_ip_count": 30,
-    "verification_ip_count": 13,
-    "digital_subsystem_count": 7,
-    "chip_profile_count": 10,
-    "compatible_ip_count": 30,
-    "compatible_digital_subsystem_count": 7,
-    "compatible_chip_profile_count": 10
+    "reusable_ip_count": 49,
+    "verification_ip_count": 23,
+    "digital_subsystem_count": 17,
+    "chip_profile_count": 15,
+    "compatible_ip_count": 0,
+    "compatible_digital_subsystem_count": 0,
+    "compatible_chip_profile_count": 0
   },
   "technologies": [
     {
@@ -62,7 +62,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "analog_multiplexer"
+      "key": "analog_multiplexer",
+      "compatible": false
     },
     {
       "name": "Bandgap Reference",
@@ -87,7 +88,61 @@
         "generic65",
         "bcd180"
       ],
-      "key": "bandgap"
+      "key": "bandgap",
+      "compatible": false
+    },
+    {
+      "name": "Bias Generator",
+      "domain": "analog",
+      "category": "bias",
+      "generator": "bias_gen",
+      "ports": [
+        "VDD",
+        "GND",
+        "BIAS_OUT",
+        "TRIM_CODE"
+      ],
+      "aliases": [
+        "bias",
+        "self_bias"
+      ],
+      "description": "Self-biasing circuit with programmable trim for distributed bias.",
+      "role": "Generates precision bias currents for analog blocks without external reference.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "bias_generator",
+      "compatible": false
+    },
+    {
+      "name": "Boost Converter",
+      "domain": "analog",
+      "category": "power",
+      "generator": "boost_converter",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND",
+        "EN",
+        "FREQ_DIV"
+      ],
+      "aliases": [
+        "boost",
+        "step_up_converter"
+      ],
+      "description": "Boost regulator for generating higher voltage rails from lower supply.",
+      "role": "Steps up lower input voltage to higher output voltage for high-side drivers and special bias networks.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "boost_converter",
+      "compatible": false
     },
     {
       "name": "Buck Converter",
@@ -106,7 +161,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "buck_converter"
+      "key": "buck_converter",
+      "compatible": false
     },
     {
       "name": "CAN Controller",
@@ -131,7 +187,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "can_controller"
+      "key": "can_controller",
+      "compatible": false
     },
     {
       "name": "CAN Transceiver",
@@ -159,7 +216,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "can_transceiver"
+      "key": "can_transceiver",
+      "compatible": false
     },
     {
       "name": "Charge Pump",
@@ -185,7 +243,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "charge_pump"
+      "key": "charge_pump",
+      "compatible": false
     },
     {
       "name": "Clock Divider",
@@ -209,7 +268,38 @@
         "generic65",
         "bcd180"
       ],
-      "key": "clock_divider"
+      "key": "clock_divider",
+      "compatible": false
+    },
+    {
+      "name": "Multiplexed Comparator Array",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "comp_array",
+      "ports": [
+        "VDD",
+        "GND",
+        "IN_P",
+        "IN_N",
+        "SEL",
+        "OUT",
+        "VREF_ARRAY",
+        "HYSTERESIS"
+      ],
+      "aliases": [
+        "comp_mux",
+        "window_comparator"
+      ],
+      "description": "Array of analog comparators with multiplexed input and programmable thresholds.",
+      "role": "Enables multi-threshold analog monitoring with a single comparator array macro.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "comparator_array",
+      "compatible": false
     },
     {
       "name": "CMOS Comparator",
@@ -228,7 +318,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "comparator_cmos"
+      "key": "comparator_cmos",
+      "compatible": false
     },
     {
       "name": "Control Logic",
@@ -254,7 +345,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "control_logic"
+      "key": "control_logic",
+      "compatible": false
     },
     {
       "name": "Current Mirror",
@@ -279,7 +371,36 @@
         "generic65",
         "bcd180"
       ],
-      "key": "current_mirror"
+      "key": "current_mirror",
+      "compatible": false
+    },
+    {
+      "name": "Current Reference Generator",
+      "domain": "analog",
+      "category": "reference",
+      "generator": "current_ref_gen",
+      "ports": [
+        "VDD",
+        "GND",
+        "IREF_OUT",
+        "TRIM_CODE",
+        "EN"
+      ],
+      "aliases": [
+        "iref",
+        "curent_source_ref",
+        "bandgap_iref"
+      ],
+      "description": "Temperature-compensated current reference generator based on bandgap principle.",
+      "role": "Provides precision reference current for distributed analog bias without external components.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "current_reference",
+      "compatible": false
     },
     {
       "name": "R-2R DAC 4-bit",
@@ -298,7 +419,120 @@
         "generic65",
         "bcd180"
       ],
-      "key": "dac_r2r_4bit"
+      "key": "dac_r2r_4bit",
+      "compatible": false
+    },
+    {
+      "name": "ESD Protection Diode Array",
+      "domain": "analog",
+      "category": "interface",
+      "generator": "esd_array",
+      "ports": [
+        "VDD",
+        "VSS",
+        "IO_RAIL"
+      ],
+      "aliases": [
+        "esd_clamp",
+        "esd_diode"
+      ],
+      "description": "On-chip ESD clamps and protection diodes for all I/O pins.",
+      "role": "Protects core circuitry from ESD transients during assembly, test, and use.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "esd_protection",
+      "compatible": false
+    },
+    {
+      "name": "Flash Memory Compiler",
+      "domain": "digital",
+      "category": "storage",
+      "generator": "flash_compiler",
+      "ports": [
+        "clk",
+        "rst_n",
+        "addr",
+        "din",
+        "dout",
+        "wr_en",
+        "erase_en"
+      ],
+      "aliases": [
+        "flash",
+        "nvm",
+        "nonvolatile_memory"
+      ],
+      "description": "Non-volatile flash memory for firmware storage and calibration data.",
+      "role": "Stores bootcode, calibration constants, and configuration across power cycles.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "flash_memory",
+      "compatible": false
+    },
+    {
+      "name": "Frequency Detector/Monitor",
+      "domain": "mixed",
+      "category": "sense",
+      "generator": "freq_detector",
+      "ports": [
+        "CLK_IN",
+        "VDD",
+        "GND",
+        "FREQ_VALID",
+        "FREQ_HI_N",
+        "CLK_DIV"
+      ],
+      "aliases": [
+        "freq_mon",
+        "clock_detector"
+      ],
+      "description": "Clock frequency detector and monitoring circuit for oscillator health checking.",
+      "role": "Validates oscillator frequency within expected range to prevent runaway clock faults.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "frequency_detector",
+      "compatible": false
+    },
+    {
+      "name": "GPIO Controller",
+      "domain": "digital",
+      "category": "interface",
+      "generator": "gpio_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "gpio_pad",
+        "gpio_out",
+        "gpio_in",
+        "gpio_oe"
+      ],
+      "aliases": [
+        "gpio",
+        "port_controller",
+        "io_mux"
+      ],
+      "description": "General-purpose I/O interface with configurable direction, pull-ups, and interrupt support.",
+      "role": "Provides flexible digital I/O for auxiliary control, status monitoring, and application-specific signals.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "gpio_controller",
+      "compatible": false
     },
     {
       "name": "I2C Controller",
@@ -324,7 +558,37 @@
         "generic65",
         "bcd180"
       ],
-      "key": "i2c_controller"
+      "key": "i2c_controller",
+      "compatible": false
+    },
+    {
+      "name": "I2S Audio Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "i2s_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "i2s_sclk",
+        "i2s_lrck",
+        "i2s_dout",
+        "i2s_din"
+      ],
+      "aliases": [
+        "i2s",
+        "pcm_interface",
+        "audio_interface"
+      ],
+      "description": "I2S/PCM digital audio interface for audio codecs and digital audio processing.",
+      "role": "Handles I2S protocol timing and data synchronization for audio streaming.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "i2s_audio_controller",
+      "compatible": false
     },
     {
       "name": "Interrupt Controller",
@@ -351,7 +615,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "interrupt_controller"
+      "key": "interrupt_controller",
+      "compatible": false
     },
     {
       "name": "Analog LDO",
@@ -376,7 +641,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "ldo_analog"
+      "key": "ldo_analog",
+      "compatible": false
     },
     {
       "name": "Digital LDO",
@@ -401,7 +667,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "ldo_digital"
+      "key": "ldo_digital",
+      "compatible": false
     },
     {
       "name": "LIN Rail LDO",
@@ -426,7 +693,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "ldo_lin"
+      "key": "ldo_lin",
+      "compatible": false
     },
     {
       "name": "LIN Controller",
@@ -451,7 +719,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "lin_controller"
+      "key": "lin_controller",
+      "compatible": false
     },
     {
       "name": "LIN Transceiver",
@@ -480,7 +749,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "lin_transceiver"
+      "key": "lin_transceiver",
+      "compatible": false
     },
     {
       "name": "Low-Pass Filter",
@@ -504,7 +774,36 @@
         "generic65",
         "bcd180"
       ],
-      "key": "low_pass_filter"
+      "key": "low_pass_filter",
+      "compatible": false
+    },
+    {
+      "name": "LVDS Driver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "lvds_driver",
+      "ports": [
+        "VDD",
+        "VDD_IO",
+        "GND",
+        "LVDS_P",
+        "LVDS_N",
+        "SIGNAL_IN"
+      ],
+      "aliases": [
+        "lvds",
+        "differential_driver"
+      ],
+      "description": "Low-voltage differential signaling driver for noise-immune high-speed interfaces.",
+      "role": "Drives differential signals for low-noise communication across chip boundaries.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lvds_driver",
+      "compatible": false
     },
     {
       "name": "Memory Compiler",
@@ -532,7 +831,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "memory_compiler"
+      "key": "memory_compiler",
+      "compatible": false
     },
     {
       "name": "Operational Amplifier",
@@ -559,7 +859,36 @@
         "generic65",
         "bcd180"
       ],
-      "key": "operational_amplifier"
+      "key": "operational_amplifier",
+      "compatible": false
+    },
+    {
+      "name": "Phase-Locked Loop",
+      "domain": "mixed",
+      "category": "sequencing",
+      "generator": "pll",
+      "ports": [
+        "VDD",
+        "GND",
+        "REF_CLK",
+        "FEEDBACK_CLK",
+        "CLK_OUT",
+        "LOCK_DETECT",
+        "DIV_RATIO"
+      ],
+      "aliases": [
+        "pll_macro"
+      ],
+      "description": "Phase-locked loop for clock multiplication and jitter reduction.",
+      "role": "Multiplies reference clock to higher frequencies with reduced jitter.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "pll",
+      "compatible": false
     },
     {
       "name": "Precision Voltage Reference",
@@ -584,7 +913,65 @@
         "generic65",
         "bcd180"
       ],
-      "key": "precision_voltage_reference"
+      "key": "precision_voltage_reference",
+      "compatible": false
+    },
+    {
+      "name": "Programmable Gain Amplifier",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "pga",
+      "ports": [
+        "VDD",
+        "GND",
+        "VIN_P",
+        "VIN_N",
+        "VOUT",
+        "GAIN_SEL",
+        "VBIAS"
+      ],
+      "aliases": [
+        "pga",
+        "variable_gain_amp"
+      ],
+      "description": "Instrumentation amplifier with programmable gain for flexible sensor signal conditioning.",
+      "role": "Amplifies small sensor signals with software-selectable gain and high CMRR.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "programmable_gain_amplifier",
+      "compatible": false
+    },
+    {
+      "name": "PWM Generator Controller",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "pwm_gen",
+      "ports": [
+        "clk",
+        "rst_n",
+        "duty_code",
+        "freq_sel",
+        "pwm_out",
+        "pwm_n_out"
+      ],
+      "aliases": [
+        "pwm",
+        "pulse_width_mod"
+      ],
+      "description": "Programmable PWM generator with complementary output support for motor and converter drive.",
+      "role": "Generates synchronized PWM signals for power electronics control with adjustable frequency and dead-time.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "pwm_controller",
+      "compatible": false
     },
     {
       "name": "Register File",
@@ -611,7 +998,92 @@
         "generic65",
         "bcd180"
       ],
-      "key": "register_file"
+      "key": "register_file",
+      "compatible": false
+    },
+    {
+      "name": "Reset Generator",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "reset_gen",
+      "ports": [
+        "VDD",
+        "GND",
+        "EXT_RST_N",
+        "RST_N_OUT",
+        "POR_N"
+      ],
+      "aliases": [
+        "reset_logic",
+        "por_generator"
+      ],
+      "description": "Power-on reset and watchdog reset sequencer with debouncing.",
+      "role": "Generates robust reset signals synchronized to power-up and watchdog events.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "reset_generator",
+      "compatible": false
+    },
+    {
+      "name": "Ring Oscillator",
+      "domain": "analog",
+      "category": "sequencing",
+      "generator": "ring_oscillator",
+      "ports": [
+        "VDD",
+        "GND",
+        "EN",
+        "CLK_OUT",
+        "FREQ_TRIM"
+      ],
+      "aliases": [
+        "osc",
+        "ring_osc"
+      ],
+      "description": "On-chip ring oscillator for internal clock generation.",
+      "role": "Generates primary system clock using delay chain oscillation for standalone operation.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ring_oscillator",
+      "compatible": false
+    },
+    {
+      "name": "RS-485 Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "rs485_txrx",
+      "ports": [
+        "VDD",
+        "GND",
+        "TXD",
+        "RXD",
+        "A",
+        "B",
+        "DE",
+        "RE_N"
+      ],
+      "aliases": [
+        "rs485",
+        "half_duplex_phy"
+      ],
+      "description": "Isolated or non-isolated RS-485 bus transceiver for long-distance serial communication.",
+      "role": "Bridges digital UART signals to industrial RS-485 bus with integrated line termination options.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "rs485_transceiver",
+      "compatible": false
     },
     {
       "name": "Sample and Hold Frontend",
@@ -630,7 +1102,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "sample_hold_frontend"
+      "key": "sample_hold_frontend",
+      "compatible": false
     },
     {
       "name": "SAR ADC Top",
@@ -682,7 +1155,8 @@
           }
         ]
       },
-      "key": "sar_adc_top"
+      "key": "sar_adc_top",
+      "compatible": false
     },
     {
       "name": "Sigma-Delta ADC Top",
@@ -739,7 +1213,35 @@
           }
         ]
       },
-      "key": "sigma_delta_adc_top"
+      "key": "sigma_delta_adc_top",
+      "compatible": false
+    },
+    {
+      "name": "Slew-Rate Limited Output Buffer",
+      "domain": "analog",
+      "category": "interface",
+      "generator": "slew_limiter",
+      "ports": [
+        "VDD",
+        "GND",
+        "IN",
+        "OUT",
+        "SLEW_CTRL"
+      ],
+      "aliases": [
+        "slew_buf",
+        "soft_start_buf"
+      ],
+      "description": "Output buffer with programmable slew-rate limiting for EMI reduction.",
+      "role": "Limits dI/dt and dV/dt on outputs to reduce radiated and conducted emissions.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "slew_rate_limiter",
+      "compatible": false
     },
     {
       "name": "SPI Controller",
@@ -765,7 +1267,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "spi_controller"
+      "key": "spi_controller",
+      "compatible": false
     },
     {
       "name": "Temperature Sensor",
@@ -790,7 +1293,34 @@
         "generic65",
         "bcd180"
       ],
-      "key": "temperature_sensor"
+      "key": "temperature_sensor",
+      "compatible": false
+    },
+    {
+      "name": "Trim Circuit",
+      "domain": "analog",
+      "category": "bias",
+      "generator": "trim_circuit",
+      "ports": [
+        "VDD",
+        "GND",
+        "TRIM_CODE",
+        "VREF_TUNED"
+      ],
+      "aliases": [
+        "trim",
+        "tuning_circuit"
+      ],
+      "description": "Programmable resistor ladder for analog parameter tuning.",
+      "role": "Provides post-silicon trimming capability for reference, bias, and threshold tuning.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "trim_circuit",
+      "compatible": false
     },
     {
       "name": "UART Controller",
@@ -817,7 +1347,29 @@
         "generic65",
         "bcd180"
       ],
-      "key": "uart_controller"
+      "key": "uart_controller",
+      "compatible": false
+    },
+    {
+      "name": "Voltage Ladder DAC",
+      "domain": "analog",
+      "category": "converter",
+      "source": "examples/adc/dac_string.spice",
+      "ports": [],
+      "aliases": [
+        "string_dac",
+        "resistor_ladder"
+      ],
+      "description": "String DAC for programmable reference and bias generation.",
+      "role": "Converts digital codes into precision analog voltage levels via resistor divider.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "voltage_ladder_dac",
+      "compatible": false
     },
     {
       "name": "Watchdog Timer",
@@ -843,10 +1395,24 @@
         "generic65",
         "bcd180"
       ],
-      "key": "watchdog_timer"
+      "key": "watchdog_timer",
+      "compatible": false
     }
   ],
   "verification_ips": [
+    {
+      "name": "ADC Linearity VIP",
+      "protocol": "Converter linearity",
+      "checks": [
+        "INL/DNL analysis",
+        "code histogram",
+        "missing codes",
+        "monotonicity"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates ADC linearity through INL/DNL computation and code transition analysis.",
+      "key": "adc_linearity_vip"
+    },
     {
       "name": "ADC Transient VIP",
       "protocol": "Converter transient",
@@ -925,6 +1491,32 @@
       "key": "digital_subsystem_vip"
     },
     {
+      "name": "EMC Compliance VIP",
+      "protocol": "Electromagnetic compatibility",
+      "checks": [
+        "EMI immunity",
+        "conducted emissions",
+        "radiated immunity",
+        "ESD margin"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates electromagnetic compatibility for automotive and industrial environments.",
+      "key": "emc_compliance_vip"
+    },
+    {
+      "name": "Frequency Accuracy VIP",
+      "protocol": "Oscillator/Clock accuracy",
+      "checks": [
+        "frequency tolerance",
+        "temperature drift",
+        "supply sensitivity",
+        "long-term stability"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates oscillator frequency accuracy across corners and operating conditions.",
+      "key": "frequency_accuracy_vip"
+    },
+    {
       "name": "I2C Verification IP",
       "protocol": "I2C",
       "checks": [
@@ -936,6 +1528,32 @@
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
       "description": "Validates I2C master/slave protocol compliance and timing.",
       "key": "i2c_vip"
+    },
+    {
+      "name": "I2S Audio VIP",
+      "protocol": "I2S",
+      "checks": [
+        "frame synchronization",
+        "clock gating",
+        "data alignment",
+        "channel separation"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates I2S protocol timing, frame boundaries, and stereo channel integrity.",
+      "key": "i2s_audio_vip"
+    },
+    {
+      "name": "I/O Electrical Characteristics VIP",
+      "protocol": "I/O interface",
+      "checks": [
+        "output drive strength",
+        "input threshold margin",
+        "leakage current",
+        "output impedance"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Measures I/O electrical specifications including drive capability and threshold margins.",
+      "key": "io_electrical_vip"
     },
     {
       "name": "LIN Verification IP",
@@ -962,6 +1580,32 @@
       "key": "mixed_signal_bridge_vip"
     },
     {
+      "name": "Noise Performance VIP",
+      "protocol": "Signal integrity",
+      "checks": [
+        "SNR calculation",
+        "THD analysis",
+        "SFDR measurement",
+        "noise floor"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Evaluates converter noise performance including SNR, THD, and spectral characteristics.",
+      "key": "noise_performance_vip"
+    },
+    {
+      "name": "Power Domain Isolation VIP",
+      "protocol": "Analog/Digital isolation",
+      "checks": [
+        "cross-domain leakage",
+        "isolation boundary integrity",
+        "handshake synchronization",
+        "metastability"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Ensures robust isolation between analog and digital power domains to prevent noise coupling.",
+      "key": "power_domain_isolation_vip"
+    },
+    {
       "name": "Power Sequence VIP",
       "protocol": "Power-up sequencing",
       "checks": [
@@ -974,6 +1618,19 @@
       "key": "power_sequence_vip"
     },
     {
+      "name": "Power Supply VIP",
+      "protocol": "Power supply quality",
+      "checks": [
+        "ripple and noise",
+        "PSRR, transient response",
+        "regulation accuracy",
+        "ramp rate"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Measures power supply quality metrics including ripple, PSRR, and regulation performance.",
+      "key": "power_supply_vip"
+    },
+    {
       "name": "SPI Verification IP",
       "protocol": "SPI",
       "checks": [
@@ -984,6 +1641,19 @@
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
       "description": "Exercises the serial programming path and register map visibility.",
       "key": "spi_vip"
+    },
+    {
+      "name": "Temperature Corner VIP",
+      "protocol": "Temperature characterization",
+      "checks": [
+        "cold corner performance",
+        "hot corner performance",
+        "gradient effects",
+        "thermal coupling"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates analog and digital functionality across temperature extremes.",
+      "key": "temperature_corner_vip"
     },
     {
       "name": "Thermal Monitoring VIP",
@@ -1010,9 +1680,41 @@
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
       "description": "Exercises serial communication framing, timing, and error handling.",
       "key": "uart_vip"
+    },
+    {
+      "name": "Voltage Regulation VIP",
+      "protocol": "Power supply regulation",
+      "checks": [
+        "DC regulation accuracy",
+        "load transient response",
+        "line regulation",
+        "soft-start behavior"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Characterizes regulator steady-state accuracy and dynamic response under load steps.",
+      "key": "voltage_regulation_vip"
     }
   ],
   "digital_subsystems": [
+    {
+      "name": "Analog Conditioning Plane",
+      "blocks": [
+        "programmable_gain_amplifier",
+        "low_pass_filter",
+        "comparator_array",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Multi-channel analog signal conditioning with programmable gain, filtering, and thresholding.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "analog_conditioning_plane",
+      "compatible": false
+    },
     {
       "name": "CAN Node Control Plane",
       "blocks": [
@@ -1029,7 +1731,25 @@
         "generic65",
         "bcd180"
       ],
-      "key": "can_node_control_plane"
+      "key": "can_node_control_plane",
+      "compatible": false
+    },
+    {
+      "name": "Clock Distribution Plane",
+      "blocks": [
+        "pll",
+        "clock_divider",
+        "control_logic"
+      ],
+      "description": "Advanced clock generation, distribution, and gating for power-efficient multi-domain designs.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "clock_distribution_plane",
+      "compatible": false
     },
     {
       "name": "Converter Control Plane",
@@ -1045,7 +1765,26 @@
         "generic65",
         "bcd180"
       ],
-      "key": "converter_control_plane"
+      "key": "converter_control_plane",
+      "compatible": false
+    },
+    {
+      "name": "Frequency Monitoring Plane",
+      "blocks": [
+        "frequency_detector",
+        "control_logic",
+        "register_file",
+        "interrupt_controller"
+      ],
+      "description": "Dedicated frequency monitoring and fault detection subsystem for oscillator health.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "frequency_monitoring_plane",
+      "compatible": false
     },
     {
       "name": "I2C Sensor Interface",
@@ -1062,7 +1801,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "i2c_sensor_interface"
+      "key": "i2c_sensor_interface",
+      "compatible": false
     },
     {
       "name": "LIN Node Control Plane",
@@ -1079,7 +1819,100 @@
         "generic65",
         "bcd180"
       ],
-      "key": "lin_node_control_plane"
+      "key": "lin_node_control_plane",
+      "compatible": false
+    },
+    {
+      "name": "Multi-Rail Power Control Plane",
+      "blocks": [
+        "control_logic",
+        "reset_generator",
+        "register_file",
+        "interrupt_controller",
+        "temperature_sensor"
+      ],
+      "description": "Advanced multi-rail power sequencing with rail-order enforcement and cross-domain isolation.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "multi_rail_power_control",
+      "compatible": false
+    },
+    {
+      "name": "Power Sequencer",
+      "blocks": [
+        "control_logic",
+        "reset_generator",
+        "interrupt_controller",
+        "register_file"
+      ],
+      "description": "Multi-rail power sequencing with enable staging and monitoring.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "power_sequencer",
+      "compatible": false
+    },
+    {
+      "name": "PWM Motor Control Plane",
+      "blocks": [
+        "pwm_controller",
+        "register_file",
+        "control_logic",
+        "interrupt_controller"
+      ],
+      "description": "Coordinated PWM generation with dead-time insertion and fault protection for motor drive.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "pwm_motor_control_plane",
+      "compatible": false
+    },
+    {
+      "name": "RS-485 Interface Plane",
+      "blocks": [
+        "rs485_transceiver",
+        "uart_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Integrated RS-485 bus interface with UART-based protocol and fault detection.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "rs485_interface_plane",
+      "compatible": false
+    },
+    {
+      "name": "Sensor Aggregation Plane",
+      "blocks": [
+        "i2c_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Multi-protocol sensor interface plane for coordinating I2C and SPI peripherals.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sensor_aggregation_plane",
+      "compatible": false
     },
     {
       "name": "Sensor Hub Control Plane",
@@ -1095,7 +1928,27 @@
         "generic65",
         "bcd180"
       ],
-      "key": "sensor_hub_control_plane"
+      "key": "sensor_hub_control_plane",
+      "compatible": false
+    },
+    {
+      "name": "Test and Debug Control Plane",
+      "blocks": [
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic",
+        "interrupt_controller"
+      ],
+      "description": "JTAG, test-point aggregation, and debug signal routing for production test.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "test_control_plane",
+      "compatible": false
     },
     {
       "name": "Thermal Management Plane",
@@ -1112,7 +1965,26 @@
         "generic65",
         "bcd180"
       ],
-      "key": "thermal_management_plane"
+      "key": "thermal_management_plane",
+      "compatible": false
+    },
+    {
+      "name": "Trim Engine Subsystem",
+      "blocks": [
+        "trim_circuit",
+        "voltage_ladder_dac",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Programmable analog parameter tuning with NVM storage for post-silicon calibration.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "trim_engine",
+      "compatible": false
     },
     {
       "name": "UART Debug Interface",
@@ -1128,7 +2000,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "uart_debug_interface"
+      "key": "uart_debug_interface",
+      "compatible": false
     }
   ],
   "chip_profiles": [
@@ -1167,7 +2040,102 @@
         "generic65",
         "bcd180"
       ],
-      "key": "analog_signal_conditioner"
+      "key": "analog_signal_conditioner",
+      "compatible": false
+    },
+    {
+      "name": "Audio Codec ASIC",
+      "summary": "Digital audio interface chip combining stereo ADC/DAC, I2S, and signal conditioning.",
+      "headline": "Integrated audio codec platform with I2S interface and precision analog front-end.",
+      "narrative": "This profile assembles a complete audio-in/audio-out codec chip from precision analog infrastructure (references, op-amps, filters, ADC/DAC) and digital I2S interface for consumer and automotive audio applications.",
+      "standard": "I2S 3.0, internal audio codec architecture",
+      "tags": [
+        "audio",
+        "codec",
+        "i2s",
+        "dac",
+        "adc",
+        "mixed-signal"
+      ],
+      "blocks": [
+        "bandgap",
+        "precision_voltage_reference",
+        "operational_amplifier",
+        "low_pass_filter",
+        "dac_r2r_4bit",
+        "sar_adc_top",
+        "i2s_audio_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "i2s_audio_vip",
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "spi_vip"
+      ],
+      "digital_subsystems": [
+        "sensor_aggregation_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "audio_codec_asic",
+      "compatible": false
+    },
+    {
+      "name": "Automotive HV/DC PMIC",
+      "summary": "Automotive multi-output PMIC with boost converter, buck converter, and integrated protection.",
+      "headline": "High-integration automotive power management IC for battery-powered systems with multiple rail generation.",
+      "narrative": "This profile combines boost, buck, and LDO converters with multi-rail sequencing, frequency monitoring, and thermal protection for demanding automotive power-distribution applications.",
+      "standard": "ISO 26262 ASIL-B, ISO 7637 transient immunity, AEC-Q200",
+      "tags": [
+        "automotive",
+        "power",
+        "boost",
+        "buck",
+        "multi-rail",
+        "hvdc"
+      ],
+      "blocks": [
+        "bandgap",
+        "boost_converter",
+        "buck_converter",
+        "ldo_analog",
+        "ldo_digital",
+        "frequency_detector",
+        "charge_pump",
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "frequency_accuracy_vip",
+        "voltage_regulation_vip"
+      ],
+      "digital_subsystems": [
+        "multi_rail_power_control",
+        "frequency_monitoring_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "automotive_hvdc_pmic",
+      "compatible": false
     },
     {
       "name": "CAN Automotive Node",
@@ -1208,7 +2176,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "can_automotive_node"
+      "key": "can_automotive_node",
+      "compatible": false
     },
     {
       "name": "Debug Console Interface",
@@ -1244,7 +2213,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "debug_console_interface"
+      "key": "debug_console_interface",
+      "compatible": false
     },
     {
       "name": "High-Voltage Power Supply",
@@ -1285,7 +2255,51 @@
         "generic65",
         "bcd180"
       ],
-      "key": "high_voltage_power_supply"
+      "key": "high_voltage_power_supply",
+      "compatible": false
+    },
+    {
+      "name": "Isolated RS-485 Gateway",
+      "summary": "Galvanically isolated RS-485 interface combining transceiver, isolation, and protocol handling.",
+      "headline": "Isolated industrial communication gateway for multi-node networks and power-isolated systems.",
+      "narrative": "This profile combines RS-485 transceiver with integrated isolation barrier and protocol handling for robust industrial communication networks with ground potential differences.",
+      "standard": "IEC 61800-5, RS-485, ISO 7637 automotive immunity",
+      "tags": [
+        "industrial",
+        "rs485",
+        "isolation",
+        "gateway",
+        "communication"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "rs485_transceiver",
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "uart_vip",
+        "spi_vip",
+        "emc_compliance_vip",
+        "power_domain_isolation_vip"
+      ],
+      "digital_subsystems": [
+        "rs485_interface_plane",
+        "test_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "isolated_rs485_gateway",
+      "compatible": false
     },
     {
       "name": "LIN Node ASIC",
@@ -1326,7 +2340,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "lin_node_asic"
+      "key": "lin_node_asic",
+      "compatible": false
     },
     {
       "name": "Mixed-Signal Sensor Hub",
@@ -1366,7 +2381,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "mixed_signal_sensor_hub"
+      "key": "mixed_signal_sensor_hub",
+      "compatible": false
     },
     {
       "name": "Multi-Sensor Hub",
@@ -1412,7 +2428,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "multi_sensor_hub"
+      "key": "multi_sensor_hub",
+      "compatible": false
     },
     {
       "name": "Power Management Unit",
@@ -1450,7 +2467,99 @@
         "generic65",
         "bcd180"
       ],
-      "key": "power_management_unit"
+      "key": "power_management_unit",
+      "compatible": false
+    },
+    {
+      "name": "Precision Analog Front-End",
+      "summary": "Lab instrumentation front-end with programmable gain, multi-threshold detection, and precision references.",
+      "headline": "Reusable precision analog interface for measurement equipment and laboratory instrumentation.",
+      "narrative": "This profile builds a precision analog front-end from programmable gain amplifiers, multi-threshold comparator arrays, and precision reference generators for multi-channel instrumentation.",
+      "standard": "Precision measurement architecture reference",
+      "tags": [
+        "precision",
+        "measurement",
+        "instrumentation",
+        "analog",
+        "multi-channel"
+      ],
+      "blocks": [
+        "bandgap",
+        "precision_voltage_reference",
+        "current_reference",
+        "programmable_gain_amplifier",
+        "comparator_array",
+        "low_pass_filter",
+        "sar_adc_top",
+        "trim_circuit",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "io_electrical_vip",
+        "frequency_accuracy_vip"
+      ],
+      "digital_subsystems": [
+        "analog_conditioning_plane",
+        "converter_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "precision_analog_frontend",
+      "compatible": false
+    },
+    {
+      "name": "Real-Time Motor Controller",
+      "summary": "Three-phase motor control ASIC with PWM generation, current sensing, and thermal protection.",
+      "headline": "Integrated motor control platform for robotics, industrial drives, and automotive applications.",
+      "narrative": "This profile assembles a complete motor controller from PWM generation, programmable gain amplifiers for current sensing, thermal monitoring, and digital control plane for commutation sequencing.",
+      "standard": "IEC 61800-5 suitability, internal motor-control architecture reference",
+      "tags": [
+        "motor",
+        "pwm",
+        "three-phase",
+        "real-time",
+        "industrial",
+        "automotive"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "pwm_controller",
+        "programmable_gain_amplifier",
+        "comparator_array",
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "frequency_accuracy_vip"
+      ],
+      "digital_subsystems": [
+        "pwm_motor_control_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "real_time_motor_controller",
+      "compatible": false
     },
     {
       "name": "SAR ADC Macro",
@@ -1485,7 +2594,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "sar_adc_macro"
+      "key": "sar_adc_macro",
+      "compatible": false
     },
     {
       "name": "Sigma-Delta ADC Macro",
@@ -1520,7 +2630,8 @@
         "generic65",
         "bcd180"
       ],
-      "key": "sigma_delta_macro"
+      "key": "sigma_delta_macro",
+      "compatible": false
     }
   ]
 }
