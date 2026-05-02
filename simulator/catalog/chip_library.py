@@ -938,7 +938,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
                 "thd_plus_n_sweep: 1kHz fundamental with 2-10x harmonic content analysis",
                 "settling_time_precision: 0.1% and 0.01% settling verification",
                 "phase_matching_p_n: <3° phase difference between differential outputs",
-                "gain_accuracy_pnp_matching": "Resistor network tolerance and temperature tracking"
+                "gain_accuracy_pnp_matching: Resistor network tolerance and temperature tracking"
             ],
             "mixed_signal_integration": {
                 "bridge_sensor_frontend": {
