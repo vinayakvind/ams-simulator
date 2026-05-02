@@ -4,14 +4,16 @@ Main application window for the AMS Simulator.
 
 import json
 import os
+import re
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
     QToolBar, QStatusBar, QMenuBar, QMenu, QFileDialog, QMessageBox,
     QDockWidget, QTabWidget, QLabel, QDialog, QListWidget, QListWidgetItem,
-    QPushButton, QTextEdit, QDialogButtonBox, QApplication, QLineEdit
+    QPushButton, QTextEdit, QDialogButtonBox, QApplication, QLineEdit,
+    QTreeWidget, QTreeWidgetItem, QAbstractItemView
 )
 from PyQt6.QtCore import Qt, QSettings, QSize, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon, QKeySequence
@@ -25,6 +27,21 @@ from simulator.gui.waveform_viewer import WaveformWindow
 from simulator.gui.simulation_dialog import SimulationDialog
 from simulator.gui.netlist_viewer import NetlistViewer
 from simulator.gui.terminal_widget import TerminalWidget
+
+
+SUPPORTED_DESIGN_LIBRARY_SUFFIXES = {
+    ".sp",
+    ".spice",
+    ".v",
+    ".sv",
+    ".md",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".html",
+    ".txt",
+    ".py",
+}
 
 
 class CircuitLibraryDialog(QDialog):
@@ -292,6 +309,9 @@ class MainWindow(QMainWindow):
         self.settings = QSettings("AMSSimulator", "AMSSimulator")
         
         # Current project state
+        self._repo_root = Path(__file__).parent.parent.parent
+        self._designs_root = self._repo_root / "designs"
+        self._reports_root = self._repo_root / "reports"
         self.current_file = None
         self.modified = False
         self.api_session_guid = "waiting-for-server"
@@ -304,17 +324,18 @@ class MainWindow(QMainWindow):
         self._test_tracker_window: Optional[TestTrackerWindow] = None
         self._last_regression_report: Optional[dict] = None
         self._last_regression_command = ""
+        self._design_library_recent_entry: Optional[dict[str, Any]] = None
         self._asic_test_plan_path = (
-            Path(__file__).parent.parent.parent / "designs" / "lin_asic" / "LIN_ASIC_TESTPLAN.md"
+            self._designs_root / "lin_asic" / "LIN_ASIC_TESTPLAN.md"
         )
         self._asic_architecture_path = (
-            Path(__file__).parent.parent.parent / "designs" / "lin_asic" / "01_ARCHITECTURE.md"
+            self._designs_root / "lin_asic" / "01_ARCHITECTURE.md"
         )
         self._asic_regression_report_path = (
-            Path(__file__).parent.parent.parent / "reports" / "lin_asic_regression_latest.json"
+            self._reports_root / "lin_asic_regression_latest.json"
         )
         self._asic_regression_log_path = (
-            Path(__file__).parent.parent.parent / "reports" / "lin_asic_regression_latest.log"
+            self._reports_root / "lin_asic_regression_latest.log"
         )
         self._latest_waveform_window: Optional[WaveformWindow] = None
         self._waveform_windows: list = []
@@ -390,6 +411,7 @@ class MainWindow(QMainWindow):
         self.main_splitter.setSizes([250, 700, 300])
 
         self._create_api_session_monitor()
+        self._create_design_library_browser()
 
     def _create_api_session_monitor(self):
         """Create a live dock that shows API session GUID and call flow."""
@@ -431,6 +453,1214 @@ class MainWindow(QMainWindow):
         self.api_session_dock = dock
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, dock)
         self._refresh_api_session_monitor()
+
+    def _create_design_library_browser(self) -> None:
+        """Create a docked browser for design projects, files, and chip views."""
+        dock = QDockWidget("Design Library Browser", self)
+        dock.setObjectName("design_library_browser_dock")
+        dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea |
+            Qt.DockWidgetArea.RightDockWidgetArea
+        )
+
+        content = QWidget()
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(8, 8, 8, 8)
+
+        self.design_library_filter = QLineEdit()
+        self.design_library_filter.setPlaceholderText(
+            "Filter projects, blocks, RTL, reports, or chip profiles..."
+        )
+        self.design_library_filter.textChanged.connect(self._apply_design_library_filter)
+        layout.addWidget(self.design_library_filter)
+
+        action_row = QHBoxLayout()
+
+        refresh_btn = QPushButton("Refresh")
+        refresh_btn.clicked.connect(self._refresh_design_library_browser)
+        action_row.addWidget(refresh_btn)
+
+        open_btn = QPushButton("Open Selected")
+        open_btn.clicked.connect(self._open_selected_design_library_item)
+        action_row.addWidget(open_btn)
+
+        run_btn = QPushButton("Run + Waveforms")
+        run_btn.clicked.connect(self._run_selected_design_library_item)
+        action_row.addWidget(run_btn)
+
+        recent_btn = QPushButton("Launch Recent Chip")
+        recent_btn.clicked.connect(self._launch_recent_chip_design)
+        action_row.addWidget(recent_btn)
+
+        layout.addLayout(action_row)
+
+        browser_splitter = QSplitter(Qt.Orientation.Vertical)
+
+        self.design_library_tree = QTreeWidget()
+        self.design_library_tree.setHeaderLabels(["Design Item", "Type"])
+        self.design_library_tree.setAlternatingRowColors(True)
+        self.design_library_tree.setRootIsDecorated(True)
+        self.design_library_tree.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.design_library_tree.setColumnWidth(0, 260)
+        self.design_library_tree.currentItemChanged.connect(self._on_design_library_item_selected)
+        self.design_library_tree.itemDoubleClicked.connect(self._on_design_library_item_activated)
+        browser_splitter.addWidget(self.design_library_tree)
+
+        self.design_library_preview = QTextEdit()
+        self.design_library_preview.setReadOnly(True)
+        self.design_library_preview.setPlaceholderText(
+            "Select a project, block, or file to preview its location and contents."
+        )
+        browser_splitter.addWidget(self.design_library_preview)
+        browser_splitter.setSizes([340, 260])
+
+        layout.addWidget(browser_splitter)
+
+        dock.setWidget(content)
+        self.design_library_dock = dock
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+
+        self._refresh_design_library_browser()
+
+    @staticmethod
+    def _make_design_library_entry(
+        label: str,
+        kind: str,
+        *,
+        path: str = "",
+        open_mode: str = "",
+        run_mode: str = "",
+        run_path: str = "",
+        title: str = "",
+        focus_alias: str = "",
+        pin_names: Optional[list[str]] = None,
+        summary_lines: Optional[list[str]] = None,
+        children: Optional[list[dict[str, Any]]] = None,
+        recent_candidate: bool = False,
+        modified_at: float = 0.0,
+    ) -> dict[str, Any]:
+        """Create a serialisable design-library tree entry."""
+        return {
+            "label": label,
+            "kind": kind,
+            "path": path,
+            "open_mode": open_mode,
+            "run_mode": run_mode,
+            "run_path": run_path,
+            "title": title or label,
+            "focus_alias": focus_alias,
+            "pin_names": list(pin_names or []),
+            "summary_lines": list(summary_lines or []),
+            "children": list(children or []),
+            "recent_candidate": recent_candidate,
+            "modified_at": modified_at,
+        }
+
+    @staticmethod
+    def _read_json_file_safe(path: Path) -> Optional[dict[str, Any]]:
+        """Read a JSON document if it exists and is valid."""
+        if not path.exists():
+            return None
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+        return payload if isinstance(payload, dict) else None
+
+    @staticmethod
+    def _friendly_design_label(value: str) -> str:
+        """Convert a snake_case file stem into a readable title."""
+        return value.replace("_", " ").replace("-", " ").title()
+
+    @staticmethod
+    def _extract_subckt_ports(file_path: Path) -> list[str]:
+        """Return the first .SUBCKT port list declared in a SPICE file."""
+        if not file_path.exists() or file_path.suffix.lower() not in {".sp", ".spice"}:
+            return []
+
+        try:
+            file_text = MainWindow._read_text_file(file_path)
+            for raw_line in file_text.splitlines():
+                stripped = raw_line.strip()
+                if stripped.upper().startswith(".SUBCKT"):
+                    parts = stripped.split()
+                    return parts[2:] if len(parts) > 2 else []
+        except OSError:
+            return []
+        return []
+
+    @staticmethod
+    def _format_pin_summary(pin_names: list[str], limit: int = 8) -> str:
+        """Render a compact pin summary for the browser preview."""
+        if not pin_names:
+            return ""
+        if len(pin_names) <= limit:
+            return ", ".join(pin_names)
+        return f"{', '.join(pin_names[:limit])}, +{len(pin_names) - limit} more"
+
+    @staticmethod
+    def _netlist_has_analysis(netlist_text: str) -> bool:
+        """Return whether a netlist contains an executable analysis directive."""
+        upper_text = netlist_text.upper()
+        return any(token in upper_text for token in (".TRAN", ".AC", ".DC", ".OP"))
+
+    @staticmethod
+    def _find_default_run_entry(entries: list[dict[str, Any]]) -> Optional[dict[str, Any]]:
+        """Return the first nested entry that has a run action."""
+        for entry in entries:
+            if entry.get("run_mode"):
+                return entry
+            nested = MainWindow._find_default_run_entry(entry.get("children", []))
+            if nested:
+                return nested
+        return None
+
+    @staticmethod
+    def _parse_spice_include_target(line: str) -> Optional[str]:
+        """Extract a .include path from one SPICE line."""
+        stripped = line.strip()
+        if not stripped.lower().startswith(".include"):
+            return None
+        parts = stripped.split(maxsplit=1)
+        if len(parts) < 2:
+            return None
+        return parts[1].strip().strip('"').strip("'")
+
+    def _read_spice_file_with_includes(
+        self,
+        file_path: Path,
+        seen: Optional[set[Path]] = None,
+    ) -> str:
+        """Inline local .include files so browser-run testbenches stay self-contained."""
+        resolved_path = file_path.resolve()
+        visited = seen or set()
+        if resolved_path in visited:
+            return f"* Skipping recursive include: {resolved_path}"
+
+        visited.add(resolved_path)
+        rendered_lines: list[str] = []
+        for raw_line in self._read_text_file(file_path).splitlines():
+            include_target = self._parse_spice_include_target(raw_line)
+            if include_target is None:
+                rendered_lines.append(raw_line)
+                continue
+
+            include_path = Path(include_target)
+            if not include_path.is_absolute():
+                include_path = (file_path.parent / include_path).resolve()
+
+            if not include_path.exists():
+                rendered_lines.append(f"* Missing include skipped: {include_target}")
+                continue
+
+            rendered_lines.append(f"* Begin include: {include_path}")
+            rendered_lines.append(self._read_spice_file_with_includes(include_path, visited))
+            rendered_lines.append(f"* End include: {include_path}")
+
+        return "\n".join(rendered_lines)
+
+    def _build_block_wrapper_netlist(self, dut_path: Path) -> str:
+        """Build a runnable top-level wrapper around one IP block netlist."""
+        netlist_text = self._read_text_file(dut_path)
+        body_lines: list[str] = []
+        ports: list[str] = []
+        in_subckt = False
+        found_subckt = False
+
+        for raw_line in netlist_text.splitlines():
+            stripped = raw_line.strip()
+            if stripped.upper().startswith(".SUBCKT"):
+                parts = stripped.split()
+                ports = parts[2:] if len(parts) > 2 else []
+                found_subckt = True
+                in_subckt = True
+                continue
+            if stripped.upper().startswith(".ENDS") and in_subckt:
+                break
+            if in_subckt:
+                body_lines.append(raw_line)
+
+        if not found_subckt:
+            body_lines = [line for line in netlist_text.splitlines() if not line.strip().startswith(".")]
+            ports = self._extract_subckt_ports(dut_path)
+
+        if not body_lines:
+            raise ValueError(f"No runnable DUT body found in {dut_path.name}")
+
+        block_name = dut_path.stem.lower()
+        has_vout = any(port.upper() == "VOUT" for port in ports)
+        supply_lines: list[str] = []
+        load_lines: list[str] = []
+
+        for port in ports:
+            upper = port.upper()
+            if upper in {"0", "GND", "VSS", "VGND", "AVSS"} or "GND" in upper:
+                supply_lines.append(f"V_{upper} {port} 0 DC 0")
+            elif upper in {"VDD", "VDD_IO", "VDD_ANA", "VDD_DIGITAL"}:
+                supply_lines.append(f"V_{upper} {port} 0 DC 3.3")
+            elif upper == "VBAT":
+                supply_lines.append(f"V_{upper} {port} 0 DC 12")
+            elif upper == "VIN":
+                vin_voltage = 3.3 if "digital" in block_name else 12.0
+                supply_lines.append(f"V_{upper} {port} 0 DC {vin_voltage}")
+            elif upper == "VREF" and has_vout:
+                supply_lines.append(f"V_{upper} {port} 0 DC 1.2")
+            elif upper in {"EN", "SLP_N", "TXD", "CLK", "CLK_IN", "RST_N", "CS_N", "WR", "RD", "MOSI", "SCLK"}:
+                supply_lines.append(f"V_{upper} {port} 0 DC 3.3")
+
+        for port in ports:
+            upper = port.upper()
+            if upper == "VOUT":
+                load_lines.append(f"R_LOAD_{upper} {port} 0 100k")
+                load_lines.append(f"C_LOAD_{upper} {port} 0 100p")
+            elif upper == "VREF" and not has_vout:
+                load_lines.append(f"R_LOAD_{upper} {port} 0 100k")
+
+        return "\n".join([
+            f"* Auto-generated wrapper for {dut_path.stem}",
+            ".MODEL NMOS_3P3 NMOS (VTO=0.5 KP=120u LAMBDA=0.01 GAMMA=0.4 PHI=0.8)",
+            ".MODEL PMOS_3P3 PMOS (VTO=-0.5 KP=40u LAMBDA=0.01 GAMMA=0.4 PHI=0.8)",
+            ".MODEL PMOS_HV PMOS (VTO=-0.8 KP=20u LAMBDA=0.005)",
+            ".MODEL NPN_VERT NPN (IS=1e-15 BF=100 BR=1)",
+            "",
+            *body_lines,
+            "",
+            "* Auto-generated supplies",
+            *supply_lines,
+            "",
+            "* Auto-generated loads",
+            *load_lines,
+            "",
+            ".OP",
+            ".END",
+        ])
+
+    @staticmethod
+    def _detect_netlist_analysis_type(netlist: str) -> str:
+        """Detect the dominant analysis directive in a SPICE netlist."""
+        upper_text = netlist.upper()
+        if ".DC" in upper_text:
+            return "DC"
+        if ".AC" in upper_text:
+            return "AC"
+        if ".TRAN" in upper_text:
+            return "Transient"
+        if ".OP" in upper_text:
+            return "Operating Point"
+        return "Transient"
+
+    def _normalize_results_for_waveform_viewer(
+        self,
+        results: dict[str, Any],
+        analysis_type: str,
+    ) -> dict[str, Any]:
+        """Make scalar or single-point results plottable in the waveform window."""
+        if not results:
+            return {}
+
+        normalized = dict(results)
+        axis = normalized.get("time")
+        if axis is not None:
+            return normalized
+
+        if "frequency" in normalized and "time" not in normalized:
+            normalized["time"] = normalized.pop("frequency")
+            return normalized
+
+        waveform_map: dict[str, list[float]] = {}
+        point_count = 2
+        for key, value in normalized.items():
+            if key in {"type", "dc_op", "metadata"} or isinstance(value, str):
+                continue
+
+            values: list[float]
+            if isinstance(value, dict):
+                raw_values = value.get("values", [])
+            elif hasattr(value, "tolist"):
+                raw_values = value.tolist()
+            elif isinstance(value, (list, tuple)):
+                raw_values = list(value)
+            else:
+                raw_values = [value]
+
+            try:
+                values = [float(item) for item in raw_values]
+            except (TypeError, ValueError):
+                continue
+
+            if not values:
+                continue
+            if len(values) == 1:
+                values = [values[0], values[0]]
+            point_count = max(point_count, len(values))
+            waveform_map[key] = values
+
+        if not waveform_map:
+            return normalized
+
+        for key, values in list(waveform_map.items()):
+            if len(values) < point_count:
+                waveform_map[key] = values + [values[-1]] * (point_count - len(values))
+
+        prepared = {
+            "type": analysis_type.lower().replace(" ", "_"),
+            "time": [float(index) for index in range(point_count)],
+            "dc_op": analysis_type == "Operating Point",
+        }
+        prepared.update(waveform_map)
+        return prepared
+
+    def _is_supported_design_library_file(self, path: Path) -> bool:
+        """Return whether a path belongs in the design browser."""
+        return path.is_file() and path.suffix.lower() in SUPPORTED_DESIGN_LIBRARY_SUFFIXES
+
+    def _latest_supported_file_mtime(self, root: Path) -> float:
+        """Return the newest modification time beneath a root path."""
+        if not root.exists():
+            return 0.0
+        if root.is_file():
+            return root.stat().st_mtime
+
+        latest = 0.0
+        for candidate in root.rglob("*"):
+            if self._is_supported_design_library_file(candidate):
+                latest = max(latest, candidate.stat().st_mtime)
+        return latest
+
+    def _find_first_openable_entry(self, entries: list[dict[str, Any]]) -> Optional[dict[str, Any]]:
+        """Return the first nested entry that has an open action."""
+        for entry in entries:
+            if entry.get("open_mode"):
+                return entry
+            nested = self._find_first_openable_entry(entry.get("children", []))
+            if nested:
+                return nested
+        return None
+
+    def _build_design_library_entries(self) -> list[dict[str, Any]]:
+        """Build the top-level contents for the design browser."""
+        entries: list[dict[str, Any]] = []
+
+        project_entries = []
+        if self._designs_root.exists():
+            for project_dir in sorted(
+                (path for path in self._designs_root.iterdir() if path.is_dir()),
+                key=lambda path: path.name.lower(),
+            ):
+                project_entry = self._build_design_project_entry(project_dir)
+                if project_entry:
+                    project_entries.append(project_entry)
+
+        if project_entries:
+            entries.append(self._make_design_library_entry(
+                "Design Projects",
+                "Collection",
+                path=str(self._designs_root),
+                summary_lines=[
+                    "Browse all checked-in design projects and open netlists, RTL, specs, and collateral from one tree.",
+                    f"Projects found: {len(project_entries)}",
+                ],
+                children=project_entries,
+            ))
+
+        testbench_entries = self._build_testbench_library_entries()
+        if testbench_entries is not None:
+            entries.append(testbench_entries)
+
+        chip_profiles_entry = self._build_chip_profile_entries()
+        if chip_profiles_entry is not None:
+            entries.append(chip_profiles_entry)
+
+        generated_reports_entry = self._build_generated_report_entries()
+        if generated_reports_entry is not None:
+            entries.append(generated_reports_entry)
+
+        return entries
+
+    def _build_design_project_entry(self, project_dir: Path) -> Optional[dict[str, Any]]:
+        """Build a browser entry for a design project under designs/."""
+        child_entries: list[dict[str, Any]] = []
+        project_name = project_dir.name
+
+        if project_name == "lin_asic":
+            top_path = project_dir / "lin_asic_top.spice"
+            child_entries.append(self._make_design_library_entry(
+                "Launch Full LIN ASIC Hierarchy",
+                "Hierarchy Demo",
+                path=str(top_path),
+                open_mode="lin_asic_hierarchy",
+                title="LIN ASIC Hierarchy",
+                summary_lines=[
+                    "Open the full LIN ASIC top-level schematic with child analog/digital tabs and hierarchy navigation.",
+                    "This is the best entry point if you want to descend into block-level views.",
+                ],
+                recent_candidate=top_path.exists(),
+                modified_at=top_path.stat().st_mtime if top_path.exists() else 0.0,
+            ))
+            lin_hierarchy = self._build_lin_asic_hierarchy_entry()
+            if lin_hierarchy is not None:
+                child_entries.append(lin_hierarchy)
+
+        root_files = [
+            self._build_file_entry(path)
+            for path in sorted(project_dir.iterdir(), key=lambda path: (path.is_file(), path.name.lower()))
+            if path.is_file() and self._is_supported_design_library_file(path)
+        ]
+        if root_files:
+            child_entries.append(self._make_design_library_entry(
+                "Project Files",
+                "Section",
+                path=str(project_dir),
+                summary_lines=["Top-level files for this design project."],
+                children=root_files,
+            ))
+
+        for directory in sorted(
+            (path for path in project_dir.iterdir() if path.is_dir()),
+            key=lambda path: path.name.lower(),
+        ):
+            directory_entry = self._build_directory_entry(directory)
+            if directory_entry is not None:
+                child_entries.append(directory_entry)
+
+        if not child_entries:
+            return None
+
+        default_entry = self._find_first_openable_entry(child_entries)
+        run_entry = self._find_default_run_entry(child_entries)
+        project_file_count = sum(1 for candidate in project_dir.rglob("*") if self._is_supported_design_library_file(candidate))
+        summary_lines = [
+            f"Project path: {project_dir.relative_to(self._repo_root).as_posix()}",
+            f"Browsable design files: {project_file_count}",
+        ]
+        if project_name == "lin_asic":
+            summary_lines.append("Includes a ready-to-open hierarchical chip demo plus block-level source views.")
+
+        return self._make_design_library_entry(
+            self._friendly_design_label(project_name),
+            "Project",
+            path=str(project_dir),
+            open_mode=(default_entry or {}).get("open_mode", ""),
+            run_mode=(run_entry or {}).get("run_mode", ""),
+            run_path=(run_entry or {}).get("run_path", ""),
+            title=(default_entry or {}).get("title", self._friendly_design_label(project_name)),
+            focus_alias=(default_entry or {}).get("focus_alias", ""),
+            summary_lines=summary_lines,
+            children=child_entries,
+            recent_candidate=project_name == "lin_asic",
+            modified_at=self._latest_supported_file_mtime(project_dir),
+        )
+
+    def _build_testbench_library_entries(self) -> Optional[dict[str, Any]]:
+        """Build a dedicated library of runnable IP testbenches."""
+        testbench_paths = sorted(
+            self._designs_root.glob("**/testbench.spice"),
+            key=lambda path: path.parent.as_posix().lower(),
+        )
+        if not testbench_paths:
+            return None
+
+        entries: list[dict[str, Any]] = []
+        for testbench_path in testbench_paths:
+            block_dir = testbench_path.parent
+            block_name = self._friendly_design_label(block_dir.name)
+            dut_path = block_dir / f"{block_dir.name}.spice"
+            simulate_path = block_dir / "simulate.py"
+            pin_names = self._extract_subckt_ports(dut_path) if dut_path.exists() else []
+
+            child_entries = [self._build_file_entry(testbench_path)]
+            if dut_path.exists():
+                child_entries.append(self._build_file_entry(dut_path))
+            if simulate_path.exists():
+                child_entries.append(self._build_file_entry(simulate_path))
+
+            summary_lines = [
+                f"Testbench path: {testbench_path.relative_to(self._repo_root).as_posix()}",
+                "Run Selected launches a normalized wrapper simulation for this IP and opens a waveform window.",
+            ]
+            pin_summary = self._format_pin_summary(pin_names)
+            if pin_summary:
+                summary_lines.append(f"Pins: {pin_summary}")
+
+            entries.append(self._make_design_library_entry(
+                block_name,
+                "IP Testbench",
+                path=str(testbench_path),
+                open_mode="source",
+                run_mode="block_wrapper" if dut_path.exists() else "",
+                run_path=str(dut_path) if dut_path.exists() else "",
+                title=f"{block_name} Testbench",
+                pin_names=pin_names,
+                summary_lines=summary_lines,
+                children=child_entries,
+                modified_at=max(path.stat().st_mtime for path in [testbench_path, dut_path] if path.exists()),
+            ))
+
+        return self._make_design_library_entry(
+            "IP Testbench Library",
+            "Collection",
+            path=str(self._designs_root),
+            summary_lines=[
+                "Runnable block-level testbenches with matching DUT collateral and optional helper scripts.",
+                f"Testbenches found: {len(entries)}",
+            ],
+            children=entries,
+        )
+
+    def _build_lin_asic_hierarchy_entry(self) -> Optional[dict[str, Any]]:
+        """Build explicit block-level entries for the LIN ASIC hierarchy."""
+        try:
+            from simulator.api.server import _asic_design_root, _get_asic_block_catalog
+        except Exception:
+            return None
+
+        design_root = _asic_design_root()
+        catalog = _get_asic_block_catalog()
+        block_entries: list[dict[str, Any]] = []
+
+        for block_key, spec in sorted(
+            catalog.items(),
+            key=lambda item: ((item[1].get("domain") or "mixed"), item[1].get("name") or item[0]),
+        ):
+            child_files: list[dict[str, Any]] = []
+            candidate_paths = []
+            spice_path: Optional[Path] = None
+            for relative_path in (spec.get("spice_file"), spec.get("rtl_file")):
+                if not relative_path:
+                    continue
+                candidate = design_root / relative_path
+                if candidate.exists():
+                    if candidate.suffix.lower() in {".sp", ".spice"}:
+                        spice_path = candidate
+                    candidate_paths.append(candidate)
+                    child_files.append(self._build_file_entry(candidate))
+
+            pin_names = self._extract_subckt_ports(spice_path) if spice_path is not None else []
+            pin_summary = self._format_pin_summary(pin_names)
+            summary_lines = [
+                spec.get("description") or "No description available.",
+                f"Domain: {spec.get('domain', 'mixed')}",
+                f"Primary open action: focuses the hierarchy tab for {spec.get('name') or block_key}.",
+            ]
+            if pin_summary:
+                summary_lines.append(f"Pins: {pin_summary}")
+
+            block_entries.append(self._make_design_library_entry(
+                spec.get("name") or self._friendly_design_label(block_key),
+                f"{(spec.get('domain') or 'mixed').title()} Block",
+                path=str(candidate_paths[0]) if candidate_paths else str(design_root),
+                open_mode="lin_asic_focus",
+                title=f"LIN ASIC — {spec.get('name') or block_key}",
+                focus_alias=block_key,
+                pin_names=pin_names,
+                summary_lines=summary_lines,
+                children=child_files,
+                modified_at=max((path.stat().st_mtime for path in candidate_paths), default=0.0),
+            ))
+
+        return self._make_design_library_entry(
+            "LIN ASIC Block Hierarchy",
+            "Hierarchy",
+            path=str(design_root),
+            summary_lines=[
+                "Open any LIN ASIC block directly from this section.",
+                "Digital block entries also open their RTL source window when available.",
+            ],
+            children=block_entries,
+        ) if block_entries else None
+
+    def _build_chip_profile_entries(self) -> Optional[dict[str, Any]]:
+        """Build entries for the newest generated chip-profile collateral."""
+        reference_files = sorted(
+            self._reports_root.glob("cycle_*_reference_implementation.json"),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+        reference_payload = self._read_json_file_safe(reference_files[0]) if reference_files else None
+        if not reference_payload:
+            return None
+
+        catalog_payload = self._read_json_file_safe(self._reports_root / "chip_catalog_latest.json") or {}
+        profile_map = {
+            entry.get("key", ""): entry
+            for entry in catalog_payload.get("chip_profiles", [])
+            if isinstance(entry, dict) and entry.get("key")
+        }
+
+        children: list[dict[str, Any]] = []
+        for profile_key, result in (reference_payload.get("profiles") or {}).items():
+            if not isinstance(result, dict):
+                continue
+
+            profile_data = profile_map.get(profile_key, {})
+            html_path = self._reports_root / f"{profile_key}_design_reference.html"
+            summary_lines = [
+                profile_data.get("summary") or f"Reference implementation status: {result.get('status', 'unknown')}",
+                (
+                    f"Status: {result.get('status', 'unknown')}  |  blocks={result.get('blocks_count', 0)}  "
+                    f"VIPs={result.get('vips_count', 0)}  subsystems={result.get('subsystems_count', 0)}"
+                ),
+            ]
+            tech_support = profile_data.get("technology_support") or result.get("technology_support") or []
+            if tech_support:
+                summary_lines.append(f"Technology support: {', '.join(tech_support)}")
+            if profile_data.get("headline"):
+                summary_lines.append(profile_data["headline"])
+            collateral = profile_data.get("design_collateral") or []
+            if collateral:
+                summary_lines.append(f"Collateral highlights: {', '.join(collateral[:3])}")
+
+            child_entries: list[dict[str, Any]] = []
+            if html_path.exists():
+                child_entries.append(self._build_file_entry(html_path))
+
+            children.append(self._make_design_library_entry(
+                profile_data.get("name") or self._friendly_design_label(profile_key),
+                "Chip Profile",
+                path=str(html_path if html_path.exists() else reference_files[0]),
+                open_mode="source" if html_path.exists() else "",
+                title=f"Chip Profile — {profile_data.get('name') or self._friendly_design_label(profile_key)}",
+                summary_lines=summary_lines,
+                children=child_entries,
+                recent_candidate=html_path.exists(),
+                modified_at=html_path.stat().st_mtime if html_path.exists() else reference_files[0].stat().st_mtime,
+            ))
+
+        return self._make_design_library_entry(
+            "Recent Chip Profiles",
+            "Collection",
+            path=str(self._reports_root),
+            summary_lines=[
+                "Generated reference collateral for the newest chip-profile work.",
+                f"Profiles listed: {len(children)}",
+            ],
+            children=children,
+        ) if children else None
+
+    def _build_generated_report_entries(self) -> Optional[dict[str, Any]]:
+        """Build entries for generated design references and reports."""
+        report_files: list[Path] = []
+        patterns = [
+            "*_design_reference.html",
+            "*_regression_latest.json",
+            "*_regression_latest.md",
+            "chip_catalog*.json",
+            "chip_catalog*.md",
+            "design_portfolio_overview.json",
+            "design_portfolio_overview.md",
+        ]
+        for pattern in patterns:
+            report_files.extend(self._reports_root.glob(pattern))
+
+        unique_files = sorted({path for path in report_files if path.exists()}, key=lambda path: path.name.lower())
+        if not unique_files:
+            return None
+
+        return self._make_design_library_entry(
+            "Generated Design Reports",
+            "Collection",
+            path=str(self._reports_root),
+            summary_lines=[
+                "Rendered design references, regression summaries, and chip catalog snapshots.",
+                f"Files listed: {len(unique_files)}",
+            ],
+            children=[self._build_file_entry(path) for path in unique_files],
+        )
+
+    def _build_directory_entry(self, directory: Path) -> Optional[dict[str, Any]]:
+        """Recursively build a tree entry for a design directory."""
+        if directory.name.startswith("."):
+            return None
+
+        children: list[dict[str, Any]] = []
+        for child in sorted(directory.iterdir(), key=lambda path: (path.is_file(), path.name.lower())):
+            if child.is_dir():
+                nested = self._build_directory_entry(child)
+                if nested is not None:
+                    children.append(nested)
+            elif self._is_supported_design_library_file(child):
+                children.append(self._build_file_entry(child))
+
+        if not children:
+            return None
+
+        default_entry = self._find_first_openable_entry(children)
+        run_entry = self._find_default_run_entry(children)
+        return self._make_design_library_entry(
+            self._friendly_design_label(directory.name),
+            "Folder",
+            path=str(directory),
+            open_mode=(default_entry or {}).get("open_mode", ""),
+            run_mode=(run_entry or {}).get("run_mode", ""),
+            run_path=(run_entry or {}).get("run_path", ""),
+            title=(default_entry or {}).get("title", self._friendly_design_label(directory.name)),
+            focus_alias=(default_entry or {}).get("focus_alias", ""),
+            summary_lines=[
+                f"Folder: {directory.relative_to(self._repo_root).as_posix()}",
+                f"Browsable children: {len(children)}",
+            ],
+            children=children,
+            modified_at=self._latest_supported_file_mtime(directory),
+        )
+
+    def _build_file_entry(self, file_path: Path) -> dict[str, Any]:
+        """Build a leaf entry for one browsable design file."""
+        suffix = file_path.suffix.lower()
+        relative_path = file_path.relative_to(self._repo_root).as_posix()
+        open_mode = "source"
+        kind = "Source"
+        run_mode = ""
+        run_path = ""
+        pin_names: list[str] = []
+
+        if suffix in {".sp", ".spice"} and file_path.name != "testbench.spice":
+            pin_names = self._extract_subckt_ports(file_path)
+
+        if file_path.name == "lin_asic_top.spice":
+            open_mode = "lin_asic_hierarchy"
+            kind = "Hierarchy Schematic"
+        elif file_path.name == "testbench.spice":
+            kind = "Testbench"
+            dut_path = file_path.parent / f"{file_path.parent.name}.spice"
+            if dut_path.exists():
+                run_mode = "block_wrapper"
+                run_path = str(dut_path)
+            else:
+                run_mode = "spice_file"
+                run_path = str(file_path)
+        elif suffix in {".sp", ".spice"}:
+            open_mode = "schematic"
+            kind = "Schematic"
+            sibling_testbench = file_path.parent / "testbench.spice"
+            if sibling_testbench.exists() and file_path.parent.name == file_path.stem:
+                run_mode = "block_wrapper"
+                run_path = str(file_path)
+            elif self._netlist_has_analysis(self._read_text_file(file_path)):
+                run_mode = "spice_file"
+                run_path = str(file_path)
+            else:
+                testbench_path = file_path.parent / "testbench.spice"
+                if testbench_path.exists() and file_path.parent.name == file_path.stem:
+                    run_mode = "block_wrapper"
+                    run_path = str(file_path)
+        elif suffix in {".v", ".sv"}:
+            kind = "RTL Source"
+        elif suffix in {".md", ".txt"}:
+            kind = "Document"
+        elif suffix in {".json", ".yaml", ".yml"}:
+            kind = "Manifest"
+        elif suffix == ".html":
+            kind = "Rendered View"
+
+        summary_lines = [
+            f"Path: {relative_path}",
+            f"Size: {file_path.stat().st_size} bytes",
+        ]
+        pin_summary = self._format_pin_summary(pin_names)
+        if pin_summary:
+            summary_lines.append(f"Pins: {pin_summary}")
+        if run_path:
+            summary_lines.append(f"Run action: {Path(run_path).name}")
+
+        return self._make_design_library_entry(
+            file_path.name,
+            kind,
+            path=str(file_path),
+            open_mode=open_mode,
+            run_mode=run_mode,
+            run_path=run_path,
+            title=file_path.name if suffix in {".sp", ".spice"} else relative_path,
+            pin_names=pin_names,
+            summary_lines=summary_lines,
+            modified_at=file_path.stat().st_mtime,
+        )
+
+    def _refresh_design_library_browser(self) -> None:
+        """Re-scan the repo-backed design browser and refresh the tree."""
+        self.design_library_tree.clear()
+        self._design_library_recent_entry = None
+
+        for entry in self._build_design_library_entries():
+            self._add_design_library_tree_item(None, entry)
+
+        self.design_library_tree.expandToDepth(1)
+        self._apply_design_library_filter(self.design_library_filter.text())
+
+        recent_entry = self._design_library_recent_entry
+        if recent_entry is not None:
+            self.design_library_tree.setCurrentItem(recent_entry["item"])
+
+    def _add_design_library_tree_item(
+        self,
+        parent: Optional[QTreeWidgetItem],
+        entry: dict[str, Any],
+    ) -> QTreeWidgetItem:
+        """Append one design-library entry to the tree and recurse into children."""
+        item = QTreeWidgetItem([entry.get("label", "Item"), entry.get("kind", "")])
+        item.setData(0, Qt.ItemDataRole.UserRole, entry)
+        tooltip = entry.get("path") or entry.get("label", "")
+        item.setToolTip(0, tooltip)
+        item.setToolTip(1, entry.get("kind", ""))
+
+        if parent is None:
+            self.design_library_tree.addTopLevelItem(item)
+        else:
+            parent.addChild(item)
+
+        if entry.get("recent_candidate"):
+            current = self._design_library_recent_entry
+            if current is None or entry.get("modified_at", 0.0) >= current["entry"].get("modified_at", 0.0):
+                self._design_library_recent_entry = {"item": item, "entry": entry}
+
+        for child in entry.get("children", []):
+            self._add_design_library_tree_item(item, child)
+
+        return item
+
+    def _entry_search_text(self, entry: dict[str, Any]) -> str:
+        """Flatten an entry into searchable text for tree filtering."""
+        fields = [
+            entry.get("label", ""),
+            entry.get("kind", ""),
+            entry.get("path", ""),
+            " ".join(entry.get("summary_lines", [])),
+        ]
+        return " ".join(fields).lower()
+
+    def _filter_design_library_item(self, item: QTreeWidgetItem, query: str) -> bool:
+        """Recursively filter one tree item and return whether it should stay visible."""
+        entry = item.data(0, Qt.ItemDataRole.UserRole) or {}
+        matches = not query or query in self._entry_search_text(entry)
+        child_matches = False
+
+        for index in range(item.childCount()):
+            child_matches = self._filter_design_library_item(item.child(index), query) or child_matches
+
+        visible = matches or child_matches
+        item.setHidden(not visible)
+        if child_matches and query:
+            item.setExpanded(True)
+        return visible
+
+    def _apply_design_library_filter(self, text: str) -> None:
+        """Apply a case-insensitive filter to the design library tree."""
+        query = (text or "").strip().lower()
+        for index in range(self.design_library_tree.topLevelItemCount()):
+            self._filter_design_library_item(self.design_library_tree.topLevelItem(index), query)
+
+    def _read_entry_preview_text(self, entry: dict[str, Any]) -> str:
+        """Build a preview payload for the selected design entry."""
+        lines = [entry.get("label", "Item"), f"Type: {entry.get('kind', 'Unknown')}"]
+        if entry.get("path"):
+            path = Path(entry["path"])
+            lines.append(f"Path: {path}")
+        else:
+            path = None
+
+        summary_lines = entry.get("summary_lines", [])
+        if summary_lines:
+            lines.extend(["", *summary_lines])
+
+        if path is not None and path.exists() and path.is_file():
+            try:
+                preview = self._read_text_file(path)
+                preview_lines = preview.splitlines()
+                if preview_lines:
+                    lines.extend(["", *preview_lines[:80]])
+            except Exception as exc:
+                lines.extend(["", f"Preview unavailable: {exc}"])
+
+        pin_names = entry.get("pin_names", [])
+        if pin_names:
+            lines.extend(["", f"Pins: {', '.join(pin_names)}"])
+
+        if entry.get("open_mode"):
+            lines.extend(["", f"Double-click or press Open Selected to: {entry['open_mode']}"])
+        if entry.get("run_mode"):
+            run_target = entry.get("run_path") or entry.get("path") or "selected design"
+            lines.append(f"Run + Waveforms executes: {run_target}")
+
+        return "\n".join(lines)
+
+    def _on_design_library_item_selected(
+        self,
+        current: Optional[QTreeWidgetItem],
+        _previous: Optional[QTreeWidgetItem],
+    ) -> None:
+        """Update the preview pane when the design browser selection changes."""
+        if current is None:
+            self.design_library_preview.clear()
+            return
+
+        entry = current.data(0, Qt.ItemDataRole.UserRole) or {}
+        self.design_library_preview.setPlainText(self._read_entry_preview_text(entry))
+
+    def _on_design_library_item_activated(self, item: QTreeWidgetItem, _column: int) -> None:
+        """Open or expand the selected design browser item on double-click."""
+        entry = item.data(0, Qt.ItemDataRole.UserRole) or {}
+        if entry.get("open_mode"):
+            self._open_design_library_entry(entry)
+            return
+
+        item.setExpanded(not item.isExpanded())
+
+    def _show_design_library_browser(self) -> None:
+        """Refresh and reveal the design library browser dock."""
+        self._refresh_design_library_browser()
+        self.design_library_dock.show()
+        self.design_library_dock.raise_()
+        self.design_library_dock.activateWindow()
+
+    def _expand_design_library_parents(self, item: QTreeWidgetItem) -> None:
+        """Expand all ancestors for a selected design-library item."""
+        parent = item.parent()
+        while parent is not None:
+            parent.setExpanded(True)
+            parent = parent.parent()
+
+    def _launch_recent_chip_design(self) -> None:
+        """Open the newest chip-related browser entry and bring the dock forward."""
+        self._show_design_library_browser()
+        recent_entry = self._design_library_recent_entry
+        if recent_entry is None:
+            self.statusbar.showMessage("No recent chip entry is available in the design browser")
+            return
+
+        item = recent_entry["item"]
+        self._expand_design_library_parents(item)
+        self.design_library_tree.setCurrentItem(item)
+        self._open_design_library_entry(recent_entry["entry"])
+
+    def _open_selected_design_library_item(self) -> None:
+        """Open the currently selected item from the design library tree."""
+        item = self.design_library_tree.currentItem()
+        if item is None:
+            self.statusbar.showMessage("Select a design, block, or file from the browser first")
+            return
+
+        entry = item.data(0, Qt.ItemDataRole.UserRole) or {}
+        self._open_design_library_entry(entry)
+
+    def _run_selected_design_library_item(self) -> None:
+        """Simulate the currently selected browser entry when it has a run action."""
+        item = self.design_library_tree.currentItem()
+        if item is None:
+            self.statusbar.showMessage("Select a runnable design or testbench from the browser first")
+            return
+
+        entry = item.data(0, Qt.ItemDataRole.UserRole) or {}
+        self._run_design_library_entry(entry)
+
+    def _run_design_library_entry(self, entry: dict[str, Any]) -> None:
+        """Run the selected browser entry and show waveforms when possible."""
+        run_mode = entry.get("run_mode", "")
+        if not run_mode:
+            self.statusbar.showMessage("Select a testbench or design entry with a run action")
+            return
+
+        path_text = entry.get("run_path") or entry.get("path", "")
+        if not path_text:
+            self.statusbar.showMessage("This browser item is missing a runnable file path")
+            return
+
+        run_path = Path(path_text)
+        if not run_path.exists():
+            self.statusbar.showMessage(f"Missing run target: {run_path}")
+            return
+
+        if run_mode == "spice_file":
+            self._run_spice_file_simulation(run_path, entry.get("title") or entry.get("label") or run_path.stem)
+            return
+
+        if run_mode == "block_wrapper":
+            self._run_block_wrapper_simulation(run_path, entry.get("title") or entry.get("label") or run_path.stem)
+            return
+
+        self.statusbar.showMessage(f"Unsupported browser run action: {run_mode}")
+
+    def _open_design_library_entry(self, entry: dict[str, Any]) -> None:
+        """Open one browser entry using the correct helper for its type."""
+        open_mode = entry.get("open_mode", "")
+        if not open_mode:
+            self.statusbar.showMessage("Open a specific file or hierarchy view from this section")
+            return
+
+        if open_mode == "lin_asic_hierarchy":
+            self._load_lin_asic_hierarchy(entry.get("focus_alias") or None)
+            return
+
+        if open_mode == "lin_asic_focus":
+            self._load_lin_asic_hierarchy(entry.get("focus_alias") or None)
+            return
+
+        path_text = entry.get("path", "")
+        if not path_text:
+            self.statusbar.showMessage("This browser item is missing a file path")
+            return
+
+        path = Path(path_text)
+        if not path.exists():
+            self.statusbar.showMessage(f"Missing design file: {path}")
+            return
+
+        if open_mode == "schematic":
+            self._open_netlist_file(path, entry.get("title") or self._friendly_design_label(path.stem))
+            return
+
+        if open_mode == "source":
+            self._open_source_file(path, entry.get("title") or path.name)
+            return
+
+        self.statusbar.showMessage(f"Unsupported browser action: {open_mode}")
+
+    def _open_source_file(self, path: Path, title: str) -> None:
+        """Open one text-like design file in the standalone source window."""
+        self._show_source_window(
+            title,
+            self._read_text_file(path),
+            str(path),
+        )
+        self.statusbar.showMessage(f"Opened source view: {path.name}")
+
+    def _open_netlist_file(self, path: Path, tab_name: str) -> None:
+        """Open a SPICE netlist file in a new schematic tab and netlist viewer."""
+        netlist = self._read_text_file(path)
+        self.netlist_viewer.set_netlist(netlist)
+
+        editor = SchematicEditor()
+        index = self.schematic_tabs.addTab(editor, tab_name)
+        self.schematic_tabs.setCurrentIndex(index)
+        self.schematic_editor = editor
+        self._connect_editor_signals(editor)
+        editor.load_from_netlist(netlist)
+        self.statusbar.showMessage(f"Opened schematic view: {path.name}")
+
+    def _run_spice_file_simulation(self, path: Path, title: str) -> None:
+        """Run a SPICE file from disk and open the waveform window."""
+        try:
+            from simulator.engine.ngspice_backend import NgSpiceBackend
+
+            source_netlist = self._read_text_file(path)
+            expanded_netlist = self._read_spice_file_with_includes(path)
+            analysis_type = self._detect_netlist_analysis_type(expanded_netlist)
+            backend = NgSpiceBackend()
+
+            if backend.is_available():
+                self.statusbar.showMessage(f"{title}: Running {analysis_type} with NgSpice...")
+                QApplication.processEvents()
+                results = backend.simulate(expanded_netlist)
+                prepared_results = self._normalize_results_for_waveform_viewer(results, analysis_type)
+                if not prepared_results or len(prepared_results) <= 1:
+                    raise RuntimeError("Simulation completed but produced no plottable signals")
+                self._show_waveform_viewer(prepared_results, title=f"{title} — {analysis_type}")
+                self.statusbar.showMessage(f"{title}: {analysis_type} analysis complete")
+                return
+
+            if ".include" in source_netlist.lower() or re.search(r"(?mi)^\s*x\w+", expanded_netlist):
+                raise RuntimeError(
+                    "NgSpice is required to run this testbench because it uses includes or hierarchical subcircuits."
+                )
+
+            self._run_netlist_simulation(expanded_netlist, title)
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Simulation Error",
+                f"Failed to run simulation for {path.name}:\n{exc}",
+            )
+            self.statusbar.showMessage(f"Simulation error: {exc}")
+
+    def _run_block_wrapper_simulation(self, dut_path: Path, title: str) -> None:
+        """Run a browser-selected IP using a generated wrapper around the DUT body."""
+        try:
+            wrapper_netlist = self._build_block_wrapper_netlist(dut_path)
+            self._run_netlist_simulation(wrapper_netlist, title)
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Simulation Error",
+                f"Failed to run wrapper simulation for {dut_path.name}:\n{exc}",
+            )
+            self.statusbar.showMessage(f"Simulation error: {exc}")
+
+    def _load_lin_asic_hierarchy(self, focus_alias: Optional[str] = None) -> None:
+        """Load or refocus the LIN ASIC hierarchy demo from the design browser."""
+        try:
+            from simulator.api.server import _asic_design_root, _get_asic_block_catalog, _read_asic_design_file
+        except Exception as exc:
+            QMessageBox.critical(self, "LIN ASIC Loader", f"Failed to import ASIC loader helpers:\n{exc}")
+            return
+
+        top_spec = self._find_hierarchy_spec("lin_asic", "top_level")
+        if top_spec is None:
+            design_root = _asic_design_root()
+            catalog = _get_asic_block_catalog()
+
+            top_file = design_root / "lin_asic_top.spice"
+            loaded_tabs = [{
+                "tab_name": "★ LIN ASIC — Top Level",
+                "netlist": self._read_text_file(top_file) if top_file.exists() else "",
+                "hierarchical": True,
+                "block_key": None,
+                "parent_tab_name": None,
+                "block_aliases": ["lin_asic", "top_level"],
+                "domain": None,
+                "rtl_file": None,
+                "spice_file": "lin_asic_top.spice",
+                "display_name": "LIN ASIC Top Level",
+            }]
+
+            for block_key, spec in catalog.items():
+                netlist = _read_asic_design_file(spec.get("spice_file"))
+                if not netlist and spec.get("rtl_file"):
+                    netlist = _read_asic_design_file(spec.get("rtl_file"))
+                domain_tag = "DIG" if spec.get("domain") == "digital" else "ANA"
+                if spec.get("domain") == "mixed":
+                    domain_tag = "MS"
+                loaded_tabs.append({
+                    "tab_name": f"[{domain_tag}:{spec['icon']}] {spec['name']}",
+                    "netlist": netlist,
+                    "hierarchical": False,
+                    "block_key": block_key,
+                    "parent_tab_name": "★ LIN ASIC — Top Level",
+                    "block_aliases": [spec["name"]],
+                    "domain": spec.get("domain"),
+                    "rtl_file": spec.get("rtl_file"),
+                    "spice_file": spec.get("spice_file"),
+                    "display_name": spec.get("name"),
+                })
+
+            for entry in loaded_tabs:
+                self.load_block_tab(
+                    entry["tab_name"],
+                    entry["netlist"],
+                    hierarchical=entry["hierarchical"],
+                    block_key=entry.get("block_key"),
+                    parent_tab_name=entry.get("parent_tab_name"),
+                    block_aliases=entry.get("block_aliases"),
+                    domain=entry.get("domain"),
+                    rtl_file=entry.get("rtl_file"),
+                    spice_file=entry.get("spice_file"),
+                    display_name=entry.get("display_name"),
+                )
+
+        target_spec = self._find_hierarchy_spec(focus_alias or "lin_asic", focus_alias or "top_level")
+        if target_spec is None:
+            self.statusbar.showMessage(
+                f"LIN ASIC hierarchy is loaded, but no specific view matched '{focus_alias or 'top level'}'"
+            )
+            self.present_asic_demo_ui()
+            return
+
+        target_index = self._ensure_hierarchy_tab_open(target_spec)
+        if target_index >= 0:
+            self.schematic_tabs.setCurrentIndex(target_index)
+            if target_spec.get("domain") == "digital":
+                self._open_digital_block_source(target_spec)
+            self.statusbar.showMessage(
+                f"Opened LIN ASIC view: {target_spec.get('display_name') or target_spec.get('tab_name')}")
+
+        self.present_asic_demo_ui()
 
     def _refresh_api_session_monitor(self):
         """Refresh the session GUID + schematic handshake summary."""
@@ -911,6 +2141,7 @@ class MainWindow(QMainWindow):
         return {
             "test_tracker_visible": bool(self._test_tracker_window and self._test_tracker_window.isVisible()),
             "api_monitor_visible": self.api_session_dock.isVisible(),
+            "design_library_visible": self.design_library_dock.isVisible(),
             "source_window_count": len(source_windows),
             "source_windows": source_windows,
             "latest_source_key": self._last_source_window_key,
@@ -1146,6 +2377,15 @@ class MainWindow(QMainWindow):
         bandgap_action = QAction("Bandgap Reference", self)
         bandgap_action.triggered.connect(lambda: self._load_standard_circuit("bandgap_reference.spice"))
         circuits_menu.addAction(bandgap_action)
+
+        browse_design_library_action = QAction("Browse &Design Library...", self)
+        browse_design_library_action.setShortcut(QKeySequence("Ctrl+Shift+L"))
+        browse_design_library_action.triggered.connect(self._show_design_library_browser)
+        file_menu.addAction(browse_design_library_action)
+
+        launch_recent_chip_action = QAction("Launch Recent &Chip", self)
+        launch_recent_chip_action.triggered.connect(self._launch_recent_chip_design)
+        file_menu.addAction(launch_recent_chip_action)
         
         file_menu.addSeparator()
         
@@ -1230,6 +2470,7 @@ class MainWindow(QMainWindow):
         source_window_action.setShortcut(QKeySequence("Ctrl+Shift+R"))
         source_window_action.triggered.connect(self._show_latest_source_window)
         view_menu.addAction(source_window_action)
+        view_menu.addAction(self.design_library_dock.toggleViewAction())
         view_menu.addAction(self.api_session_dock.toggleViewAction())
         
         # Component menu
@@ -1471,6 +2712,12 @@ class MainWindow(QMainWindow):
         
         lib_act = circuit_toolbar.addAction("📚 Circuit Library")
         lib_act.triggered.connect(self._open_circuit_library)
+
+        design_lib_act = circuit_toolbar.addAction("🗂 Design Browser")
+        design_lib_act.triggered.connect(self._show_design_library_browser)
+
+        recent_chip_act = circuit_toolbar.addAction("🚀 Recent Chip")
+        recent_chip_act.triggered.connect(self._launch_recent_chip_design)
     
     def _start_wire_mode(self):
         """Put the schematic editor into wire drawing mode."""
@@ -1589,6 +2836,7 @@ class MainWindow(QMainWindow):
 
         # Keep the live API monitor visible even when restoring an older layout.
         self.api_session_dock.show()
+        self.design_library_dock.show()
     
     def closeEvent(self, event):
         """Handle window close event."""
@@ -1982,6 +3230,7 @@ class MainWindow(QMainWindow):
             dc_match = re.search(
                 r'\.DC\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)', netlist, re.I
             )
+            op_match = re.search(r'\.OP\b', netlist, re.I)
             
             if dc_match:
                 analysis_type = "DC"
@@ -1989,6 +3238,8 @@ class MainWindow(QMainWindow):
                 analysis_type = "AC"
             elif tran_match:
                 analysis_type = "Transient"
+            elif op_match:
+                analysis_type = "Operating Point"
             
             # Create engine and load netlist
             engine = AnalogEngine()
@@ -2010,6 +3261,8 @@ class MainWindow(QMainWindow):
                         'step': self._parse_spice_num(dc_match.group(4)),
                     }
                 results = analysis.run(settings)
+            elif analysis_type == "Operating Point":
+                results = engine.solve_dc()
             elif analysis_type == "AC":
                 analysis = ACAnalysis(engine)
                 settings = {
@@ -2055,6 +3308,7 @@ class MainWindow(QMainWindow):
                 results = analysis.run(settings, progress_cb)
             
             if results:
+                results = self._normalize_results_for_waveform_viewer(results, analysis_type)
                 self._show_waveform_viewer(
                     results,
                     title=f"{name} — {analysis_type}",

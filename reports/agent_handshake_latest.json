@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-02T20:20:29.938470",
-  "session_id": "66da1c65-9800-4ca7-b50c-0d9af9829e39",
+  "generated_at": "2026-05-02T20:53:38.716610",
+  "session_id": "312b80cf-cf22-4590-ab8f-2b2778a0d3a4",
   "repo_root": "C:\\Users\\vinay\\My Simulator",
   "branch": "master",
-  "commit": "d33d405dda4bbbff8d84bf129444a0df46f9eae3",
+  "commit": "4c5af78087382fe12055e7a0bd6b12a2eacc780c",
   "git_status": [
-    "## master...origin/master [ahead 25]",
+    "## master...origin/master [ahead 35]",
     " M designs/sar_adc/blocks/sar_adc_top/REPORT.md",
     " M designs/sigma_delta_adc/blocks/sigma_delta_adc_top/REPORT.md",
     " M reports/agent_controller_state.json",
@@ -21,7 +21,6 @@
     " M reports/chip_catalog_generic65_latest.md",
     " M reports/chip_catalog_latest.json",
     " M reports/chip_catalog_latest.md",
-    " D reports/cycle_0025_completion_summary.md",
     " M reports/design_autopilot_latest.json",
     " M reports/design_autopilot_latest.md",
     " M reports/design_portfolio_overview.json",
@@ -34,11 +33,12 @@
     " M reports/sar_adc_regression_latest.json",
     " M reports/sar_adc_regression_latest.md",
     " M reports/sar_adc_sar_adc_top_transient_latest_raw.json",
+    " M reports/sigma_delta_adc_design_reference.html",
     " M reports/sigma_delta_adc_regression_latest.json",
     " M reports/sigma_delta_adc_regression_latest.md",
     " M reports/sigma_delta_adc_sigma_delta_adc_top_transient_latest_raw.json",
-    " M scripts/agent_cli_controller.py",
-    " M tests/test_agent_cli_controller.py"
+    " M simulator/gui/main_window.py",
+    " M simulator/gui/schematic_editor.py"
   ],
   "host": "Manasvi",
   "platform": "Windows-11-10.0.26100-SP0",

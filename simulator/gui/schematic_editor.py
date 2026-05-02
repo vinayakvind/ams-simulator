@@ -22,7 +22,7 @@ from PyQt6.QtGui import (
     QTransform, QFont, QKeyEvent, QMouseEvent, QWheelEvent
 )
 
-from simulator.components.base import Component, Pin, Point
+from simulator.components.base import Component, Pin, PinType, Point
 from simulator.components.hierarchy import HierarchicalBlock
 
 
@@ -76,8 +76,8 @@ class ComponentGraphicsItem(QGraphicsItem):
         self._pen = QPen(QColor("#333333"), 2)
         self._pen_selected = QPen(QColor("#0066cc"), 2)
         self._brush = QBrush(Qt.BrushStyle.NoBrush)
-        self._pin_pen = QPen(QColor("#cc0000"), 2)
-        self._pin_brush = QBrush(QColor("#cc0000"))
+        self._pin_pen = QPen(QColor("#555555"), 1.5)
+        self._pin_brush = QBrush(QColor("#ffffff"))
     
     def boundingRect(self) -> QRectF:
         """Return the bounding rectangle of the component."""
@@ -139,10 +139,8 @@ class ComponentGraphicsItem(QGraphicsItem):
             self._draw_command(painter, cmd)
         
         # Draw pins
-        painter.setPen(self._pin_pen)
-        painter.setBrush(self._pin_brush)
         for pin in self.component.pins:
-            painter.drawEllipse(QPointF(pin.x_offset, pin.y_offset), 3, 3)
+            self._draw_pin_marker(painter, pin)
         
         # Draw reference designator
         painter.setPen(self._pen if not self.isSelected() else self._pen_selected)
@@ -183,6 +181,68 @@ class ComponentGraphicsItem(QGraphicsItem):
             font = QFont("Arial", size)
             painter.setFont(font)
             painter.drawText(QPointF(x, y), text)
+
+    @staticmethod
+    def _pin_color(pin_type: PinType) -> QColor:
+        """Return a stable color per pin type so hierarchy ports stay readable."""
+        palette = {
+            PinType.INPUT: QColor("#1f77b4"),
+            PinType.OUTPUT: QColor("#ff7f0e"),
+            PinType.BIDIRECTIONAL: QColor("#00a398"),
+            PinType.POWER: QColor("#2ca02c"),
+            PinType.GROUND: QColor("#444444"),
+            PinType.ANALOG: QColor("#d62728"),
+            PinType.DIGITAL: QColor("#7f7f7f"),
+        }
+        return palette.get(pin_type, QColor("#cc0000"))
+
+    def _draw_pin_marker(self, painter: QPainter, pin: Pin) -> None:
+        """Draw a pin marker whose shape and color reflect the pin role."""
+        x = pin.x_offset
+        y = pin.y_offset
+        size = 5.0
+        color = self._pin_color(pin.pin_type)
+        fill = color if pin.is_connected else QColor("#ffffff")
+        toward_body = 1 if x < 0 else -1
+
+        painter.save()
+        painter.setPen(QPen(color.darker(120), 1.5))
+        painter.setBrush(QBrush(fill))
+
+        if pin.pin_type in {PinType.INPUT, PinType.OUTPUT}:
+            pointing_toward_body = pin.pin_type == PinType.INPUT
+            tip_x = x + (toward_body * size if pointing_toward_body else -toward_body * size)
+            base_x = x - (toward_body * size if pointing_toward_body else -toward_body * size)
+            marker = QPainterPath()
+            marker.moveTo(tip_x, y)
+            marker.lineTo(base_x, y - size)
+            marker.lineTo(base_x, y + size)
+            marker.closeSubpath()
+            painter.drawPath(marker)
+        elif pin.pin_type == PinType.POWER:
+            marker = QPainterPath()
+            marker.moveTo(x, y - size)
+            marker.lineTo(x + size, y)
+            marker.lineTo(x, y + size)
+            marker.lineTo(x - size, y)
+            marker.closeSubpath()
+            painter.drawPath(marker)
+        elif pin.pin_type == PinType.GROUND:
+            marker = QPainterPath()
+            marker.moveTo(x - size, y - size / 2)
+            marker.lineTo(x + size, y - size / 2)
+            marker.lineTo(x, y + size)
+            marker.closeSubpath()
+            painter.drawPath(marker)
+        elif pin.pin_type == PinType.DIGITAL:
+            painter.drawRect(QRectF(x - size, y - size, size * 2, size * 2))
+        elif pin.pin_type == PinType.BIDIRECTIONAL:
+            painter.drawEllipse(QPointF(x, y), size, size)
+            painter.drawLine(QPointF(x - size, y), QPointF(x + size, y))
+        else:
+            painter.drawEllipse(QPointF(x, y), size, size)
+
+        painter.restore()
     
     def itemChange(self, change, value):
         """Handle item changes."""

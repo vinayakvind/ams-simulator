@@ -1,6 +1,6 @@
 # LIN ASIC Regression Report
 
-- Generated: 2026-05-02T20:25:43.943589
+- Generated: 2026-05-02T20:57:45.705585
 - Standard Target: ISO 17987 / LIN 2.2A
 - Overall: PASS
 
@@ -27,7 +27,7 @@
 | DIG-CTRL-SEQUENCE | control_logic | PASS | Power sequence advanced through BGR, analog LDO, digital LDO, LIN enable, then de-asserted LIN in sleep mode. |
 | TOP-MS-BRIDGE | lin_mixed_signal_interface | PASS | Digital TXD logic level drives the analog LIN bus, and the analog bus is thresholded back into RXD logic |
 
-Regression log: reports\lin_asic_regression_latest.log
+Regression log: C:\Users\vinay\My Simulator\reports\lin_asic_regression_latest.log
 
 ## Test Plan
 
