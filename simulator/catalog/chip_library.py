@@ -2703,6 +2703,40 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "vips": ["i2s_audio_vip", "can_vip", "ethernet_vip", "thermal_monitoring_vip", "power_sequence_vip"],
         "digital_subsystems": ["infotainment_control_plane", "safety_monitor_plane", "thermal_management_plane"],
         "technology_support": ["generic130", "generic65", "bcd180"],
+        "power_domains": {
+            "vdd_io": {"voltage": "3.3V", "blocks": ["uart_controller", "spi_controller", "i2s_audio_controller"], "current_budget": "100mA"},
+            "vdd_core": {"voltage": "1.8V", "blocks": ["control_logic", "register_file", "interrupt_controller"], "current_budget": "200mA"},
+            "vdd_analog": {"voltage": "3.3V", "blocks": ["bandgap", "ldo_analog", "can_transceiver", "ethernet_phy"], "current_budget": "150mA"},
+            "vdd_can": {"voltage": "5.0V", "blocks": ["can_controller", "can_transceiver"], "current_budget": "50mA"}
+        },
+        "integration_rules": [
+            "Multi-rail power sequencing: VDD_ANA → VDD_CORE → VDD_IO → VDD_CAN with 1ms staggered ramp-up",
+            "I2S audio interface: 48kHz/16-bit master clock must be <50ps jitter, DMA pre-fetching >4ms buffer",
+            "CAN transceiver: failsafe biasing with 50kΩ termination resistors on CAN H/L lines",
+            "Ethernet PHY: 100Ω differential pair impedance control with <5mm length matching",
+            "Thermal sensor: on-die temperature feedback with auto derate at 85°C (audio DSP 80%), 105°C (audio 50%)",
+            "Watchdog: independent RC oscillator with ±10% accuracy, 10s timeout non-maskable",
+            "Reset sequencing: async watchdog → sync core → I/O with 100ns minimum hold-time",
+            "Clock distribution: master oscillator → watchdog (independent), PLL output → audio DSP with <50ps skew",
+            "Power gating: I2S buffer and CAN interface can be independently gated when not active",
+            "CDC (Clock Domain Crossing): all cross-domain signals through dual-stage flip-flop synchronizers with parity",
+            "ESD protection: >2kV HBM on all external pins (CAN, Ethernet, I2S, UART)",
+            "Thermal management: CPU throttling coordinated with audio downsampling to prevent buffer underrun"
+        ],
+        "design_reference": {
+            "reference_design_doc": "automotive_infotainment_soc_reference_design_v1.pdf",
+            "schematic_hierarchies": ["top_level.sch", "analog_domains.sch", "digital_core.sch", "protocol_interfaces.sch", "power_distribution.sch"],
+            "layout_floorplan": "infotainment_soc_floorplan_500mm2.lef",
+            "thermal_model": "infotainment_thermal_model_transient.cir",
+            "autosar_config": "AUTOSAR_4.4_infotainment_ecuc_config.xml",
+            "safety_documentation": ["FMEA_infotainment_asil_b.xlsx", "safety_case_infotainment_iso26262.pdf", "SOTIF_hazard_analysis.docx"],
+            "integration_examples": [
+                "example_i2s_audio_stream.py: demonstrates 48kHz stereo audio streaming with DMA",
+                "example_can_message_filter.py: CAN message filtering for automotive network",
+                "example_ethernet_link_up.py: Ethernet auto-negotiation and link detection",
+                "example_thermal_derating.py: automatic CPU throttling based on die temperature"
+            ]
+        },
         "design_collateral": [
             "full schematic with power distribution network (4-layer PCB)",
             "layout floorplan (500mm²) with thermal analysis and hotspot identification",
@@ -2791,6 +2825,39 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "vips": ["profibus_vip", "canopen_vip", "ethernet_vip", "crypto_vip", "power_sequence_vip"],
         "digital_subsystems": ["ethernet_control_plane", "security_crypto_plane", "power_sequencer"],
         "technology_support": ["generic130", "generic65", "bcd180"],
+        "power_domains": {
+            "vdd_io": {"voltage": "3.3V", "blocks": ["profibus_transceiver", "canopen_controller", "uart_controller", "spi_controller"], "current_budget": "120mA"},
+            "vdd_core": {"voltage": "1.8V", "blocks": ["control_logic", "register_file", "interrupt_controller", "memory_compiler"], "current_budget": "250mA"},
+            "vdd_crypto": {"voltage": "1.8V", "blocks": ["aes_accelerator", "sha_accelerator", "true_random_number_generator"], "current_budget": "180mA"},
+            "vdd_eth": {"voltage": "3.3V", "blocks": ["ethernet_phy", "lvds_driver", "lvds_receiver"], "current_budget": "100mA"}
+        },
+        "integration_rules": [
+            "Multi-protocol sequencing: VDD_IO → VDD_CORE → VDD_CRYPTO → VDD_ETH with 2ms staggered startup",
+            "DMA channels: 3 independent units with round-robin arbiter (PROFIBUS→SRAM, CAN→SRAM, ETH→SRAM with no stalling)",
+            "Crypto accelerator: dedicated high-speed clock domain with side-channel isolation from protocol clocks",
+            "PROFIBUS interface: 12Mbps token-passing with failsafe biasing on passive bus",
+            "CANopen controller: autonomous message filtering with 256-entry acceptance table",
+            "Ethernet PHY: 100Ω differential impedance control, IEEE 802.3 timing compliance",
+            "Packet buffering: multi-rail ECC on all packet buffers, separate parity on register file",
+            "Clock tree: independent oscillators for PROFIBUS (12MHz), CAN (arbitration), Ethernet (100MHz PLL)",
+            "CDC (Clock Domain Crossing): Gray code counters on all multi-domain handshakes with 2-stage FF",
+            "Protocol isolation: PROFIBUS on low-noise rail, CAN on I/O domain, Ethernet on high-speed domain",
+            "Memory hierarchy: Register file in core domain, packet buffers in dedicated crypto domain with CDC synchronizers",
+            "Thermal management: crypto workload reduction at 85°C, 50% power at 105°C, full shutdown >125°C"
+        ],
+        "design_reference": {
+            "reference_design_doc": "industrial_iot_gateway_reference_design_v1.pdf",
+            "schematic_hierarchies": ["top_level.sch", "protocol_interfaces.sch", "crypto_accelerator.sch", "dma_controller.sch", "power_distribution.sch"],
+            "layout_floorplan": "iot_gateway_floorplan_800mm2.lef",
+            "thermal_model": "iot_gateway_thermal_model_crypto_workload.cir",
+            "firmware_template": "IEC_61131_3_compatible_gateway_firmware.c",
+            "integration_examples": [
+                "example_profibus_token_pass.py: PROFIBUS token-passing sequence",
+                "example_canopen_message_filter.py: CANopen message acceptance filtering",
+                "example_ethernet_routing.py: multi-protocol packet forwarding with priority",
+                "example_aes256_gcm_encrypt.py: AES-256-GCM encryption at line-rate"
+            ]
+        },
         "design_collateral": [
             "gateway architecture with multi-protocol routing and priority scheduling",
             "multi-protocol packet router with DMA support for >100Mbps throughput",
@@ -2878,6 +2945,39 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "vips": ["power_sequence_vip", "thermal_monitoring_vip", "current_consumption_vip", "voltage_regulation_vip", "frequency_accuracy_vip"],
         "digital_subsystems": ["multi_rail_power_control", "thermal_management_plane", "power_conversion_plane"],
         "technology_support": ["generic130", "generic65", "bcd180"],
+        "power_domains": {
+            "vdd_primary": {"voltage": "24V", "blocks": ["boost_converter", "buck_converter", "charge_pump"], "current_budget": "500mA"},
+            "vdd_primary_ldo": {"voltage": "5.0V", "blocks": ["control_logic", "register_file", "spi_controller"], "current_budget": "100mA"},
+            "vdd_secondary_isolated": {"voltage": "15V", "blocks": ["isolated_gate_driver", "ldo_analog", "ldo_digital"], "current_budget": "150mA"},
+            "vdd_barrier": {"voltage": "3.3V", "blocks": ["optocoupler_isolation", "frequency_detector", "reset_generator"], "current_budget": "50mA"}
+        },
+        "integration_rules": [
+            "Primary-secondary isolation: >2kV withstand voltage per IEC 60664, creepage/clearance >5mm",
+            "Multi-isolated rail sequencing: primary first, 100ms delay before secondary startup to prevent inrush",
+            "Galvanic isolation: independent optocouplers on each isolated output with periodic self-test",
+            "Clock domains: independent oscillators on primary and secondary with <5% frequency tolerance",
+            "CDC (Clock Domain Crossing): dual-stage flip-flops with parity checking on all domain crossings",
+            "Current limiting: per-output foldback with <50mA overshoot, settable via SPI with 8-bit DAC",
+            "Isolation barrier self-test: periodic test pattern injection every 1s, 3-strike fault detection",
+            "Feedback isolation: isolated voltage dividers on secondary outputs with galvanic isolation",
+            "Thermal monitoring: primary domain temperature sensor with isolated measurement feedback",
+            "Power sequencing: coordinated ramp-up with soft-start to prevent voltage spikes and transient overload",
+            "Redundancy: dual-channel watchdog with independent oscillators for high-reliability SIL rating",
+            "EMC isolation: EMI isolation trenches between primary and secondary domains with shielded traces"
+        ],
+        "design_reference": {
+            "reference_design_doc": "isolated_pmic_reference_design_v1.pdf",
+            "schematic_hierarchies": ["top_level.sch", "primary_converter.sch", "secondary_isolated.sch", "barrier_isolation.sch", "control_sequencer.sch"],
+            "layout_floorplan": "isolated_pmic_floorplan_600mm2.lef",
+            "thermal_model": "isolated_pmic_thermal_two_domain.cir",
+            "regulatory_docs": ["isolation_certification_IEC_61010.pdf", "SIL_rating_analysis_ISO_13849.pdf", "EMC_immunity_EN_61000.txt"],
+            "integration_examples": [
+                "example_multi_rail_startup.py: coordinated 5V/15V isolated rail bring-up",
+                "example_hipos_test.py: 2kV hi-pot isolation testing framework",
+                "example_current_limiting.py: per-output foldback current limit characterization",
+                "example_barrier_self_test.py: periodic optocoupler health monitoring"
+            ]
+        },
         "design_collateral": [
             "isolation barrier schematic with creepage/clearance rules per IEC 60664",
             "multi-isolated rail power tree with load sequencing (primary→secondary→tertiary)",
@@ -2967,6 +3067,40 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "vips": ["ethernet_vip", "i2c_vip", "adc_transient_vip", "analog_snapshot_vip", "power_sequence_vip"],
         "digital_subsystems": ["ethernet_control_plane", "sensor_aggregation_plane"],
         "technology_support": ["generic130", "generic65", "bcd180"],
+        "power_domains": {
+            "vdd_io": {"voltage": "3.3V", "blocks": ["i2c_controller", "spi_controller", "uart_controller"], "current_budget": "80mA"},
+            "vdd_core": {"voltage": "1.8V", "blocks": ["control_logic", "register_file", "interrupt_controller", "memory_compiler"], "current_budget": "120mA"},
+            "vdd_analog": {"voltage": "3.3V", "blocks": ["bandgap", "ldo_analog", "precision_voltage_reference", "operational_amplifier", "low_pass_filter"], "current_budget": "100mA"},
+            "vdd_adc": {"voltage": "3.3V", "blocks": ["sar_adc_top", "comparator_array"], "current_budget": "90mA"}
+        },
+        "integration_rules": [
+            "Multi-rail power sequencing: VDD_ANA → VDD_ADC → VDD_CORE → VDD_IO with 1ms staggered startup",
+            "Sensor input conditioning: AC-coupled with 1kΩ series impedance, >-3dB BW at 5kHz anti-aliasing",
+            "ADC sampling synchronization: all 16-channel ADCs phase-aligned with <100ns cross-channel skew",
+            "Precision voltage reference: initial settle time <1ms, long-term drift <5ppm/°C, output impedance <50Ω",
+            "I2C/SPI multi-master arbitration: independent sensor bus with configurable data rates (100kHz to 3.4MHz I2C, 1MHz to 50MHz SPI)",
+            "Ethernet PHY integration: 100Ω differential pair routing with IEEE 1588 PTP timestamping capability",
+            "Timestamp synchronization: nanosecond-level GPS/PTP input with phase detector (±100ns accuracy)",
+            "EEPROM calibration storage: per-channel gain/offset trim with CRC protection for sensor-specific calibration",
+            "Deterministic packet scheduling: TSN priority queueing with <1µs scheduling jitter",
+            "Clock distribution: independent oscillators for ADC master clock (high-precision <100ppm), Ethernet PHY clock",
+            "CDC (Clock Domain Crossing): Gray code counters on all multi-domain handshakes with dual-stage FF",
+            "Sensor excitation: 0-10V programmable output with <1% linearity for ratiometric sensing calibration"
+        ],
+        "design_reference": {
+            "reference_design_doc": "ethernet_sensor_hub_reference_design_v1.pdf",
+            "schematic_hierarchies": ["top_level.sch", "sensor_input_conditioning.sch", "adc_frontend.sch", "ethernet_interface.sch", "precision_reference.sch"],
+            "layout_floorplan": "sensor_hub_floorplan_400mm2.lef",
+            "thermal_model": "sensor_hub_thermal_adc_sampling.cir",
+            "ptp_firmware": "IEEE_1588_PTP_implementation_v1.c",
+            "calibration_tool": "sensor_hub_calibration_framework.py",
+            "integration_examples": [
+                "example_16ch_adc_sync.py: synchronized 16-channel ADC sampling with timestamp",
+                "example_sensor_calibration.py: EEPROM-backed gain/offset calibration per channel",
+                "example_ieee1588_ptp.py: IEEE 1588 PTP clock synchronization with <100ns accuracy",
+                "example_tsn_scheduling.py: deterministic Ethernet packet scheduling for real-time sensors"
+            ]
+        },
         "design_collateral": [
             "sensor hub reference platform with 16-channel analog input capability",
             "IEEE 1588 PTP implementation for nanosecond-level time synchronization",
@@ -3060,6 +3194,40 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "vips": ["power_sequence_vip", "thermal_monitoring_vip", "current_consumption_vip", "high_speed_signal_vip", "clock_gating_vip"],
         "digital_subsystems": ["pwm_motor_control_plane", "safety_monitor_plane", "thermal_management_plane"],
         "technology_support": ["generic130", "generic65", "bcd180"],
+        "power_domains": {
+            "vdd_io": {"voltage": "3.3V", "blocks": ["spi_controller", "interrupt_controller"], "current_budget": "50mA"},
+            "vdd_core": {"voltage": "1.8V", "blocks": ["control_logic", "register_file", "pwm_controller"], "current_budget": "150mA"},
+            "vdd_analog": {"voltage": "3.3V", "blocks": ["bandgap", "ldo_analog", "programmable_gain_amplifier", "high_speed_comparator"], "current_budget": "80mA"},
+            "vdd_gate": {"voltage": "5.0V or 15.0V", "blocks": ["gate_drivers_high_side", "gate_drivers_low_side"], "current_budget": "300mA"}
+        },
+        "integration_rules": [
+            "Three-phase PWM commutation: six-step or sinusoidal with 50-200ns programmable dead-time insertion",
+            "Gate driver control: 3 high-side + 3 low-side drivers with integrated shoot-through protection via AND-gated enables",
+            "Current sensing: cycle-by-cycle over-current detection <10µs latency with 5% measurement accuracy across 10:1 load range",
+            "PWM frequency: synchronized across all three phases with <100ns jitter for multi-axis motor synchronization",
+            "Watchdog independent oscillator: RC oscillator with ±10% drift guarantee, safe timeout enforcement",
+            "Reset sequencing: watchdog timeout triggers 1ms internal reset delay, all gates forced OFF within <500ns",
+            "Thermal protection: on-die temperature sensor with hysteresis (soft-stop at >110°C), safe shutdown coordination",
+            "Safety output: independent NAND gate guarantees safe state (OFF) until watchdog armed and system ready",
+            "Phase voltage measurement: 3-channel ADC for BEMF reconstruction with 100kHz cutoff filtering",
+            "Current shunt: 10mΩ typical with 50V/V programmable gain amplifier for cycle-by-cycle limiting",
+            "Hall sensor input: glitch filtering with <10ns propagation delay, invalid state detection",
+            "Diagnostic monitoring: SIL-2 compliance with >90% diagnostic coverage, fault categorization (safe vs dangerous)"
+        ],
+        "design_reference": {
+            "reference_design_doc": "safe_motor_drive_controller_reference_design_v1.pdf",
+            "schematic_hierarchies": ["top_level.sch", "pwm_gate_drivers.sch", "current_sensing.sch", "safety_diagnostics.sch", "watchdog_safety_unit.sch"],
+            "layout_floorplan": "motor_drive_floorplan_700mm2.lef",
+            "thermal_model": "motor_drive_thermal_with_three_phase.cir",
+            "safety_docs": ["SIL_2_FMEA_motor_drive_IEC_61508.pdf", "diagnostic_coverage_analysis_90pct.pdf", "ISO_13849_certification_package.zip"],
+            "firmware_template": "motor_control_firmware_six_step_sinusoidal.c",
+            "integration_examples": [
+                "example_six_step_commutation.py: six-step PWM pattern generation with dead-time",
+                "example_current_limiting.py: cycle-by-cycle over-current detection and derating",
+                "example_safety_shutdown.py: watchdog-triggered safe state transition with gate driver shutdown",
+                "example_thermal_management.py: temperature-dependent motor derating 85-125°C"
+            ]
+        },
         "design_collateral": [
             "three-phase PWM commutation logic with dead-time insertion (50-200ns programmable)",
             "SIL-2 functional safety FMEA with failure mode mapping and residual risk analysis",
