@@ -1,6 +1,6 @@
 # Chip Assembly Catalog Report
 
-Generated: 2026-05-02T19:44:45.778704
+Generated: 2026-05-02T19:54:55.383788
 Technology filter: all
 
 ## Summary
