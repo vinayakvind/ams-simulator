@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-05-02T19:09:20.749455",
+  "generated_at": "2026-05-02T19:29:22.863131",
   "technology_filter": "generic130",
   "summary": {
     "technology_count": 4,
-    "reusable_ip_count": 61,
-    "verification_ip_count": 29,
-    "digital_subsystem_count": 20,
-    "chip_profile_count": 19,
-    "compatible_ip_count": 58,
-    "compatible_digital_subsystem_count": 20,
-    "compatible_chip_profile_count": 19
+    "reusable_ip_count": 69,
+    "verification_ip_count": 35,
+    "digital_subsystem_count": 25,
+    "chip_profile_count": 24,
+    "compatible_ip_count": 69,
+    "compatible_digital_subsystem_count": 25,
+    "compatible_chip_profile_count": 24
   },
   "technologies": [
     {
@@ -292,6 +292,34 @@
       "compatible": true
     },
     {
+      "name": "Buffered Precision DAC",
+      "domain": "analog",
+      "category": "converter",
+      "generator": "buf_dac",
+      "ports": [
+        "VDD",
+        "GND",
+        "DIN",
+        "VOUT",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "buffered_dac",
+        "precision_dac_with_buffer"
+      ],
+      "description": "High-resolution DAC with integrated output buffer for low-impedance analog signal generation.",
+      "role": "Converts digital control words into precise, low-impedance analog voltages for accurate setpoint control.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "buffered_precision_dac",
+      "compatible": true
+    },
+    {
       "name": "CAN Controller",
       "domain": "digital",
       "category": "protocol",
@@ -344,6 +372,37 @@
         "bcd180"
       ],
       "key": "can_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "CANopen Protocol Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "canopen_ctrl",
+      "ports": [
+        "clk",
+        "rst_n",
+        "txd",
+        "rxd",
+        "int_n",
+        "sdo_mosi",
+        "sdo_miso",
+        "pdo_in",
+        "pdo_out"
+      ],
+      "aliases": [
+        "canopen",
+        "can_open_stack"
+      ],
+      "description": "Full-stack CANopen protocol implementation with SDO, PDO, and NMT state machine.",
+      "role": "Implements CANopen protocol for industrial machinery, robotics, and distributed control systems.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22"
+      ],
+      "key": "canopen_controller",
       "compatible": true
     },
     {
@@ -550,6 +609,35 @@
       "compatible": true
     },
     {
+      "name": "Differential Amplifier",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "diff_amp",
+      "ports": [
+        "VDD",
+        "VSS",
+        "VIN_P",
+        "VIN_N",
+        "VOUT_P",
+        "VOUT_N",
+        "VBIAS"
+      ],
+      "aliases": [
+        "diffamp",
+        "diff_stage"
+      ],
+      "description": "Precision differential amplifier with high CMRR for balanced signal conditioning and low-noise amplification.",
+      "role": "Provides differential gain for instrumentation, precision measurements, and audio front-end applications.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "differential_amplifier",
+      "compatible": true
+    },
+    {
       "name": "ESD Protection Diode Array",
       "domain": "analog",
       "category": "interface",
@@ -572,6 +660,39 @@
         "bcd180"
       ],
       "key": "esd_protection",
+      "compatible": true
+    },
+    {
+      "name": "Ethernet PHY (10/100 Base-T)",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "eth_phy",
+      "ports": [
+        "VDD",
+        "VDD_IO",
+        "GND",
+        "RXD_P",
+        "RXD_N",
+        "TXD_P",
+        "TXD_N",
+        "MDI_P",
+        "MDI_N",
+        "CLK"
+      ],
+      "aliases": [
+        "ethernet",
+        "eth_phy",
+        "rmii_interface"
+      ],
+      "description": "10Base-T/100Base-TX Ethernet transceiver PHY with integrated analog front-end and digital control.",
+      "role": "Provides Ethernet connectivity for networked IoT, industrial, and automotive applications.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22"
+      ],
+      "key": "ethernet_phy",
       "compatible": true
     },
     {
@@ -659,6 +780,34 @@
         "bcd180"
       ],
       "key": "gpio_controller",
+      "compatible": true
+    },
+    {
+      "name": "High-Speed Comparator",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "high_speed_comp",
+      "ports": [
+        "VDD",
+        "GND",
+        "VIN_P",
+        "VIN_N",
+        "VOUT",
+        "VBIAS"
+      ],
+      "aliases": [
+        "hyper_comp",
+        "speed_comp"
+      ],
+      "description": "Ultra-fast comparator for high-frequency signal detection and threshold crossing in RF and mixed-signal applications.",
+      "role": "Provides sub-nanosecond propagation delay for precision timing and high-speed ADC feedback paths.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "high_speed_comparator",
       "compatible": true
     },
     {
@@ -803,6 +952,34 @@
         "bcd180"
       ],
       "key": "interrupt_controller",
+      "compatible": true
+    },
+    {
+      "name": "Isolated Gate Driver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "iso_gate_drv",
+      "ports": [
+        "VDD",
+        "VDD_ISO",
+        "GND",
+        "GND_ISO",
+        "IN",
+        "OUT",
+        "OUT_N"
+      ],
+      "aliases": [
+        "gate_driver",
+        "isolated_driver"
+      ],
+      "description": "Galvanically isolated MOSFET/IGBT gate driver for three-phase power conversion and switching.",
+      "role": "Provides high-side drive for power electronics while maintaining galvanic isolation to prevent ground loops.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "isolated_gate_driver",
       "compatible": true
     },
     {
@@ -993,6 +1170,34 @@
       "compatible": true
     },
     {
+      "name": "LVDS Receiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "lvds_receiver",
+      "ports": [
+        "VDD",
+        "VDD_IO",
+        "GND",
+        "LVDS_P",
+        "LVDS_N",
+        "SIGNAL_OUT"
+      ],
+      "aliases": [
+        "lvds_rx",
+        "differential_receiver"
+      ],
+      "description": "Low-voltage differential signaling receiver for noise-immune high-speed interfaces.",
+      "role": "Receives and recovers differential signals for low-noise communication across chip boundaries and backplanes.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lvds_receiver",
+      "compatible": true
+    },
+    {
       "name": "Memory Compiler",
       "domain": "digital",
       "category": "storage",
@@ -1134,6 +1339,35 @@
       "compatible": true
     },
     {
+      "name": "PROFIBUS Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "profibus_txrx",
+      "ports": [
+        "VDD",
+        "GND",
+        "TXD",
+        "RXD",
+        "PROFIBUS_P",
+        "PROFIBUS_N",
+        "EN",
+        "DE"
+      ],
+      "aliases": [
+        "profibus",
+        "profibus_phy"
+      ],
+      "description": "PROFIBUS PA/DP physical layer transceiver for industrial fieldbus communication.",
+      "role": "Bridges digital PROFIBUS protocol signals to industrial PROFIBUS fieldbus for distributed process control.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "profibus_transceiver",
+      "compatible": true
+    },
+    {
       "name": "Programmable Gain Amplifier",
       "domain": "analog",
       "category": "sense",
@@ -1211,12 +1445,14 @@
       "description": "Wireless power receiver controller for Qi standard charging (5W-15W) with foreign object detection.",
       "role": "Enables wireless charging capability for portable IoT devices with automated power negotiation and safety.",
       "technology_support": [
+        "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],
       "key": "qi_wireless_rx",
-      "compatible": false
+      "compatible": true
     },
     {
       "name": "Register File",
@@ -1297,6 +1533,7 @@
       "technology_support": [
         "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],
@@ -1456,12 +1693,14 @@
       "description": "Hardware SHA-256/512 hash computation accelerator for integrity verification and authentication.",
       "role": "Accelerates cryptographic hashing for secure boot, firmware verification, and authentication protocols.",
       "technology_support": [
+        "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],
       "key": "sha_accelerator",
-      "compatible": false
+      "compatible": true
     },
     {
       "name": "Sigma-Delta ADC Top",
@@ -1647,12 +1886,14 @@
       "description": "Entropy-based true random number generator for cryptographic key generation and nonce production.",
       "role": "Provides non-predictable random numbers for cryptographic operations, ensuring security of random key generation.",
       "technology_support": [
+        "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],
       "key": "true_random_number_generator",
-      "compatible": false
+      "compatible": true
     },
     {
       "name": "UART Controller",
@@ -1708,6 +1949,7 @@
       "technology_support": [
         "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],
@@ -1842,6 +2084,33 @@
       "key": "can_vip"
     },
     {
+      "name": "CANopen VIP",
+      "protocol": "CANopen",
+      "checks": [
+        "SDO transfer",
+        "PDO mapping",
+        "NMT state machine",
+        "heartbeat",
+        "emergency messages"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates CANopen protocol stack including object dictionary access and state management.",
+      "key": "canopen_vip"
+    },
+    {
+      "name": "Clock Gating VIP",
+      "protocol": "Clock gating control",
+      "checks": [
+        "gating latency",
+        "enable synchronization",
+        "glitch immunity",
+        "clock tree propagation"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates clock gating cells for correct enable timing and glitch-free operation.",
+      "key": "clock_gating_vip"
+    },
+    {
       "name": "Clock Monitoring VIP",
       "protocol": "Clock/Oscillator",
       "checks": [
@@ -1907,6 +2176,20 @@
       "key": "emc_compliance_vip"
     },
     {
+      "name": "Ethernet VIP",
+      "protocol": "Ethernet 10/100 Base-T",
+      "checks": [
+        "frame format",
+        "CRC validation",
+        "link detection",
+        "collision detection",
+        "MDI signaling"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates Ethernet PHY compliance with IEEE 802.3 standards and frame integrity.",
+      "key": "ethernet_vip"
+    },
+    {
       "name": "Frequency Accuracy VIP",
       "protocol": "Oscillator/Clock accuracy",
       "checks": [
@@ -1918,6 +2201,20 @@
       "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
       "description": "Validates oscillator frequency accuracy across corners and operating conditions.",
       "key": "frequency_accuracy_vip"
+    },
+    {
+      "name": "High-Speed Signal VIP",
+      "protocol": "High-speed signaling",
+      "checks": [
+        "rise/fall time",
+        "overshoot/undershoot",
+        "jitter analysis",
+        "crosstalk immunity",
+        "impedance matching"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates high-speed signal integrity including timing margins and electromagnetic effects.",
+      "key": "high_speed_signal_vip"
     },
     {
       "name": "I2C Verification IP",
@@ -2058,6 +2355,34 @@
       "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
       "description": "Measures power supply quality metrics including ripple, PSRR, and regulation performance.",
       "key": "power_supply_vip"
+    },
+    {
+      "name": "Precision DAC VIP",
+      "protocol": "DAC conversion",
+      "checks": [
+        "DNL/INL analysis",
+        "settling time",
+        "output impedance",
+        "linearity",
+        "code transition"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates precision DAC linearity, settling behavior, and output accuracy across codes.",
+      "key": "precision_dac_vip"
+    },
+    {
+      "name": "PROFIBUS VIP",
+      "protocol": "PROFIBUS PA/DP",
+      "checks": [
+        "bit timing",
+        "frame format",
+        "addressing",
+        "CRC validation",
+        "collision handling"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates PROFIBUS transceiver protocol compliance for industrial fieldbus networks.",
+      "key": "profibus_vip"
     },
     {
       "name": "SPI Verification IP",
@@ -2215,6 +2540,24 @@
       "compatible": true
     },
     {
+      "name": "Clock Gating Plane",
+      "blocks": [
+        "control_logic",
+        "register_file",
+        "clock_divider",
+        "interrupt_controller"
+      ],
+      "description": "Integrated clock gating and domain control for multi-frequency clock generation and distribution.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "clock_gating_plane",
+      "compatible": true
+    },
+    {
       "name": "Converter Control Plane",
       "blocks": [
         "spi_controller",
@@ -2229,6 +2572,26 @@
         "bcd180"
       ],
       "key": "converter_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "Ethernet Control Plane",
+      "blocks": [
+        "ethernet_phy",
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Complete Ethernet PHY control and management interface subsystem for networked applications.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22"
+      ],
+      "key": "ethernet_control_plane",
       "compatible": true
     },
     {
@@ -2265,6 +2628,26 @@
         "bcd180"
       ],
       "key": "i2c_sensor_interface",
+      "compatible": true
+    },
+    {
+      "name": "Infotainment Control Plane",
+      "blocks": [
+        "i2s_audio_controller",
+        "i2c_controller",
+        "uart_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Multimedia and human-machine interface subsystem with I2S audio, I2C, and UART support.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "infotainment_control_plane",
       "compatible": true
     },
     {
@@ -2326,6 +2709,26 @@
       "compatible": true
     },
     {
+      "name": "Power Conversion Plane",
+      "blocks": [
+        "boost_converter",
+        "buck_converter",
+        "pwm_controller",
+        "frequency_detector",
+        "control_logic",
+        "register_file"
+      ],
+      "description": "Integrated power conversion control plane for multi-output PMIC and power management.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "power_conversion_plane",
+      "compatible": true
+    },
+    {
       "name": "Power Sequencer",
       "blocks": [
         "control_logic",
@@ -2377,6 +2780,25 @@
         "bcd180"
       ],
       "key": "rs485_interface_plane",
+      "compatible": true
+    },
+    {
+      "name": "Safety Monitor Plane",
+      "blocks": [
+        "watchdog_timer",
+        "temperature_sensor",
+        "interrupt_controller",
+        "control_logic",
+        "reset_generator"
+      ],
+      "description": "Safety-critical monitoring subsystem with watchdog, temperature, and system reset coordination.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "safety_monitor_plane",
       "compatible": true
     },
     {
@@ -2643,6 +3065,56 @@
       "compatible": true
     },
     {
+      "name": "Automotive Infotainment SoC",
+      "summary": "Advanced in-vehicle infotainment system with multi-protocol connectivity, audio interface, and safety monitoring.",
+      "headline": "Integrated automotive SoC for multimedia and telematics with safety-critical features.",
+      "narrative": "This profile creates a complete automotive infotainment chip combining I2S audio interfaces, multi-protocol connectivity (CAN, Ethernet), safety monitoring, and robust power management for in-vehicle entertainment and navigation systems.",
+      "standard": "ISO 26262 ASIL-B, AUTOSAR 4.x compatible",
+      "tags": [
+        "automotive",
+        "infotainment",
+        "multimedia",
+        "safety",
+        "soc",
+        "connectivity"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "i2s_audio_controller",
+        "can_transceiver",
+        "can_controller",
+        "ethernet_phy",
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "spi_controller",
+        "uart_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "i2s_audio_vip",
+        "can_vip",
+        "ethernet_vip",
+        "thermal_monitoring_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "infotainment_control_plane",
+        "safety_monitor_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "automotive_infotainment_soc",
+      "compatible": true
+    },
+    {
       "name": "CAN Automotive Node",
       "summary": "CAN-enabled automotive controller with transceiver, messaging, and thermal protection.",
       "headline": "Integrated CAN node assembly with automotive-grade reliability and multi-protocol support.",
@@ -2722,6 +3194,56 @@
       "compatible": true
     },
     {
+      "name": "Ethernet Sensor Hub",
+      "summary": "Networked sensor aggregation node with Ethernet PHY, multi-channel I2C/SPI, and precision analog.",
+      "headline": "Industrial sensor hub with Ethernet connectivity for distributed measurement systems.",
+      "narrative": "This profile assembles a complete sensor aggregation and networking device combining Ethernet connectivity, multi-protocol sensor interfaces (I2C, SPI), precision analog front-ends, and data buffering for industrial process monitoring and control.",
+      "standard": "IEEE 802.3, Ethernet TSN-capable, IEC 61588 (PTP) compatible",
+      "tags": [
+        "sensor",
+        "hub",
+        "ethernet",
+        "precision",
+        "measurement",
+        "industrial"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "ethernet_phy",
+        "i2c_controller",
+        "spi_controller",
+        "precision_voltage_reference",
+        "operational_amplifier",
+        "sar_adc_top",
+        "low_pass_filter",
+        "comparator_array",
+        "uart_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "ethernet_vip",
+        "i2c_vip",
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "ethernet_control_plane",
+        "sensor_aggregation_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ethernet_sensor_hub",
+      "compatible": true
+    },
+    {
       "name": "High-Voltage Power Supply",
       "summary": "Automotive high-voltage supply combining buck converter, LDO, charge pump, and protection.",
       "headline": "Reusable high-voltage PMIC assembly for automotive battery-powered systems.",
@@ -2761,6 +3283,56 @@
         "bcd180"
       ],
       "key": "high_voltage_power_supply",
+      "compatible": true
+    },
+    {
+      "name": "Industrial IoT Gateway",
+      "summary": "Multi-protocol industrial gateway with PROFIBUS, CANopen, Ethernet, and security acceleration.",
+      "headline": "Comprehensive industrial edge node for protocol translation and secure data aggregation.",
+      "narrative": "This profile assembles a complete industrial IoT gateway from multiple protocol interfaces (PROFIBUS, CANopen, Ethernet), cryptographic security acceleration, and robust power management for distributed industrial control and data collection.",
+      "standard": "IEC 61131-3, PROFIBUS PA/DP, CANopen, EtherCAT-capable",
+      "tags": [
+        "industrial",
+        "iot",
+        "gateway",
+        "fieldbus",
+        "security",
+        "edge"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "profibus_transceiver",
+        "canopen_controller",
+        "ethernet_phy",
+        "aes_accelerator",
+        "sha_accelerator",
+        "true_random_number_generator",
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "profibus_vip",
+        "canopen_vip",
+        "ethernet_vip",
+        "crypto_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "ethernet_control_plane",
+        "security_crypto_plane",
+        "power_sequencer"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "industrial_iot_gateway",
       "compatible": true
     },
     {
@@ -2813,6 +3385,57 @@
         "generic14"
       ],
       "key": "iot_edge_hub",
+      "compatible": true
+    },
+    {
+      "name": "Isolated Power Supply Controller",
+      "summary": "Isolated PMIC with multiple isolated rails, boost/buck converters, and high-side gate drivers.",
+      "headline": "Industrial-grade multi-isolated power management IC for modular and resilient systems.",
+      "narrative": "This profile creates a comprehensive isolated power controller combining multiple LDO rails with galvanic isolation, boost/buck conversion, high-side gate drivers, and power sequencing for industrial equipment requiring multiple isolated supplies.",
+      "standard": "IEC 61010-1, ISO 13849-1 SIL-rated capable",
+      "tags": [
+        "isolated",
+        "power",
+        "pmic",
+        "industrial",
+        "multi-rail",
+        "safety"
+      ],
+      "blocks": [
+        "bandgap",
+        "boost_converter",
+        "buck_converter",
+        "ldo_analog",
+        "ldo_digital",
+        "isolated_gate_driver",
+        "charge_pump",
+        "temperature_sensor",
+        "frequency_detector",
+        "watchdog_timer",
+        "reset_generator",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "voltage_regulation_vip",
+        "frequency_accuracy_vip"
+      ],
+      "digital_subsystems": [
+        "multi_rail_power_control",
+        "thermal_management_plane",
+        "power_conversion_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "isolated_power_supply_controller",
       "compatible": true
     },
     {
@@ -3119,6 +3742,55 @@
       "compatible": true
     },
     {
+      "name": "Safe Motor Drive Controller",
+      "summary": "Functional safety-compliant three-phase motor drive with integrated diagnostics and SIL monitoring.",
+      "headline": "ISO 13849 SIL-2 capable motor drive ASIC for safety-critical industrial applications.",
+      "narrative": "This profile creates a safety-critical motor control IC combining three-phase PWM generation, current sensing, thermal protection, watchdog monitoring, and built-in safety diagnostics for industrial robots, conveyors, and machinery requiring certified safety performance.",
+      "standard": "ISO 13849-1 SIL-2, IEC 61508 SIL-2, IEC 60204-1",
+      "tags": [
+        "motor",
+        "drive",
+        "safety",
+        "sil",
+        "industrial",
+        "diagnostics"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "pwm_controller",
+        "programmable_gain_amplifier",
+        "high_speed_comparator",
+        "temperature_sensor",
+        "watchdog_timer",
+        "reset_generator",
+        "interrupt_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "high_speed_signal_vip",
+        "clock_gating_vip"
+      ],
+      "digital_subsystems": [
+        "pwm_motor_control_plane",
+        "safety_monitor_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "safe_motor_drive_controller",
+      "compatible": true
+    },
+    {
       "name": "SAR ADC Macro",
       "summary": "Converter-oriented chip scaffold centered on a reusable SAR ADC macro and digital control hooks.",
       "headline": "Reusable SAR ADC chip assembly with verification hooks baked in.",
@@ -3205,6 +3877,7 @@
       "technology_support": [
         "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],
@@ -3293,6 +3966,7 @@
       "technology_support": [
         "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-02T19:11:39.669500",
+  "generated_at": "2026-05-02T19:29:56.984463",
   "python_executable": "C:\\Users\\vinay\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
   "strict_mode": true,
   "overall": "PASS",
@@ -55,7 +55,7 @@
         {
           "path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.json",
           "exists": true,
-          "size_bytes": 8228
+          "size_bytes": 8229
         },
         {
           "path": "C:\\Users\\vinay\\My Simulator\\reports\\lin_asic_regression_latest.md",
@@ -153,7 +153,7 @@
       {
         "path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.json",
         "exists": true,
-        "size_bytes": 13153
+        "size_bytes": 13154
       },
       {
         "path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.md",

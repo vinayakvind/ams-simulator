@@ -595,7 +595,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["uwb", "ultra_wideband"],
         "description": "Ultra-wideband RF transceiver for high-precision ranging and localization (IEEE 802.15.4z).",
         "role": "Enables indoor positioning, asset localization, and secure communication for industrial IoT and consumer devices.",
-        "technology_support": ["generic130", "generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "rf_front_end": {
         "name": "RF Front-End Module",

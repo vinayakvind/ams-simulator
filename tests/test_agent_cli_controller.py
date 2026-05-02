@@ -247,6 +247,29 @@ class AgentCliControllerTests(unittest.TestCase):
             self.assertIn("Priority Build Targets", prompt_text)
             self.assertIn("bandgap, buck_converter", prompt_text)
             self.assertIn("Digital subsystem backlog", prompt_text)
+            self.assertIn("Do not invoke scripts/agent_cli_controller.py", prompt_text)
+
+    def test_main_blocks_nested_controller_launch_when_env_active(self) -> None:
+        with mock.patch.dict(
+            agent_cli_controller.os.environ,
+            {agent_cli_controller.CONTROLLER_ACTIVE_ENV: "pid:existing"},
+            clear=False,
+        ), mock.patch.object(agent_cli_controller, "run_cycle") as run_cycle:
+            exit_code = agent_cli_controller.main([])
+
+        self.assertEqual(exit_code, 0)
+        run_cycle.assert_not_called()
+
+    def test_main_allows_nested_controller_with_override(self) -> None:
+        with mock.patch.dict(
+            agent_cli_controller.os.environ,
+            {agent_cli_controller.CONTROLLER_ACTIVE_ENV: "pid:existing"},
+            clear=False,
+        ), mock.patch.object(agent_cli_controller, "run_cycle", return_value={"agent_result": None}) as run_cycle:
+            exit_code = agent_cli_controller.main(["--allow-nested-controller"])
+
+        self.assertEqual(exit_code, 0)
+        run_cycle.assert_called_once()
 
     def test_run_agent_command_detects_token_limit_pattern(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

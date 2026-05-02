@@ -877,3 +877,307 @@ M_CLK_MUX2 CLK_OUT CLK_IN GND GND NMOS_3P3 W=4u L=0.5u
             "power_sequencing": "BGR -> LDO_ANA -> LDO_DIG -> LDO_LIN -> LIN",
         },
     }
+
+
+# ================================================================
+# ANALOG SENSE & INTERFACE GENERATORS (PRIORITY IP TARGETS)
+# ================================================================
+
+@_register("high_speed_comparator")
+@_register("high_speed_comp")
+@_register("hyper_comp")
+@_register("speed_comp")
+def _build_high_speed_comparator(**kwargs) -> dict[str, Any]:
+    """Ultra-fast comparator for high-frequency signal detection.
+    
+    Sub-nanosecond propagation delay for precision timing and high-speed
+    ADC feedback paths. Optimized for RF and mixed-signal applications.
+    """
+    vdd = kwargs.get("supply_voltage", 3.3)
+
+    netlist = f"""\
+* High-Speed Comparator - Sub-nanosecond Delay
+* Supply: {vdd}V, Propagation delay: < 0.5ns
+* CMRR: > 60 dB, Offset: < 5 mV
+.SUBCKT HIGH_SPEED_COMPARATOR VDD GND VIN_P VIN_N VOUT VBIAS
+
+* Differential input stage (telescopic cascode)
+M_IN_P VOUT n_in_p n_tail1 GND NMOS_3P3 W=20u L=0.5u
+M_IN_N n_in_n VIN_N n_tail1 GND NMOS_3P3 W=20u L=0.5u
+M_CM_P VIN_P n_in_p n_tail2 GND NMOS_3P3 W=20u L=0.5u
+M_CM_N n_in_n n_in_n n_tail2 GND NMOS_3P3 W=20u L=0.5u
+
+* Active load (cascode current mirror)
+M_P1 VOUT n_bias VDD VDD PMOS_3P3 W=40u L=1u
+M_P2 n_in_p n_bias VDD VDD PMOS_3P3 W=40u L=1u
+M_P3 n_in_n n_bias VDD VDD PMOS_3P3 W=40u L=1u
+
+* Tail current sources with high impedance
+M_TAIL1 n_tail1 VBIAS GND GND NMOS_3P3 W=10u L=4u
+M_TAIL2 n_tail2 VBIAS GND GND NMOS_3P3 W=10u L=4u
+
+* High-impedance bias generation
+M_IBIAS n_bias n_bias GND GND NMOS_3P3 W=2u L=6u
+R_IBIAS n_bias VDD 1MEG
+
+* Output buffer (strong inverter for speed)
+M_BUF_P VOUT_INT VOUT VDD VDD PMOS_3P3 W=100u L=0.5u
+M_BUF_N VOUT_INT VOUT GND GND NMOS_3P3 W=50u L=0.5u
+
+* Output latch for latching mode
+M_LATCH_P VOUT_INT VOUT_INT VDD VDD PMOS_3P3 W=20u L=0.5u
+M_LATCH_N VOUT_INT VOUT_INT GND GND NMOS_3P3 W=10u L=0.5u
+
+* Hysteresis network for noise immunity
+R_HYS VOUT_INT VOUT 5k
+C_HYS VOUT_INT GND 0.5p
+
+.ENDS HIGH_SPEED_COMPARATOR
+"""
+    return {
+        "name": "high_speed_comparator",
+        "type": "analog",
+        "netlist": netlist,
+        "ports": ["VDD", "GND", "VIN_P", "VIN_N", "VOUT", "VBIAS"],
+        "subckt_name": "HIGH_SPEED_COMPARATOR",
+        "transistor_count": 14,
+        "specs": {
+            "propagation_delay": "< 0.5 ns",
+            "gain": "> 10000 V/V",
+            "offset": "< 5 mV",
+            "cmrr": "> 60 dB",
+            "slew_rate": "> 1000 V/us",
+            "power_consumption": "2-5 mW",
+        },
+    }
+
+
+@_register("differential_amplifier")
+@_register("diff_amp")
+@_register("diffamp")
+@_register("diff_stage")
+def _build_differential_amplifier(**kwargs) -> dict[str, Any]:
+    """Precision differential amplifier with high CMRR.
+    
+    For balanced signal conditioning and low-noise amplification in
+    instrumentation, precision measurements, and audio front-end applications.
+    """
+    vdd = kwargs.get("supply_voltage", 3.3)
+    gain = kwargs.get("gain", 10)
+
+    netlist = f"""\
+* Differential Amplifier - Precision Low-Noise
+* Supply: {vdd}V, Gain: {gain} V/V
+* CMRR: > 80 dB, Offset: < 2 mV
+.SUBCKT DIFFERENTIAL_AMPLIFIER VDD VSS VIN_P VIN_N VOUT_P VOUT_N VBIAS
+
+* Differential input pair (long-tail)
+M_IN_P n_out_p VIN_P n_tail GND NMOS_3P3 W=50u L=1u
+M_IN_N n_out_n VIN_N n_tail GND NMOS_3P3 W=50u L=1u
+
+* Load resistors (for resistive load stage)
+R_LOAD_P n_out_p VDD 50k
+R_LOAD_N n_out_n VDD 50k
+
+* Tail current source
+M_TAIL n_tail VBIAS GND GND NMOS_3P3 W=30u L=3u
+
+* Cascode stage for increased gain
+M_CS_P n_cas_p n_out_p VDD VDD PMOS_3P3 W=40u L=1u
+M_CS_N n_cas_n n_out_n VDD VDD PMOS_3P3 W=40u L=1u
+
+* Active load (current mirror)
+M_MIRROR_P n_cas_p n_cas_p VDD VDD PMOS_3P3 W=40u L=1u
+M_MIRROR_N n_cas_n n_cas_p VDD VDD PMOS_3P3 W=40u L=1u
+
+* Output buffers
+M_BUF_P_OUT VOUT_P n_cas_p VDD VDD PMOS_3P3 W=80u L=0.5u
+M_BUF_P_GND VOUT_P n_cas_p GND GND NMOS_3P3 W=40u L=0.5u
+M_BUF_N_OUT VOUT_N n_cas_n VDD VDD PMOS_3P3 W=80u L=0.5u
+M_BUF_N_GND VOUT_N n_cas_n GND GND NMOS_3P3 W=40u L=0.5u
+
+* Bias network
+M_IBIAS VBIAS VBIAS GND GND NMOS_3P3 W=3u L=5u
+R_IBIAS VBIAS VDD 500k
+
+* Common-mode feedback network for symmetry
+C_CM VOUT_P VOUT_N 1p
+
+.ENDS DIFFERENTIAL_AMPLIFIER
+"""
+    return {
+        "name": "differential_amplifier",
+        "type": "analog",
+        "netlist": netlist,
+        "ports": ["VDD", "VSS", "VIN_P", "VIN_N", "VOUT_P", "VOUT_N", "VBIAS"],
+        "subckt_name": "DIFFERENTIAL_AMPLIFIER",
+        "transistor_count": 13,
+        "specs": {
+            "gain": f"{gain} V/V",
+            "offset": "< 2 mV",
+            "cmrr": "> 80 dB",
+            "psrr": "> 70 dB",
+            "output_swing": f"0.2 to {vdd - 0.2}V",
+            "bandwidth": "10-100 MHz",
+        },
+    }
+
+
+@_register("buffered_precision_dac")
+@_register("buf_dac")
+@_register("buffered_dac")
+@_register("precision_dac_with_buffer")
+def _build_buffered_precision_dac(**kwargs) -> dict[str, Any]:
+    """High-resolution DAC with integrated output buffer.
+    
+    Converts digital control words into precise, low-impedance analog
+    voltages for accurate setpoint control and calibration.
+    """
+    vdd = kwargs.get("supply_voltage", 3.3)
+    resolution = kwargs.get("resolution", 10)
+
+    netlist = f"""\
+* Buffered Precision DAC - {resolution}-bit Resolution
+* Supply: {vdd}V, Output impedance: < 10 Ohm
+* INL/DNL: < 0.5 LSB, Settling: < 1 us
+.SUBCKT BUFFERED_PRECISION_DAC VDD GND DIN[{resolution-1}:0] VOUT VREF EN
+
+* R-2R resistor ladder array
+* Provides 2^{resolution} precision output levels
+* DIN[9:0] selects output voltage between 0 and VREF
+
+* 10-bit R-2R ladder (simplified to 4 stages shown)
+R_R0 n_dac_out n_1 10k
+M_S0 n_1 DIN[0] GND GND NMOS_3P3 W=10u L=1u
+R_R1 n_dac_out n_2 10k
+M_S1 n_2 DIN[1] GND GND NMOS_3P3 W=10u L=1u
+R_R2 n_dac_out n_3 10k
+M_S2 n_3 DIN[2] GND GND NMOS_3P3 W=10u L=1u
+R_R3 n_dac_out n_4 10k
+M_S3 n_4 DIN[3] GND GND NMOS_3P3 W=10u L=1u
+
+* Reference current source
+M_IREF n_dac_out VREF VDD VDD PMOS_3P3 W=100u L=1u
+
+* Unity-gain buffer (OTA-based)
+* Error amplifier (high gain for precision)
+M_EA_P n_ea_p n_ea_p VDD VDD PMOS_3P3 W=10u L=1u
+M_EA_N n_ea_n n_ea_p VDD VDD PMOS_3P3 W=10u L=1u
+M_EA_INP n_ea_p n_dac_out n_ea_tail GND NMOS_3P3 W=30u L=1u
+M_EA_INM n_ea_n VOUT n_ea_tail GND NMOS_3P3 W=30u L=1u
+M_EA_TAIL n_ea_tail n_bias GND GND NMOS_3P3 W=15u L=2u
+
+* Bias
+M_BIAS n_bias n_bias GND GND NMOS_3P3 W=2u L=5u
+R_BIAS n_bias VDD 500k
+
+* Output stage (Class AB push-pull)
+M_OUT_P VOUT n_ea_n VDD VDD PMOS_3P3 W=200u L=0.5u
+M_OUT_N VOUT n_ea_n GND GND NMOS_3P3 W=100u L=0.5u
+
+* Load driving capability
+C_LOAD VOUT GND 100p
+
+* Compensation network
+C_COMP n_ea_n VOUT 2p
+
+* Enable control
+M_EN_DAC n_dac_out EN GND GND NMOS_3P3 W=1u L=0.5u
+M_EN_BIAS n_bias EN GND GND NMOS_3P3 W=1u L=0.5u
+
+.ENDS BUFFERED_PRECISION_DAC
+"""
+    return {
+        "name": "buffered_precision_dac",
+        "type": "analog",
+        "netlist": netlist,
+        "ports": ["VDD", "GND", f"DIN[{resolution-1}:0]", "VOUT", "VREF", "EN"],
+        "subckt_name": "BUFFERED_PRECISION_DAC",
+        "transistor_count": 15,
+        "specs": {
+            "resolution": f"{resolution} bits",
+            "output_range": "0 to VREF",
+            "settling_time": "< 1 us",
+            "output_impedance": "< 10 Ohm",
+            "inl": "< 0.5 LSB",
+            "dnl": "< 0.5 LSB",
+            "load_capability": "10 mA peak",
+        },
+    }
+
+
+@_register("lvds_receiver")
+@_register("lvds_rx")
+@_register("differential_receiver")
+def _build_lvds_receiver(**kwargs) -> dict[str, Any]:
+    """LVDS receiver for low-voltage differential signaling.
+    
+    Receives and recovers differential signals for low-noise communication
+    across chip boundaries and backplanes.
+    """
+    vdd = kwargs.get("supply_voltage", 3.3)
+
+    netlist = f"""\
+* LVDS Receiver - Low-Voltage Differential Signaling
+* Supply: {vdd}V (VDD_IO), Input: 350 mV differential
+* Propagation delay: < 0.3 ns, Common-mode range: 0.5-2.5V
+.SUBCKT LVDS_RECEIVER VDD VDD_IO GND LVDS_P LVDS_N SIGNAL_OUT
+
+* Input differential pair with 100 Ohm termination
+* (Termination typically external, internal option here)
+R_TERM_P LVDS_P n_term_p 50
+R_TERM_N LVDS_N n_term_n 50
+R_TERM_CM n_term_cm GND 100
+
+* Differential amplifier with AC coupling assumed
+C_IN_P LVDS_P n_in_p 10p
+C_IN_N LVDS_N n_in_n 10p
+
+* Gain stage (high impedance input)
+M_IN_P n_out_p n_in_p n_tail GND NMOS_3P3 W=30u L=2u
+M_IN_N n_out_n n_in_n n_tail GND NMOS_3P3 W=30u L=2u
+
+* Load resistors
+R_LOAD_P n_out_p VDD_IO 50k
+R_LOAD_N n_out_n VDD_IO 50k
+
+* Tail current source
+M_TAIL n_tail n_bias GND GND NMOS_3P3 W=20u L=3u
+
+* Cascode gain stage for maximum gain
+M_CS_P n_cas_p n_out_p VDD_IO VDD_IO PMOS_3P3 W=50u L=1u
+M_CS_N n_cas_n n_out_n VDD_IO VDD_IO PMOS_3P3 W=50u L=1u
+
+* Active load current mirror
+M_MIRROR_P n_cas_p n_cas_p VDD_IO VDD_IO PMOS_3P3 W=50u L=1u
+M_MIRROR_N n_cas_n n_cas_p VDD_IO VDD_IO PMOS_3P3 W=50u L=1u
+
+* Output buffer stage
+M_OUT_P SIGNAL_OUT n_cas_p VDD_IO VDD_IO PMOS_3P3 W=100u L=0.5u
+M_OUT_N SIGNAL_OUT n_cas_n GND GND NMOS_3P3 W=50u L=0.5u
+
+* Bias network
+M_IBIAS n_bias n_bias GND GND NMOS_3P3 W=3u L=6u
+R_IBIAS n_bias VDD_IO 800k
+
+* Input filtering and ESD protection
+C_IN_FILTER LVDS_P LVDS_N 5p
+
+.ENDS LVDS_RECEIVER
+"""
+    return {
+        "name": "lvds_receiver",
+        "type": "mixed",
+        "netlist": netlist,
+        "ports": ["VDD", "VDD_IO", "GND", "LVDS_P", "LVDS_N", "SIGNAL_OUT"],
+        "subckt_name": "LVDS_RECEIVER",
+        "transistor_count": 12,
+        "specs": {
+            "propagation_delay": "< 0.3 ns",
+            "input_differential": "350 mV typ",
+            "common_mode_range": "0.5 to 2.5 V",
+            "output_swing": f"0 to {vdd}V",
+            "cmrr": "> 40 dB",
+            "emc_immunity": "automotive grade",
+        },
+    }

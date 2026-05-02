@@ -45,6 +45,7 @@ DEFAULT_PROMPT_PATH = ROOT / "reports" / "agent_prompt_latest.md"
 DEFAULT_AGENT_LOG_PATH = ROOT / "reports" / "agent_cli_output_latest.log"
 DEFAULT_STEP_LOG_DIR = ROOT / "reports" / "agent_cycles"
 DEFAULT_API_HANDSHAKE_URL = "http://127.0.0.1:5102/api/session/handshake"
+CONTROLLER_ACTIVE_ENV = "AMS_AGENT_CONTROLLER_ACTIVE"
 DEFAULT_TOKEN_PATTERNS = [
     r"token limit",
     r"context length",
@@ -597,6 +598,7 @@ def render_agent_prompt(
         "- Treat the script as the initiator. Continue from the latest handshake, feedback, and repo state instead of asking for a fresh prompt.",
         "- Prioritize concrete repo changes that improve automation, chip assembly coverage, technology portability, or validation completeness.",
         "- After making changes, rerun only the necessary repo commands or let the controller launch the next cycle.",
+        "- Do not invoke scripts/agent_cli_controller.py, scripts/start_agent_cli_daemon.ps1, or scripts/open_agent_cli_window.ps1 from inside the external agent run; the controller already owns cycle orchestration.",
         "- If you hit a token, context, or rate limit, stop cleanly after writing any useful partial progress. The controller will generate the next cycle prompt and continue.",
         "- Use the current repo state as the source of truth. Do not assume a previous cycle fully completed unless the reports show it.",
     ])
@@ -794,6 +796,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="Regex pattern that indicates the external agent hit a token/context/rate limit and should be continued")
     parser.add_argument("--continue-on-agent-exit", action="store_true",
                         help="Continue cycling after the external agent command exits")
+    parser.add_argument("--allow-nested-controller", action="store_true",
+                        help="Allow this controller process to start even if another controller already marked the environment active")
     parser.add_argument("--watch", action="store_true", help="Run continuously")
     parser.add_argument("--watch-interval-seconds", type=int, default=86400,
                         help="Delay between daily-style controller cycles when no external agent command is configured")
@@ -802,6 +806,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-cycles", type=int, default=0,
                         help="Maximum cycles to run in watch mode. 0 means unlimited")
     return parser.parse_args(argv)
+
+
+def nested_controller_block_reason(args: argparse.Namespace) -> str | None:
+    """Return a reason when this invocation should refuse a nested controller launch."""
+    if getattr(args, "allow_nested_controller", False):
+        return None
+
+    active_marker = os.environ.get(CONTROLLER_ACTIVE_ENV, "").strip()
+    if not active_marker:
+        return None
+
+    return (
+        f"Nested controller launch blocked because {CONTROLLER_ACTIVE_ENV}="
+        f"{active_marker}. Pass --allow-nested-controller only for intentional manual recursion."
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -814,6 +833,13 @@ def main(argv: list[str] | None = None) -> int:
         write_default_queue(queue_path)
         print(queue_path)
         return 0
+
+    block_reason = nested_controller_block_reason(args)
+    if block_reason:
+        print(block_reason)
+        return 0
+
+    os.environ[CONTROLLER_ACTIVE_ENV] = f"pid:{os.getpid()}"
 
     cycles_completed = 0
     while True:
