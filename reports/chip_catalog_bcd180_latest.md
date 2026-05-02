@@ -1,6 +1,6 @@
 # Chip Assembly Catalog Report
 
-Generated: 2026-05-03T00:01:29.992983
+Generated: 2026-05-03T00:28:35.789147
 Technology filter: bcd180
 
 ## Summary

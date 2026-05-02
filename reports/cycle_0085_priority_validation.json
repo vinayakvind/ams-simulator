@@ -242,21 +242,21 @@
         "has_blocks": true,
         "has_vips": true,
         "has_digital_subsystems": true,
-        "has_power_domains": false,
-        "has_integration_rules": false,
+        "has_power_domains": true,
+        "has_integration_rules": true,
         "has_automation_steps": true,
-        "has_design_reference": false
+        "has_design_reference": true
       },
       "assembly_metrics": {
         "block_count": 14,
         "vip_count": 5,
         "subsystem_count": 3,
-        "power_domain_count": 0,
-        "integration_rules": 0,
+        "power_domain_count": 4,
+        "integration_rules": 12,
         "automation_steps": 10,
         "total_components": 22
       },
-      "status": "partial"
+      "status": "complete"
     },
     "industrial_iot_gateway": {
       "checks": {
@@ -264,21 +264,21 @@
         "has_blocks": true,
         "has_vips": true,
         "has_digital_subsystems": true,
-        "has_power_domains": false,
-        "has_integration_rules": false,
+        "has_power_domains": true,
+        "has_integration_rules": true,
         "has_automation_steps": true,
-        "has_design_reference": false
+        "has_design_reference": true
       },
       "assembly_metrics": {
         "block_count": 14,
         "vip_count": 5,
         "subsystem_count": 3,
-        "power_domain_count": 0,
-        "integration_rules": 0,
+        "power_domain_count": 4,
+        "integration_rules": 12,
         "automation_steps": 10,
         "total_components": 22
       },
-      "status": "partial"
+      "status": "complete"
     },
     "isolated_power_supply_controller": {
       "checks": {
@@ -286,21 +286,21 @@
         "has_blocks": true,
         "has_vips": true,
         "has_digital_subsystems": true,
-        "has_power_domains": false,
-        "has_integration_rules": false,
+        "has_power_domains": true,
+        "has_integration_rules": true,
         "has_automation_steps": true,
-        "has_design_reference": false
+        "has_design_reference": true
       },
       "assembly_metrics": {
         "block_count": 15,
         "vip_count": 5,
         "subsystem_count": 3,
-        "power_domain_count": 0,
-        "integration_rules": 0,
+        "power_domain_count": 4,
+        "integration_rules": 12,
         "automation_steps": 10,
         "total_components": 23
       },
-      "status": "partial"
+      "status": "complete"
     },
     "ethernet_sensor_hub": {
       "checks": {
@@ -308,21 +308,21 @@
         "has_blocks": true,
         "has_vips": true,
         "has_digital_subsystems": true,
-        "has_power_domains": false,
-        "has_integration_rules": false,
+        "has_power_domains": true,
+        "has_integration_rules": true,
         "has_automation_steps": true,
-        "has_design_reference": false
+        "has_design_reference": true
       },
       "assembly_metrics": {
         "block_count": 15,
         "vip_count": 5,
         "subsystem_count": 2,
-        "power_domain_count": 0,
-        "integration_rules": 0,
+        "power_domain_count": 4,
+        "integration_rules": 12,
         "automation_steps": 10,
         "total_components": 22
       },
-      "status": "partial"
+      "status": "complete"
     },
     "safe_motor_drive_controller": {
       "checks": {
@@ -330,28 +330,28 @@
         "has_blocks": true,
         "has_vips": true,
         "has_digital_subsystems": true,
-        "has_power_domains": false,
-        "has_integration_rules": false,
+        "has_power_domains": true,
+        "has_integration_rules": true,
         "has_automation_steps": true,
-        "has_design_reference": false
+        "has_design_reference": true
       },
       "assembly_metrics": {
         "block_count": 13,
         "vip_count": 5,
         "subsystem_count": 3,
-        "power_domain_count": 0,
-        "integration_rules": 0,
+        "power_domain_count": 4,
+        "integration_rules": 12,
         "automation_steps": 10,
         "total_components": 21
       },
-      "status": "partial"
+      "status": "complete"
     }
   },
   "summary": {
     "total_items_validated": 4,
     "total_checks": 118,
-    "passed_checks": 103,
-    "pass_rate_percent": 87.28813559322035,
+    "passed_checks": 118,
+    "pass_rate_percent": 100.0,
     "overall_status": "PASS"
   }
 }
