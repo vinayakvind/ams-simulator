@@ -719,39 +719,114 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "role": "Provides sub-nanosecond propagation delay for precision timing and high-speed ADC feedback paths.",
         "technology_support": ["generic180", "generic130", "generic65", "bcd180"],
         "validation_coverage": [
-            "propagation delay (tpd <0.8ns) timing sweep across PVT corners (SS@125C, FF@-40C, TT@27C)",
-            "offset voltage characterization (-50mV to +50mV) across all corners with linearity analysis",
-            "hysteresis control (0-100mV) with independent verification and stability analysis",
-            "PSRR measurement at 1-10 MHz (target >60dB) with supply ripple immunity testing",
-            "temperature coefficient of offset (<10µV/°C target) with temperature ramp analysis",
-            "input-referred noise floor (<10µV RMS) across all bias currents",
-            "slew rate characterization (>50V/µs typical) for fast-edge detection",
-            "common-mode range verification (0V to VDD-0.5V typical)",
-            "output swing and loading effects (100pF load verification)",
-            "latch-up and ESD margin testing"
+            "propagation delay (tpd) timing: SS@125C: <1.2ns, FF@-40C: <0.4ns, TT@27C: <0.7ns with slew-rate dependency",
+            "offset voltage DC sweep: -50mV to +50mV, linearity <2% across -50mV to +50mV, temperature drift <10µV/°C",
+            "hysteresis control: 0-100mV programmable, switching hysteresis ±5mV accuracy, metastability injection at critical thresholds",
+            "PSRR 1MHz: >65dB (SS, TT), >60dB (FF); 10MHz: >50dB across all corners with supply ripple injection",
+            "temperature coefficient: Tco < 50 ppm/°C offset, < 30 ppm/°C propagation delay over -40°C to +125°C",
+            "input-referred noise: <10µV RMS integrated 10Hz-1MHz, noise spectral density <100nV/√Hz",
+            "slew rate: 50-200V/µs dependent on bias current (5µA to 50µA), minimum slew >50V/µs at 5µA bias",
+            "common-mode input range: 0V to VDD-0.5V with gain flatness ±10% across range",
+            "output swing: 0V to VDD (100mV to VDD-100mV available with load), transition time <100ps",
+            "latch-up testing: >100mA hold current margin per corner, ESD immunity >2kV HBM with integrated clamps",
+            "jitter analysis: input jitter transfer <0.3, clock-to-Q jitter <50ps RMS on 5-tap cascade",
+            "frequency response: -3dB bandwidth >500MHz, phase margin >60° with capacitive load up to 500pF"
         ],
         "generator_params": {
-            "tpd": "<0.8ns",
-            "offset_trim": "±50mV programmable",
-            "hysteresis_trim": "0-100mV configurable",
-            "vbias": "5-50µA tunable",
-            "slew_rate": ">50V/µs",
-            "noise_floor": "<10µV RMS"
+            "circuit_variants": ["single-stage", "cascode-gain", "telescopic", "folded-cascode"],
+            "propagation_delay_target": "<0.8ns at TT@27C",
+            "gain": "50-100 V/V configurable",
+            "offset_trim": "±50mV with 10-bit DAC trim, ±1mV resolution",
+            "hysteresis_trim": "0-100mV with 8-bit programmable control, <5mV resolution",
+            "vbias_range": "5-50µA tunable via external or programmable current DAC",
+            "slew_rate": ">50V/µs minimum at lowest bias current",
+            "noise_floor": "<10µV RMS integrated, <100nV/√Hz spectral density",
+            "cmrr": ">60dB at 1kHz, >40dB at 100kHz with input common-mode range = 0V to VDD-0.5V",
+            "psrr": ">65dB at 1MHz with 100mV peak supply ripple test",
+            "output_drive": "High-speed CMOS inverter with 100µA to 500µA source/sink current capability"
         },
         "example_config": {
-            "vbias_current": "5 uA to 50 uA configurable",
-            "input_common_mode": "0.3 to 2.5 V (supply dependent)",
-            "hysteresis": "10 mV to 100 mV programmable",
-            "response_mode": "single-stage or cascaded configurations",
-            "output_buffer": "CMOS inverter or high-impedance stages"
+            "sar_adc_16bit": {
+                "bias_current": "20 µA",
+                "hysteresis": "2 mV",
+                "propagation_delay": "0.6-0.7 ns (typical)",
+                "output_slew": "500mV/100ps transition",
+                "applications": "16-bit SAR ADC comparator with <0.5 LSB skew matching"
+            },
+            "rf_data_recovery": {
+                "bias_current": "50 µA (high-speed mode)",
+                "hysteresis": "0 mV",
+                "propagation_delay": "<0.4 ns (FF corner)",
+                "jitter_tolerance": "<200ps RMS",
+                "applications": "High-speed LVDS receiver with eye-diagram margin"
+            },
+            "precision_monitoring": {
+                "bias_current": "5 µA (low-power mode)",
+                "hysteresis": "50 mV",
+                "response_time": "1-2 µs (lower bias, low-power operation)",
+                "applications": "Temperature/voltage threshold monitoring with low power"
+            },
+            "flash_converter": {
+                "comparator_array_size": "127 comparators for 7-bit",
+                "bias_shared": "Single bias generator with matched copy",
+                "hysteresis": "Programmable 0-50mV to avoid oscillation",
+                "applications": "Flash ADC with thermometric encoding and priority"
+            }
         },
         "integration_example": {
-            "adc_feedback": "SAR ADC feedback path timing closure (<0.5ns skew to clock) with skew matching across comparator array",
-            "threshold_detection": "Multi-level threshold detection circuits with 8-16 comparators and priority encoding",
-            "rf_slicer": "RF slicer and signal conditioning for high-frequency paths (>100Mbps)",
-            "flash_converter": "Flash converter comparator arrays with thermometric/binary encoding",
-            "precision_monitor": "Precision supply/temperature monitoring with hysteresis and interrupt generation",
-            "data_recovery": "High-speed data recovery with phase alignment and jitter filtering"
+            "sar_adc_feedback": {
+                "description": "SAR ADC feedback path with tpd matching across 16-comparator array",
+                "specs": {
+                    "feedback_delay_skew": "<0.5ns max (matched pair layout with common-centroid routing)",
+                    "settling_window": "10ns with >0.1LSB accuracy at 16-bit resolution",
+                    "comparator_array": "16 identical comparator cells with shared bias and offset trim",
+                    "test_vectors": "Gray code, worst-case transitions (0→1, 15→0), monotonicity check"
+                }
+            },
+            "threshold_detection_bank": {
+                "description": "Multi-level threshold detection with 8-16 comparators and priority encoder",
+                "specs": {
+                    "threshold_levels": "8 to 16 precision thresholds with independent hysteresis",
+                    "priority_encoding": "Binary or thermometric output",
+                    "detection_latency": "<100ns from threshold crossing to encoder output",
+                    "example_use_case": "Over-voltage/under-voltage monitoring for multi-rail PMIC"
+                }
+            },
+            "rf_slicer_frontend": {
+                "description": "RF slicer with cascaded comparators for high-frequency data recovery (>100Mbps)",
+                "specs": {
+                    "cascade_gain": "3-5 cascade stages for sub-100mV input signals",
+                    "jitter": "<100ps RMS cumulative over cascade",
+                    "frequency_range": "100Mbps to 500Mbps with <10% BER at 10dB margin",
+                    "example_use_case": "Ethernet PHY receiver, CAN transceiver high-speed data path"
+                }
+            },
+            "precision_pmic_monitor": {
+                "description": "Precision supply/temperature monitoring with hysteresis and interrupt generation",
+                "specs": {
+                    "monitoring_targets": "VCORE, VBAT, VAUX rails with individual thresholds",
+                    "hysteresis": "50mV around thresholds to prevent chatter",
+                    "response_time": "<10µs from threshold crossing to interrupt assertion",
+                    "example_use_case": "Brown-out detection, over-voltage shutdown, thermal throttling"
+                }
+            },
+            "flash_converter_array": {
+                "description": "Flash converter with 127 or 255 comparator array (7-bit or 8-bit resolution)",
+                "specs": {
+                    "conversion_time": "<10ns per flash encode cycle",
+                    "thermometric_output": "One-hot encoding for lower glitch energy",
+                    "binary_encoder": "Built-in priority encoder for address output",
+                    "test_coverage": "All threshold transitions, monotonicity, missing codes"
+                }
+            },
+            "jitter_cleanup_pll": {
+                "description": "Comparator within PLL clock recovery loop with <50ps jitter contribution",
+                "specs": {
+                    "loop_gain": "Optimized for <100ps RMS closed-loop jitter",
+                    "propagation_delay": "<0.5ns for tight loop timing",
+                    "example_use_case": "Ethernet PLL, USB transceiver, DDR PHY clock recovery"
+                }
+            }
         }
     },
     "differential_amplifier": {
@@ -765,38 +840,128 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "role": "Provides differential gain for instrumentation, precision measurements, and audio front-end applications.",
         "technology_support": ["generic180", "generic130", "generic65", "bcd180"],
         "validation_coverage": [
-            "DC gain >80dB across PVT (SS@125C, FF@-40C, TT@27C) with gain flatness analysis",
-            "CMRR >60dB at 1kHz and >40dB at 100kHz across temperature corners",
-            "input-referred noise <100nV/√Hz integrated over 10Hz-1MHz bandwidth",
-            "slew rate and settling time characterization (1us to 0.1% and 0.01%)",
-            "temperature and supply voltage sensitivity analysis with compensation schemes",
-            "DC offset voltage (<10mV typical) trimming and post-trim accuracy",
-            "THD+N measurement <1% at 1kHz for audio applications",
-            "linear operating range verification (full rail swing capability)",
-            "open-loop output impedance characterization",
-            "frequency response (Bode plots) across gain settings and corners"
+            "DC gain characterization: SS@125C: >75dB, FF@-40C: >85dB, TT@27C: >80dB with gain flatness ±2dB",
+            "CMRR frequency sweep: 1kHz: >80dB, 10kHz: >70dB, 100kHz: >50dB, 1MHz: >35dB across all corners",
+            "input-referred noise density: <80nV/√Hz at 1kHz, <100nV/√Hz across 100Hz-1MHz, <50nV/√Hz at 10kHz",
+            "slew rate: 1x gain >1V/µs, 10x gain >0.3V/µs, 100x gain >0.05V/µs with stable loop operation",
+            "settling time: 1x gain <100ns to 0.1%, 10x gain <500ns to 0.1%, 100x gain <5µs to 0.01%",
+            "temperature drift: offset <5µV/°C, gain <50ppm/°C, CMRR <0.1dB/°C over -40 to +125°C",
+            "supply voltage sensitivity: PSRR >70dB with 100mV peak ripple at 100kHz on both rails",
+            "DC offset voltage: <±5mV trim range with 10-bit DAC, <±0.5mV post-trim accuracy",
+            "THD+N at 1kHz: 1x gain <0.1%, 10x gain <0.5%, 100x gain <1% at full-scale output",
+            "output impedance: 50-100Ω typical (gain independent), load-independent frequency response",
+            "common-mode input range: 0.2V to VDD-0.2V typical with ±5% gain variation across range",
+            "output swing: <100mV from rail with >10mA sourcing/sinking capability",
+            "frequency response (Bode): 1MHz -3dB BW for 1x gain, 10MHz phase margin >70° for 100x gain",
+            "phase matching between P and N output paths: <3° across 10Hz-100kHz",
+            "input-output latency: <100ns time-delay (gain independent) for control loops"
         ],
         "generator_params": {
-            "gain_stages": ["1x", "2x", "4x", "10x", "20x", "50x", "100x"],
-            "bandwidth": "DC to 100MHz optional",
-            "cmrr_tuning": "enabled with trim codes",
-            "offset_cancellation": "dynamic or static trim options",
-            "rail_swing": "near-rail to near-rail configurable"
+            "gain_configurations": ["1V/V (unity buffer)", "2V/V", "5V/V", "10V/V", "20V/V", "50V/V", "100V/V"],
+            "gain_control_method": ["fixed-resistor", "binary-weighted-DAC", "programmable-gain-array"],
+            "bandwidth_setting": ["1MHz", "5MHz", "10MHz", "50MHz", "100MHz"],
+            "cmrr_optimization": "enabled with common-mode feedback network",
+            "offset_cancellation": ["static-trim-DAC (10-bit)", "dynamic-trim-DAC (12-bit)", "chopping"],
+            "input_stage_topology": ["long-tail-pair", "telescopic-cascode", "folded-cascode"],
+            "rail_swing_capability": "near-rail (100mV) to full-rail (50mV) configurable",
+            "output_buffer_drive": "10mA to 100mA source/sink current configurable",
+            "noise_optimization": "low-noise input stage biasing with adjustable current levels",
+            "power_consumption": "1-50mW depending on gain and bandwidth configuration"
         },
         "example_config": {
-            "gain_stages": "1x to 100x programmable with binary weighting",
-            "bandwidth": "100 kHz to 10 MHz selectable",
-            "input_impedance": ">1 MΩ differential nominal",
-            "output_swing": "100mV to VDD-100mV typical",
-            "slew_rate": ">1V/µs (gain dependent)"
+            "unity_buffer_1mhz": {
+                "gain": "1V/V (buffer mode)",
+                "bandwidth": "1 MHz (-3dB)",
+                "noise": "<50nV/√Hz",
+                "input_impedance": ">100MΩ",
+                "output_impedance": "<50Ω",
+                "applications": "High-impedance sensor buffering, precision signal routing"
+            },
+            "10x_instrumentation_10mhz": {
+                "gain": "10V/V",
+                "bandwidth": "10 MHz with >70° phase margin",
+                "cmrr": ">80dB",
+                "offset_drift": "<5µV/°C",
+                "noise": "<100nV/√Hz",
+                "applications": "Bridge sensor amplification, instrumentation frontend"
+            },
+            "100x_audio_preamp_100khz": {
+                "gain": "100V/V",
+                "bandwidth": "100 kHz with flat response",
+                "thd_plus_n": "<1% at 1kHz",
+                "cmrr": ">70dB",
+                "phase_matching": "<3° left-right channels",
+                "applications": "Stereo audio preamplifier, line-level conditioning"
+            },
+            "50x_transimpedance_5mhz": {
+                "gain": "50V/V",
+                "bandwidth": "5 MHz",
+                "input_mode": "Programmable gain with binary DAC",
+                "settling_time": "<1µs to 0.1%",
+                "applications": "Photodiode receiver, optical transceiver"
+            }
         },
         "integration_example": {
-            "sensor_frontend": "Bridge sensor amplification with 0.1% gain accuracy, temperature compensation, and ratiometric biasing",
-            "audio_preamp": "Audio preamplifier with CMRR >70dB, <100nV/√Hz noise floor, and THD <1% at 1kHz",
-            "current_measurement": "Precision current measurement circuits for power monitoring and load balancing",
-            "precision_adc_input": "ADC input buffer with calibrated gain and phase alignment",
-            "medical_instrumentation": "Bio-signal acquisition with >100dB CMRR for EMG/ECG/EEG recording",
-            "precision_dac_feedback": "DAC output buffer with high impedance and low distortion"
+            "bridge_sensor_frontend": {
+                "description": "Precision bridge sensor amplification with integrated gain, offset trim, and temperature compensation",
+                "specs": {
+                    "gain": "10V/V to 100V/V depending on sensor output",
+                    "gain_accuracy": "±0.1% with resistor matching and temperature tracking",
+                    "ratiometric_biasing": "Bridge excitation from same reference as amplifier VREF",
+                    "temperature_compensation": "Sensor output TC matched by amplifier TC <50ppm/°C",
+                    "example_use_case": "Load cell, pressure sensor, strain gauge measurement"
+                }
+            },
+            "stereo_audio_frontend": {
+                "description": "Low-noise stereo audio preamplifier with channel matching and THD optimization",
+                "specs": {
+                    "gain": "Variable 0-100V/V with digital control",
+                    "left_right_matching": "<3° phase, <0.5dB gain matching across audio band",
+                    "thd_plus_n": "<1% at 1kHz full scale",
+                    "noise_floor": "<100nV/√Hz with <15µV RMS integrated output noise",
+                    "headroom": ">20dB above noise floor for 94dB SPL equivalent",
+                    "example_use_case": "Microphone preamplifier, line-level preamp, mixing console input"
+                }
+            },
+            "precision_power_monitor": {
+                "description": "Precision current measurement using low-value sense resistor and high-gain amplifier",
+                "specs": {
+                    "gain": "50V/V to 200V/V for 50mV sense resistor drop",
+                    "measurement_accuracy": "±0.5% over 1mA to 10A range",
+                    "bandwidth": "100kHz for ADC sampling compatibility",
+                    "offset_trim": "10-bit DAC for zero-current calibration",
+                    "example_use_case": "Battery charger, power supply current monitoring, load balancing"
+                }
+            },
+            "adc_input_buffer": {
+                "description": "Low-noise, high-impedance ADC input buffer with precise gain and phase alignment",
+                "specs": {
+                    "gain": "1V/V to 10V/V programmable for full-scale matching",
+                    "settling_time": "<100ns for 10-bit, <500ns for 12-bit accurate sampling",
+                    "output_impedance": "<50Ω for low source impedance to ADC",
+                    "phase_linearity": "<1% deviation across 1kHz-100kHz",
+                    "example_use_case": "Multi-channel data acquisition system, sensor signal conditioning"
+                }
+            },
+            "medical_biopotential_amplifier": {
+                "description": "Ultra-high CMRR amplifier for bio-signal acquisition (EMG, ECG, EEG) with artifact rejection",
+                "specs": {
+                    "gain": "1000V/V to 10000V/V with gain control",
+                    "cmrr": ">100dB for 50/60Hz rejection",
+                    "input_referred_noise": "<50µV RMS integrated over 0.5Hz-10kHz",
+                    "input_offset_range": "±500mV with precision trimming",
+                    "example_use_case": "Portable ECG monitor, EEG headset, EMG rehabilitation system"
+                }
+            },
+            "precision_feedback_buffer": {
+                "description": "High-impedance output buffer for DAC or precision voltage reference feedback in closed-loop systems",
+                "specs": {
+                    "gain": "1V/V unity or 0.5V/V attenuator for range compression",
+                    "output_impedance": "<50Ω for long cable runs (>10m) without loading errors",
+                    "distortion": "<0.5% THD+N for control signal fidelity",
+                    "example_use_case": "Power supply feedback sensing, precision voltage regulator compensation"
+                }
+            }
         }
     },
     "buffered_precision_dac": {
@@ -810,42 +975,130 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "role": "Converts digital control words into precise, low-impedance analog voltages for accurate setpoint control.",
         "technology_support": ["generic180", "generic130", "generic65", "bcd180"],
         "validation_coverage": [
-            "DNL/INL analysis across all codes and PVT corners (SS@125C, FF@-40C, TT@27C)",
-            "settling time to 0.1% and 0.01% verification with glitch-free guarantee",
-            "output impedance <100Ω measurement at DC and across frequency range",
-            "glitch impulse energy characterization and pulse-width analysis",
-            "monotonicity verification across temperature and supply voltage swings",
-            "temperature drift and supply sensitivity (<50ppm/°C, <10ppm/V typical)",
-            "output noise floor and THD+N measurement across all codes",
-            "buffer output driving capability for various load impedances (1kΩ to 10MΩ)",
-            "DC gain and frequency response of output buffer stage",
-            "power supply rejection ratio (PSRR) >60dB at 100kHz typical",
-            "startup behavior and settling after power-on/enable",
-            "latency from digital input to analog output convergence"
+            "DNL (Differential Non-Linearity): SS@125C: <±0.5LSB, FF@-40C: <±0.3LSB, TT@27C: <±0.4LSB across all codes",
+            "INL (Integral Non-Linearity): SS@125C: <±1LSB, FF@-40C: <±0.8LSB, TT@27C: <±1LSB end-to-end",
+            "settling time precision: 0.1% accuracy in <500ns at TT, 0.01% accuracy in <2µs with glitch-free guarantee",
+            "glitch impulse energy: <100pJ typical per LSB transition, <50pJ at binary transitions (0x7FF to 0x800)",
+            "monotonicity verification: guaranteed monotonic across all PVT corners and temperature ramps",
+            "temperature drift: <50ppm/°C on full-scale value, offset drift <20µV/°C over -40 to +125°C",
+            "supply sensitivity: <10ppm/V on full-scale with ±10% supply variation, PSRR >60dB at 100kHz",
+            "output noise floor: <100µV RMS integrated 1kHz-100kHz, <10µV RMS at 10Hz-1kHz for low-frequency control",
+            "THD+N measurement: <0.5% at mid-scale, <1% full-scale at 1kHz output frequency",
+            "buffer output impedance: <50Ω DC to 1MHz, <100Ω at 10MHz with load capability 1kΩ to 10MΩ",
+            "buffer DC gain and frequency response: flat ±0.5dB response 100Hz-100kHz, -3dB BW >500kHz",
+            "startup settling: <1µs to final value after power-on or enable signal transition",
+            "latency from DIN to VOUT: <100ns digital-to-analog propagation delay plus settling time",
+            "code-to-code glitch behavior: measured pulse width <100ns, amplitude <±50mV for adjacent codes"
         ],
         "generator_params": {
+            "resolution_options": ["8-bit", "10-bit", "12-bit", "14-bit", "16-bit"],
             "resolution": "8-14 bit configurable",
-            "output_impedance": "<50Ω typical",
-            "settling_time": "<1µs to 0.01% typical",
-            "buffer_type": "rail-to-rail CMOS or current-output",
-            "reference_options": "internal or external VREF",
-            "power_supply_rejection": ">60dB @ 100kHz"
+            "dac_architecture": ["R-2R-ladder", "Charge-redistribution", "Segmented-switch"],
+            "output_impedance": "<50Ω for driving ADC inputs and low-impedance loads",
+            "settling_time_0.1pct": "<500ns typical at 12-bit",
+            "settling_time_0.01pct": "<2µs typical at 12-bit",
+            "buffer_topology": ["rail-to-rail-CMOS", "current-output-amplifier", "open-drain"],
+            "reference_configurations": ["internal-bandgap", "external-VREF-input", "ratiometric-biasing"],
+            "update_rate": "DC to 10MHz with glitch-free latch or transparent latch options",
+            "power_supply_rejection": ">60dB at 100kHz with dual-supply option",
+            "output_drive_capability": "±10mA to ±100mA sourcing/sinking depending on buffer sizing",
+            "power_consumption": "0.5-5mW depending on update rate and buffer drive"
         },
         "example_config": {
-            "resolution": "8-bit to 14-bit configurable",
-            "output_range": "0-VREF or -VREF/2 to +VREF/2 symmetric",
-            "settling_target": "<1 µs to 0.1% (typical) or <500ns to 1%",
-            "load_impedance": "1k to 100k range typical",
-            "update_rate": "Up to 10MHz typical"
+            "12bit_sar_adc_setpoint": {
+                "resolution": "12-bit",
+                "output_range": "0 to VREF",
+                "settling_to_0.1pct": "<500ns",
+                "reference": "External VREF input",
+                "update_rate": "Up to 1MHz SPI compatible",
+                "applications": "SAR ADC reference tuning, ADC gain calibration"
+            },
+            "14bit_precision_trim": {
+                "resolution": "14-bit",
+                "output_range": "-VREF/2 to +VREF/2",
+                "output_impedance": "<50Ω for low-load effect",
+                "settling_to_0.01pct": "<2µs for precision settling",
+                "reference": "Internal bandgap with trimming",
+                "applications": "Bandgap trim tuning, bias current generation, sub-threshold device control"
+            },
+            "10bit_low_power_led": {
+                "resolution": "10-bit",
+                "output_range": "0 to 3.3V rail-to-rail",
+                "update_rate": "100Hz to 1kHz",
+                "power_consumption": "<1mW",
+                "applications": "LED brightness control, backlight PWM intensity setting"
+            },
+            "8bit_audio_dac_out": {
+                "resolution": "8-bit",
+                "output_range": "Full rail-to-rail swing",
+                "glitch_energy": "<100pJ",
+                "buffer_current": "±50mA drive capability",
+                "applications": "Audio codec output buffer, speaker driver predriver"
+            }
         },
         "integration_example": {
-            "trim_tuning": "Post-silicon trim tuning for bandgap and bias parameters with ±1% accuracy and NVM storage",
-            "setpoint_generation": "Setpoint generation for converter control loops with 0.1% accuracy and fast settling",
-            "programmable_threshold": "Programmable threshold for comparator references with digital control and ratiometric operation",
-            "led_control": "LED brightness control with PWM and DAC combination",
-            "audio_dac": "Audio DAC output buffer with low noise and distortion",
-            "sensor_calibration": "Post-production calibration signal generation for sensor trimming",
-            "power_supply_control": "Feedback signal generation for regulated power supply loop compensation"
+            "trim_calibration_engine": {
+                "description": "Precision DAC for post-silicon temperature-compensated trim tuning of analog IP (bandgap, bias, reference)",
+                "specs": {
+                    "resolution": "14-bit for 0.01% trim accuracy",
+                    "update_rate": "SPI interface at 10MHz",
+                    "trim_range": "±20% around nominal values",
+                    "temperature_compensation": "Trimmed values updated every 10ms based on onboard temperature sensor",
+                    "nvm_storage": "Trim codes stored in embedded FLASH or OTP with CRC verification",
+                    "example_use_case": "Bandgap reference trim, current mirror bias tuning, oscillator frequency calibration"
+                }
+            },
+            "power_supply_loop_control": {
+                "description": "DAC for generating precision feedback signals in buck/boost converter feedback loops",
+                "specs": {
+                    "resolution": "12-bit for 0.1% regulation accuracy",
+                    "settling_time": "<500ns for fast transient response",
+                    "output_impedance": "<50Ω to drive high-impedance divider networks",
+                    "update_rate": "100kHz for loop bandwidth optimization",
+                    "example_use_case": "PMIC output voltage programming, LDO setpoint control, multi-rail sequencing"
+                }
+            },
+            "analog_comparator_reference": {
+                "description": "DAC-generated programmable reference thresholds for analog comparator arrays",
+                "specs": {
+                    "resolution": "10-bit for threshold step size ~2mV",
+                    "output_impedance": "<50Ω for stable threshold independent of comparator input impedance",
+                    "settling_time": "<100ns for real-time threshold adjustment",
+                    "reference_current": "Ratiometric biasing from same bandgap as comparator bias",
+                    "example_use_case": "Over-voltage/under-voltage monitoring thresholds, temperature monitoring hysteresis"
+                }
+            },
+            "precision_sensor_excitation": {
+                "description": "Precision DAC for sensor bridge excitation voltage and ratiometric biasing",
+                "specs": {
+                    "resolution": "12-bit for 0.025% excitation voltage accuracy",
+                    "reference": "Ratiometric to same bandgap as bridge sensor amplifier",
+                    "temperature_tracking": "Excitation voltage temperature coefficient matches sensor output TC",
+                    "glitch_suppression": "Slow settle mode for noise-sensitive analog frontend",
+                    "example_use_case": "Load cell excitation, pressure sensor ratiometric biasing, strain gauge bridge drive"
+                }
+            },
+            "audio_dac_interface": {
+                "description": "Low-noise audio DAC output buffer for line-level audio signal generation",
+                "specs": {
+                    "resolution": "8-bit to 10-bit for audio quality",
+                    "thd_plus_n": "<1% at 1kHz (target for audio codec output)",
+                    "buffer_drive": "±20mA typical for driving 10kΩ load",
+                    "output_impedance": "<100Ω for low-impedance audio line standards",
+                    "glitch_free_update": "Synchronized to audio clock for click-pop avoidance",
+                    "example_use_case": "Audio codec output stage, headphone preamp output, line-level mixing output"
+                }
+            },
+            "programmable_current_dac": {
+                "description": "DAC generating precision current outputs (I-out) for tuning high-impedance analog circuits",
+                "specs": {
+                    "resolution": "10-14 bit",
+                    "current_range": "1µA to 100µA programmable",
+                    "output_impedance": ">100MΩ for ideal current source",
+                    "temperature_drift": "<100ppm/°C on full-scale current",
+                    "example_use_case": "Bias current tuning, leakage current compensation, oscillator frequency tuning"
+                }
+            }
         }
     },
     "lvds_receiver": {
@@ -859,26 +1112,127 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "role": "Receives and recovers differential signals for low-noise communication across chip boundaries and backplanes.",
         "technology_support": ["generic180", "generic130", "generic65", "bcd180"],
         "validation_coverage": [
-            "threshold margin analysis (100-400mV differential)",
-            "eye diagram measurements at 155Mbps to 3.2Gbps",
-            "input impedance matching (100Ω nominal ±10%)",
-            "CMTI immunity >50V/ns",
-            "jitter transfer analysis and skew verification"
+            "threshold margin sweep: minimum 100mV differential detection, typical 200mV, maximum 400mV threshold",
+            "eye diagram analysis: 1MHz to 3.2Gbps data rates with eye opening >30%, 1M-sample minimum acquisitions",
+            "input impedance matching: 100Ω nominal differential with ±10% tolerance and frequency-dependent analysis",
+            "CMTI (common-mode transient immunity): >50V/ns with false trigger detection across -10 to +10V/ns",
+            "jitter transfer: <0.3 transfer function at data rate frequency, <50ps accumulation in cascaded chains",
+            "propagation delay: 0.5-2ns typical across PVT corners with <100ps skew between P and N channels",
+            "common-mode input range: -0.5V to +3.5V without loss of sensitivity or false triggering",
+            "differential input range: 100mV (minimum) to 1V (maximum) with no cross-talk between channels",
+            "AC coupling performance: high-pass cutoff >1MHz with coupling capacitor variations",
+            "termination impedance: 100Ω characteristic (series termination) or 100Ω parallel (AC-coupled endpoint)",
+            "simultaneous switching noise (SSN): <10mV peak noise injection with 100ps pulse, no logic errors",
+            "electrostatic discharge (ESD): >2kV HBM with integrated clamping on differential pair",
+            "temperature-dependent behavior: propagation delay variation <100ps from -40 to +125°C",
+            "multi-lane phase alignment: <50ps maximum skew for N-channel receiver arrays in parallel applications"
         ],
         "generator_params": {
-            "data_rates": "155M to 3.2Gbps",
-            "jitter_tolerance": "<200ps RMS",
-            "propagation_delay": "<2ns max"
+            "data_rate_support": ["155Mbps", "250Mbps", "500Mbps", "1Gbps", "2.5Gbps", "3.125Gbps", "3.2Gbps"],
+            "receiver_architecture": ["latch-based", "voltage-comparator-based", "dynamic-latch"],
+            "threshold_setting": "Fixed 100mV or programmable 50-400mV with DAC trim",
+            "jitter_tolerance": "<200ps RMS at rated data rate",
+            "propagation_delay": "<2ns maximum with <100ps skew matched pair",
+            "common_mode_range": "-0.5V to +3.5V without threshold shift",
+            "differential_input_impedance": "100Ω nominal with ±10% variation acceptance",
+            "output_swing": "Rail-to-rail (0V to VDD) full logic swing",
+            "multi_channel_support": "1 to 8 parallel receivers with shared bias and matched delay",
+            "input_coupling": ["AC-coupled-highpass", "DC-coupled", "back-termination"],
+            "output_buffer_drive": "High-speed CMOS inverter with 50-200µA current capability"
         },
         "example_config": {
-            "data_rate": "155 Mbps to 3.2 Gbps",
-            "input_impedance": "100 Ω differential nominal",
-            "receiver_type": "CMOS or current-mode"
+            "gigabit_ethernet_receiver": {
+                "data_rate": "1Gbps",
+                "differential_input": "100mV to 400mV threshold sweep",
+                "propagation_delay": "<1.5ns",
+                "jitter_tolerance": "<150ps RMS",
+                "common_mode_range": "0V to 3.3V",
+                "impedance_matching": "100Ω differential with series termination",
+                "applications": "Gigabit Ethernet PHY, backplane interfaces"
+            },
+            "pci_express_gen1_receiver": {
+                "data_rate": "2.5Gbps per lane",
+                "threshold_programmable": "50mV to 200mV step tuning",
+                "jitter_tolerance": "<200ps RMS",
+                "multi_channel": "4-16 parallel lanes with <50ps skew",
+                "eye_diagram_margin": ">30% horizontal, >25% vertical",
+                "applications": "PCIe Gen1 transceiver, high-speed backplane"
+            },
+            "fiber_optic_receiver_front_end": {
+                "data_rate": "155Mbps to 1Gbps per channel",
+                "ac_coupled_input": "1MHz high-pass filter with coupling capacitor",
+                "common_mode_bias": "Biased to mid-supply with AC coupling",
+                "propagation_delay": "<2ns for phase alignment",
+                "applications": "Optical transceiver frontend, fiber-optic links"
+            },
+            "lvds_clock_recovery": {
+                "data_rate": "500Mbps to 3.2Gbps",
+                "low_jitter_priority": "Optimized for <50ps jitter contribution",
+                "phase_alignment": "Within 10ps across 8-lane array",
+                "programmable_threshold": "DAC-controlled 100-300mV range",
+                "applications": "Clock recovery, CDR (Clock Data Recovery) frontend"
+            }
         },
         "integration_example": {
-            "backplane_signaling": "Backplane differential signaling with impedance matching and AC coupling",
-            "adc_interface": "High-speed ADC interface with clock recovery and data synchronization",
-            "multi_channel": "Multi-channel differential arrays with phase alignment and skew matching"
+            "high_speed_backplane_interface": {
+                "description": "Multi-lane LVDS receiver array for backplane differential signaling",
+                "specs": {
+                    "channel_count": "4 to 16 parallel LVDS receivers",
+                    "data_rate": "1-3.2Gbps per channel",
+                    "propagation_delay_matching": "<50ps maximum skew across all lanes",
+                    "common_clock_interface": "Shared clock generation with per-lane phase adjustment",
+                    "example_use_case": "Mid-plane backplane, high-end networking, military avionics"
+                }
+            },
+            "gigabit_ethernet_phy": {
+                "description": "LVDS receiver as core component of Gigabit Ethernet PHY for MDI interface",
+                "specs": {
+                    "IEEE_standard": "IEEE 802.3 1000Base-T compliant",
+                    "data_rate": "125Mbps symbol rate (1Gbps effective with 8B/10B)",
+                    "eye_diagram_standard": "IEEE 802.3 Template compliance with >30% margin",
+                    "threshold_adaptation": "Programmable threshold for eye-opening optimization",
+                    "example_use_case": "Gigabit Ethernet switch, router, industrial gateway"
+                }
+            },
+            "clock_data_recovery_loop": {
+                "description": "LVDS receiver within CDR feedback loop for jitter cleanup",
+                "specs": {
+                    "closed_loop_jitter": "<50ps RMS with <100ps peak deviation",
+                    "data_rate": "500Mbps to 2.5Gbps",
+                    "loop_bandwidth": "1-10MHz for jitter transfer optimization",
+                    "phase_lock_time": "<100ns acquisition time",
+                    "example_use_case": "Fiber optic receiver, high-speed serial links, DDR PHY"
+                }
+            },
+            "pcie_lane_receiver": {
+                "description": "Multi-lane LVDS receiver for PCIe physical layer interface",
+                "specs": {
+                    "pcie_generation": "Gen1 (2.5Gbps), Gen2 (5Gbps) capable",
+                    "lane_width": "4 to 16 parallel receivers",
+                    "eye_diagram_margin": ">30% H-margin, >25% V-margin per PCIe spec",
+                    "phase_alignment": "Within 10ps skew for symbol timing",
+                    "example_use_case": "PCIe Gen1 endpoint, root complex, switch fabric"
+                }
+            },
+            "differential_front_panel_interface": {
+                "description": "AC-coupled LVDS receiver for externally connectorized differential signals",
+                "specs": {
+                    "ac_coupling": "High-pass 1MHz cutoff for DC-blocking",
+                    "common_mode_bias": "On-die bias network for AC-coupled inputs",
+                    "termination": "Optional integrated parallel 100Ω termination on input",
+                    "overcurrent_protection": "Series source impedance limiting",
+                    "example_use_case": "Instrument interfaces, industrial sensors, automotive diagnostics"
+                }
+            },
+            "test_point_analog_mux": {
+                "description": "LVDS receiver with optional analog multiplexer for multi-signal monitoring",
+                "specs": {
+                    "channel_count": "4-8 multiplexed LVDS inputs",
+                    "switch_time": "<100ns for channel selection and settling",
+                    "threshold_programmable": "Per-channel threshold calibration",
+                    "example_use_case": "Production test, debug probe, multi-signal oscilloscope input"
+                }
+            }
         }
     },
     "ethernet_phy": {
