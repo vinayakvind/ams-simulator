@@ -1,10 +1,10 @@
 # Autonomous Agent Prompt
 
 Cycle: 19
-Generated: 2026-05-02T18:54:45.275303
+Generated: 2026-05-02T19:05:55.269031
 Workspace: My Simulator
 Branch: master
-Commit: c7348523fdd72dc2c9572e318ed8f63b25c81722
+Commit: 81369a6ac4ec8918c3aaedfe490e4e429bd1dbdf
 
 ## Controller Handshake Files
 
@@ -27,21 +27,34 @@ Run validation and reporting, then feed the next concrete improvement batch back
 - PASS run-strict-autopilot (log: reports/agent_cycles/cycle_0019_run-strict-autopilot.log)
 - PASS repo-backup-report (log: reports/agent_cycles/cycle_0019_repo-backup-report.log)
 
+## Priority Build Targets
+
+- Reusable IP backlog: high_speed_comparator, differential_amplifier, buffered_precision_dac, lvds_receiver, ethernet_phy, profibus_transceiver, canopen_controller, isolated_gate_driver
+- Verification IP backlog: ethernet_vip, profibus_vip, canopen_vip, clock_gating_vip, precision_dac_vip, high_speed_signal_vip
+- Digital subsystem backlog: clock_gating_plane, ethernet_control_plane, safety_monitor_plane, infotainment_control_plane, power_conversion_plane
+- Chip profile backlog: automotive_infotainment_soc, industrial_iot_gateway, isolated_power_supply_controller, ethernet_sensor_hub, safe_motor_drive_controller
+- Prefer implementing or closing these catalog items before unrelated polish work.
+
 ## Observations
 
 - All queued validation/report commands exited cleanly in the latest cycle.
 - Strict autopilot overall status: PASS.
-- Chip catalog inventory: 49 reusable IPs, 23 VIPs, 17 digital subsystems, 15 chip profiles.
-- generic130: 49/49 reusable IPs and 15/15 chip profiles are currently compatible.
-- generic65: 49/49 reusable IPs and 15/15 chip profiles are currently compatible.
-- bcd180: 49/49 reusable IPs and 15/15 chip profiles are currently compatible.
+- Chip catalog inventory: 61 reusable IPs, 29 VIPs, 20 digital subsystems, 19 chip profiles.
+- generic130: 50/61 reusable IPs and 16/19 chip profiles are currently compatible.
+- generic65: 59/61 reusable IPs and 18/19 chip profiles are currently compatible.
+- bcd180: 49/61 reusable IPs and 15/19 chip profiles are currently compatible.
+- Priority backlog configured for 24 targeted reusable IP, VIP, digital-subsystem, and chip-profile items.
 - Workflow focus: Use the latest strict autopilot and chip-catalog reports to decide the next implementation batch.
 - Workflow focus: Prefer improvements that expand reusable chip IP, VIP, and technology coverage.
 - Workflow focus: Keep the workflow resumable so the next cycle continues cleanly after token or context limits.
 
 ## Next Improvements To Implement
 
-- Expand the reusable chip library with additional IPs, VIPs, or technology-specific implementations so future cycles improve capability instead of only revalidating.
+- Expand generic130 chip-profile support for: iot_edge_hub, secure_iot_gateway, wireless_powered_sensor.
+- Expand generic130 reusable IP support for: aes_accelerator, ble_transceiver, bms_controller, i3c_controller, imu_interface, nfc_controller.
+- Expand generic65 chip-profile support for: secure_iot_gateway.
+- Expand generic65 reusable IP support for: rf_front_end, uwb_transceiver.
+- Expand bcd180 chip-profile support for: iot_edge_hub, secure_iot_gateway, smart_battery_pack, wireless_powered_sensor.
 
 ## Agent Instructions
 

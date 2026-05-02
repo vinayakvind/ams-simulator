@@ -573,7 +573,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["ble", "bluetooth_low_energy"],
         "description": "Integrated BLE 5.0+ radio transceiver with on-chip antenna interface and SPI control.",
         "role": "Provides wireless connectivity for IoT edge nodes and sensor aggregation in industrial and consumer applications.",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "nfc_controller": {
         "name": "NFC/RFID Controller",
@@ -584,7 +584,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["nfc", "rfid"],
         "description": "NFC Type 2/3 and ISO14443-A compliant RFID/NFC controller for proximity and short-range communication.",
         "role": "Enables wireless identification, authentication, and contactless data exchange for payment, access control, and asset tracking.",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "uwb_transceiver": {
         "name": "Ultra-Wideband Transceiver",
@@ -595,7 +595,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["uwb", "ultra_wideband"],
         "description": "Ultra-wideband RF transceiver for high-precision ranging and localization (IEEE 802.15.4z).",
         "role": "Enables indoor positioning, asset localization, and secure communication for industrial IoT and consumer devices.",
-        "technology_support": ["generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "generic22", "generic14"],
     },
     "rf_front_end": {
         "name": "RF Front-End Module",
@@ -606,7 +606,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["rf_fe", "lna_pa"],
         "description": "Integrated low-noise amplifier (LNA) and power amplifier (PA) front-end for multi-band RF systems.",
         "role": "Provides high-gain, low-noise reception and high-power transmission for cellular, WLAN, and satellite IoT.",
-        "technology_support": ["generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "generic22", "generic14"],
     },
     "aes_accelerator": {
         "name": "AES Cryptographic Accelerator",
@@ -617,7 +617,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["aes", "crypto_aes"],
         "description": "Hardware AES-128/256 encryption/decryption accelerator with DMA interface.",
         "role": "Provides high-speed cryptographic acceleration for secure communications, authentication, and data protection.",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "sha_accelerator": {
         "name": "SHA Hash Accelerator",
@@ -650,7 +650,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["imu", "accelerometer_gyro"],
         "description": "I2C interface controller for 3-axis accelerometer/gyroscope sensing with integrated interrupt processing.",
         "role": "Integrates MEMS inertial sensors for motion detection, gesture recognition, and kinematic monitoring in mobile and IoT.",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "qi_wireless_rx": {
         "name": "Qi Wireless Power Receiver",
@@ -672,7 +672,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["bms_monitor", "cell_balance"],
         "description": "Single or multi-cell battery voltage and temperature monitor with integrated cell balancing switches.",
         "role": "Monitors battery health, enforces safe charge/discharge limits, and balances multi-cell packs for longevity.",
-        "technology_support": ["generic130", "generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "bms_controller": {
         "name": "Battery Management System Controller",
@@ -683,7 +683,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["bms", "battery_mgmt"],
         "description": "Advanced battery management system controller with multi-cell monitoring, pack balancing, and load switching.",
         "role": "Manages overall battery pack safety, lifespan, and performance through intelligent charging, discharging, and fault detection.",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "i3c_controller": {
         "name": "I3C (Improved I2C) Controller",
@@ -694,7 +694,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "aliases": ["i3c", "mipi_i3c"],
         "description": "MIPI I3C interface controller supporting both legacy I2C and high-speed DDR modes (up to 12.5 Mbps).",
         "role": "Provides backward-compatible sensor interface with higher bandwidth and lower latency for IoT sensor hubs.",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
 
     "pwm_controller": {
@@ -1025,19 +1025,19 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
         "name": "IoT Wireless Communication Plane",
         "blocks": ["ble_transceiver", "nfc_controller", "rf_front_end", "i3c_controller", "register_file", "interrupt_controller"],
         "description": "Integrated wireless subsystem for multi-protocol IoT connectivity (BLE, NFC, custom RF).",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "security_crypto_plane": {
         "name": "Security and Cryptography Plane",
         "blocks": ["aes_accelerator", "sha_accelerator", "true_random_number_generator", "register_file", "interrupt_controller", "control_logic"],
         "description": "Integrated cryptographic acceleration and random number generation for secure communications.",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "battery_management_plane": {
         "name": "Battery Management Subsystem",
         "blocks": ["battery_cell_monitor", "bms_controller", "temperature_sensor", "register_file", "control_logic", "interrupt_controller"],
         "description": "Complete battery pack monitoring and management with multi-cell balancing and safety enforcement.",
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
 }
 
@@ -1221,7 +1221,7 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "blocks": ["bandgap", "ldo_analog", "ldo_digital", "ble_transceiver", "nfc_controller", "rf_front_end", "aes_accelerator", "sha_accelerator", "true_random_number_generator", "i3c_controller", "register_file", "interrupt_controller", "control_logic"],
         "vips": ["ble_vip", "nfc_vip", "i3c_vip", "crypto_vip", "power_sequence_vip", "thermal_monitoring_vip"],
         "digital_subsystems": ["iot_wireless_plane", "security_crypto_plane", "sensor_aggregation_plane"],
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "secure_iot_gateway": {
         "name": "Secure IoT Gateway",
@@ -1233,7 +1233,7 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "blocks": ["bandgap", "ldo_analog", "ldo_digital", "boost_converter", "ble_transceiver", "nfc_controller", "uwb_transceiver", "rf_front_end", "aes_accelerator", "sha_accelerator", "true_random_number_generator", "i3c_controller", "uart_controller", "spi_controller", "register_file", "interrupt_controller", "control_logic", "watchdog_timer"],
         "vips": ["ble_vip", "nfc_vip", "i3c_vip", "crypto_vip", "emc_compliance_vip", "power_sequence_vip", "frequency_accuracy_vip"],
         "digital_subsystems": ["iot_wireless_plane", "security_crypto_plane", "multi_rail_power_control"],
-        "technology_support": ["generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "generic22", "generic14"],
     },
     "wireless_powered_sensor": {
         "name": "Wireless-Powered Sensor Node",
@@ -1245,7 +1245,7 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "blocks": ["bandgap", "ldo_analog", "ldo_digital", "qi_wireless_rx", "battery_cell_monitor", "bms_controller", "imu_interface", "ble_transceiver", "i3c_controller", "temperature_sensor", "register_file", "control_logic"],
         "vips": ["wireless_charging_vip", "bms_vip", "ble_vip", "i3c_vip", "analog_snapshot_vip"],
         "digital_subsystems": ["battery_management_plane", "iot_wireless_plane"],
-        "technology_support": ["generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "smart_battery_pack": {
         "name": "Smart Battery Pack Controller",

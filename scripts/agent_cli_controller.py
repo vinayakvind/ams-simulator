@@ -63,32 +63,36 @@ DEFAULT_QUEUE: dict[str, Any] = {
     ],
     "priority_build_targets": {
         "reusable_ips": [
-            "bandgap",
-            "ldo_analog",
-            "ldo_digital",
-            "ldo_lin",
-            "lin_transceiver",
-            "sample_hold_frontend",
-            "dac_r2r_4bit",
-            "comparator_cmos",
-            "buck_converter",
-            "sar_adc_top",
-            "sigma_delta_adc_top",
+            "high_speed_comparator",
+            "differential_amplifier",
+            "buffered_precision_dac",
+            "lvds_receiver",
+            "ethernet_phy",
+            "profibus_transceiver",
+            "canopen_controller",
+            "isolated_gate_driver",
         ],
         "verification_ips": [
-            "spi_vip",
-            "lin_vip",
-            "power_sequence_vip",
-            "analog_snapshot_vip",
-            "adc_transient_vip",
-            "mixed_signal_bridge_vip",
+            "ethernet_vip",
+            "profibus_vip",
+            "canopen_vip",
+            "clock_gating_vip",
+            "precision_dac_vip",
+            "high_speed_signal_vip",
+        ],
+        "digital_subsystems": [
+            "clock_gating_plane",
+            "ethernet_control_plane",
+            "safety_monitor_plane",
+            "infotainment_control_plane",
+            "power_conversion_plane",
         ],
         "chip_profiles": [
-            "lin_node_asic",
-            "sar_adc_macro",
-            "sigma_delta_macro",
-            "mixed_signal_sensor_hub",
-            "power_management_unit",
+            "automotive_infotainment_soc",
+            "industrial_iot_gateway",
+            "isolated_power_supply_controller",
+            "ethernet_sensor_hub",
+            "safe_motor_drive_controller",
         ],
     },
     "steps": [
@@ -202,7 +206,9 @@ def load_queue(path: Path) -> dict[str, Any]:
     payload.setdefault("name", DEFAULT_QUEUE["name"])
     payload.setdefault("goal", DEFAULT_QUEUE["goal"])
     payload.setdefault("focus_areas", list(DEFAULT_QUEUE["focus_areas"]))
-    payload.setdefault("priority_build_targets", deepcopy(DEFAULT_QUEUE["priority_build_targets"]))
+    priority_targets = payload.setdefault("priority_build_targets", deepcopy(DEFAULT_QUEUE["priority_build_targets"]))
+    for key, values in DEFAULT_QUEUE["priority_build_targets"].items():
+        priority_targets.setdefault(key, list(values))
     payload.setdefault("steps", list(DEFAULT_QUEUE["steps"]))
     return payload
 
@@ -339,6 +345,12 @@ def _priority_target_actions(
             "Deepen verification IP priority targets with richer protocol scenarios and mixed-signal regressions",
         ),
         (
+            "digital_subsystems",
+            "digital_subsystems",
+            "digital subsystem",
+            "Expand digital subsystem priority targets with reusable control planes, integration rules, and validation coverage",
+        ),
+        (
             "chip_profiles",
             "chip_profiles",
             "chip profile",
@@ -386,7 +398,7 @@ def _priority_target_actions(
 
     if configured_total:
         observations.append(
-            f"Priority backlog configured for {configured_total} targeted reusable IP, VIP, and chip-profile items."
+            f"Priority backlog configured for {configured_total} targeted reusable IP, VIP, digital-subsystem, and chip-profile items."
         )
 
     return observations, improvements
@@ -558,11 +570,14 @@ def render_agent_prompt(
         lines.extend(["", "## Priority Build Targets", ""])
         reusable_ips = priority_targets.get("reusable_ips", [])
         verification_ips = priority_targets.get("verification_ips", [])
+        digital_subsystems = priority_targets.get("digital_subsystems", [])
         chip_profiles = priority_targets.get("chip_profiles", [])
         if reusable_ips:
             lines.append(f"- Reusable IP backlog: {', '.join(str(item) for item in reusable_ips)}")
         if verification_ips:
             lines.append(f"- Verification IP backlog: {', '.join(str(item) for item in verification_ips)}")
+        if digital_subsystems:
+            lines.append(f"- Digital subsystem backlog: {', '.join(str(item) for item in digital_subsystems)}")
         if chip_profiles:
             lines.append(f"- Chip profile backlog: {', '.join(str(item) for item in chip_profiles)}")
         lines.append("- Prefer implementing or closing these catalog items before unrelated polish work.")

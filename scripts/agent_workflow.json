@@ -8,32 +8,36 @@
   ],
   "priority_build_targets": {
     "reusable_ips": [
-      "bandgap",
-      "ldo_analog",
-      "ldo_digital",
-      "ldo_lin",
-      "lin_transceiver",
-      "sample_hold_frontend",
-      "dac_r2r_4bit",
-      "comparator_cmos",
-      "buck_converter",
-      "sar_adc_top",
-      "sigma_delta_adc_top"
+      "high_speed_comparator",
+      "differential_amplifier",
+      "buffered_precision_dac",
+      "lvds_receiver",
+      "ethernet_phy",
+      "profibus_transceiver",
+      "canopen_controller",
+      "isolated_gate_driver"
     ],
     "verification_ips": [
-      "spi_vip",
-      "lin_vip",
-      "power_sequence_vip",
-      "analog_snapshot_vip",
-      "adc_transient_vip",
-      "mixed_signal_bridge_vip"
+      "ethernet_vip",
+      "profibus_vip",
+      "canopen_vip",
+      "clock_gating_vip",
+      "precision_dac_vip",
+      "high_speed_signal_vip"
+    ],
+    "digital_subsystems": [
+      "clock_gating_plane",
+      "ethernet_control_plane",
+      "safety_monitor_plane",
+      "infotainment_control_plane",
+      "power_conversion_plane"
     ],
     "chip_profiles": [
-      "lin_node_asic",
-      "sar_adc_macro",
-      "sigma_delta_macro",
-      "mixed_signal_sensor_hub",
-      "power_management_unit"
+      "automotive_infotainment_soc",
+      "industrial_iot_gateway",
+      "isolated_power_supply_controller",
+      "ethernet_sensor_hub",
+      "safe_motor_drive_controller"
     ]
   },
   "steps": [

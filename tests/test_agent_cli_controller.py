@@ -34,6 +34,7 @@ class AgentCliControllerTests(unittest.TestCase):
 
             self.assertIn("priority_build_targets", queue)
             self.assertIn("reusable_ips", queue["priority_build_targets"])
+            self.assertIn("digital_subsystems", queue["priority_build_targets"])
 
     def test_collect_feedback_reports_generic65_compatibility_gap(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -102,7 +103,7 @@ class AgentCliControllerTests(unittest.TestCase):
                 "summary": {
                     "reusable_ip_count": 4,
                     "verification_ip_count": 2,
-                    "digital_subsystem_count": 1,
+                    "digital_subsystem_count": 2,
                     "chip_profile_count": 2,
                 },
                 "reusable_ips": [
@@ -114,6 +115,10 @@ class AgentCliControllerTests(unittest.TestCase):
                 "verification_ips": [
                     {"key": "spi_vip"},
                     {"key": "lin_vip"},
+                ],
+                "digital_subsystems": [
+                    {"key": "sensor_aggregation_plane"},
+                    {"key": "power_sequencer"},
                 ],
                 "chip_profiles": [
                     {"key": "lin_node_asic"},
@@ -132,6 +137,8 @@ class AgentCliControllerTests(unittest.TestCase):
                             "summary": {
                                 "compatible_ip_count": 4,
                                 "reusable_ip_count": 4,
+                                "compatible_digital_subsystem_count": 2,
+                                "digital_subsystem_count": 2,
                                 "compatible_chip_profile_count": 2,
                                 "chip_profile_count": 2,
                             },
@@ -144,6 +151,10 @@ class AgentCliControllerTests(unittest.TestCase):
                             "verification_ips": [
                                 {"key": "spi_vip", "compatible": True},
                                 {"key": "lin_vip", "compatible": True},
+                            ],
+                            "digital_subsystems": [
+                                {"key": "sensor_aggregation_plane", "compatible": True},
+                                {"key": "power_sequencer", "compatible": True},
                             ],
                             "chip_profiles": [
                                 {"key": "lin_node_asic", "compatible": True},
@@ -162,6 +173,7 @@ class AgentCliControllerTests(unittest.TestCase):
                     "priority_build_targets": {
                         "reusable_ips": ["bandgap", "buck_converter", "ldo_analog", "lin_transceiver"],
                         "verification_ips": ["spi_vip", "lin_vip"],
+                        "digital_subsystems": ["sensor_aggregation_plane", "power_sequencer"],
                         "chip_profiles": ["lin_node_asic", "power_management_unit"],
                     },
                 },
@@ -169,6 +181,7 @@ class AgentCliControllerTests(unittest.TestCase):
 
             self.assertTrue(any("Harden reusable IP priority targets" in item for item in feedback["improvements"]))
             self.assertTrue(any("Deepen verification IP priority targets" in item for item in feedback["improvements"]))
+            self.assertTrue(any("Expand digital subsystem priority targets" in item for item in feedback["improvements"]))
             self.assertTrue(any("Expand chip profile priority targets" in item for item in feedback["improvements"]))
             self.assertFalse(any(item.startswith("Expand the reusable chip library with additional IPs") for item in feedback["improvements"]))
 
@@ -187,6 +200,7 @@ class AgentCliControllerTests(unittest.TestCase):
                         "priority_build_targets": {
                             "reusable_ips": ["bandgap", "buck_converter"],
                             "verification_ips": ["spi_vip"],
+                            "digital_subsystems": ["power_sequencer"],
                             "chip_profiles": ["power_management_unit"]
                         },
                         "steps": [
@@ -232,6 +246,7 @@ class AgentCliControllerTests(unittest.TestCase):
             self.assertNotIn(str(root), prompt_text)
             self.assertIn("Priority Build Targets", prompt_text)
             self.assertIn("bandgap, buck_converter", prompt_text)
+            self.assertIn("Digital subsystem backlog", prompt_text)
 
     def test_run_agent_command_detects_token_limit_pattern(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
