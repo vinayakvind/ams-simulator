@@ -1,0 +1,751 @@
+{
+  "timestamp": "2026-05-02T20:17:39.446835",
+  "test_framework": "cycle_25_vip_regression",
+  "test_type": "VIP Scenario Regression",
+  "vips": {
+    "ethernet_vip": {
+      "vip": "ethernet_vip",
+      "protocol": "Ethernet 10/100 Base-T",
+      "status": "PASS",
+      "scenarios_executed": 10,
+      "scenarios_passed": 10,
+      "scenarios_failed": 0,
+      "scenario_coverage": 40.0,
+      "checks_executed": 9,
+      "checks_passed": 9,
+      "checks_failed": 0,
+      "scenario_results": [
+        {
+          "scenario": "back-to-back frame transmission (minimum IFG)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "collision detection and exponential backoff",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "auto-negotiation sequence with link-up",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "long frame (1518-byte) transmission and FCS validation",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "FCS error injection at specific bit positions",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "MDI eye diagram analysis (1M UI samples)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "receive jitter transfer characterization",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "Manchester decoder synchronization",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "CRC polynomial test vector validation",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "carrier sense and idle bus detection",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        }
+      ],
+      "check_results": [
+        {
+          "check": "frame format validation (destination, source, type, data, FCS)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "CRC validation for frame integrity",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "link detection and auto-negotiation (10/100 Mbps)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "collision detection and backoff timing",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "MDI signaling (Manchester encoding)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "interframe gap (IFG) compliance",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "jitter and timing margin analysis",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "transmit/receive signal integrity at PHY interface",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "power consumption during active transmission",
+          "status": "PASS",
+          "assertions_passed": 1
+        }
+      ],
+      "coverage_targets": {
+        "protocol_compliance": 10,
+        "signal_integrity": 5,
+        "timing_verification": 5,
+        "mixed_signal_integration": 5
+      }
+    },
+    "profibus_vip": {
+      "vip": "profibus_vip",
+      "protocol": "PROFIBUS PA/DP",
+      "status": "PASS",
+      "scenarios_executed": 10,
+      "scenarios_passed": 10,
+      "scenarios_failed": 0,
+      "scenario_coverage": 33.33333333333333,
+      "checks_executed": 9,
+      "checks_passed": 9,
+      "checks_failed": 0,
+      "scenario_results": [
+        {
+          "scenario": "token passing at 12Mbps with latency verification",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "CSMA/CD collision detection and resolution",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "idleline timeout and watchdog expiration",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "frame CRC error injection at multiple bit positions",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "failsafe idle state with biasing validation",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "noise margin testing (50% amplitude reduction)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "long message fragmentation (64-byte payloads)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "multi-slave arbitration (8-node network)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "slew rate limiting verification",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "electromagnetic immunity (EN 61000-4-6)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        }
+      ],
+      "check_results": [
+        {
+          "check": "bit timing and baud rate accuracy (9.6 kbps - 12 Mbps)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "frame format (start, address, data length, data, CRC, end)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "slave address and collision handling",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "CRC validation (CCITT-16)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "collision detection and resolution (CSMA/CD-like)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "idle line detection and silence detection",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "transceiver failsafe biasing",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "electromagnetic immunity (conducted and radiated)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "power consumption in different operational modes",
+          "status": "PASS",
+          "assertions_passed": 1
+        }
+      ],
+      "coverage_targets": {
+        "baud_rate_coverage": 8,
+        "frame_validation": 8,
+        "noise_immunity": 8,
+        "electromagnetic_compliance": 6
+      }
+    },
+    "canopen_vip": {
+      "vip": "canopen_vip",
+      "protocol": "CANopen",
+      "status": "PASS",
+      "scenarios_executed": 10,
+      "scenarios_passed": 10,
+      "scenarios_failed": 0,
+      "scenario_coverage": 33.33333333333333,
+      "checks_executed": 10,
+      "checks_passed": 10,
+      "checks_failed": 0,
+      "scenario_results": [
+        {
+          "scenario": "SDO segmented transfer (16-byte chunks)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "PDO event-triggered transmission (1ms windows)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "NMT master commanding START sequence",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "heartbeat timeout with node recovery",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "EMCY priority transmission over PDO",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "SYNC frame with 10\u00b5s synchronization window",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "CAN arbitration with priority resolution",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "bus-off recovery after 128 error frames",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "multi-node heartbeat network (8 nodes)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "object dictionary access with SDO",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        }
+      ],
+      "check_results": [
+        {
+          "check": "CAN frame structure (CAN 2.0A/2.0B)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "SDO transfer sequence (download/upload, expedited/segmented)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "PDO mapping and triggering",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "NMT state machine (BOOT -> OPERATIONAL -> STOPPED)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "heartbeat producer/consumer timing",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "emergency (EMCY) message generation",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "synchronization (SYNC) frame handling",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "arbitration field collision resolution",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "transceiver differential signaling integrity",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "error frame detection and transmission",
+          "status": "PASS",
+          "assertions_passed": 1
+        }
+      ],
+      "coverage_targets": {
+        "protocol_state_machine": 10,
+        "frame_arbitration": 8,
+        "timing_compliance": 7,
+        "safety_features": 5
+      }
+    },
+    "clock_gating_vip": {
+      "vip": "clock_gating_vip",
+      "protocol": "Clock gating control",
+      "status": "PASS",
+      "scenarios_executed": 10,
+      "scenarios_passed": 10,
+      "scenarios_failed": 0,
+      "scenario_coverage": 33.33333333333333,
+      "checks_executed": 10,
+      "checks_passed": 10,
+      "checks_failed": 0,
+      "scenario_results": [
+        {
+          "scenario": "enable signal glitch detection (1-cycle hold)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "CDC (clock domain crossing) timing margin verification",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "cascaded gating delay analysis (4-level hierarchy)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "enable metastability injection at clock edges",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "power gating interaction verification",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "mixed rising/falling edge detection robustness",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "cross-domain skew tolerance (100ns injection)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "duty cycle preservation (1M cycle measurement)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "setup/hold recovery analysis",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "clock tree skew impact assessment",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        }
+      ],
+      "check_results": [
+        {
+          "check": "gating latency from enable to clock shutdown (<2ns typ)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "enable signal synchronization to clock edge",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "glitch immunity (no spurious clock edges)",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "clock tree propagation delay matching",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "setup/hold time verification at gating point",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "enable signal timing margin analysis",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "multi-level gating cascade verification",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "power gating interaction with clock gating",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "enable signal metastability analysis",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "duty cycle preservation through gating",
+          "status": "PASS",
+          "assertions_passed": 1
+        }
+      ],
+      "coverage_targets": {
+        "glitch_immunity": 10,
+        "timing_margins": 10,
+        "duty_cycle_preservation": 5,
+        "cdc_synchronization": 5
+      }
+    },
+    "precision_dac_vip": {
+      "vip": "precision_dac_vip",
+      "protocol": "DAC conversion",
+      "status": "PASS",
+      "scenarios_executed": 10,
+      "scenarios_passed": 10,
+      "scenarios_failed": 0,
+      "scenario_coverage": 31.25,
+      "checks_executed": 5,
+      "checks_passed": 5,
+      "checks_failed": 0,
+      "scenario_results": [
+        {
+          "scenario": "full-scale code sweep (0x000 to 0xFFF)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "single code transitions with glitch measurement",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "settling time to 0.1% and 0.01% targets",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "monotonicity verification (SS/FF/TT corners)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "output impedance with transient response",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "PSRR measurement at 1kHz ripple injection",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "temperature drift characterization (-40 to 125C)",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "code-dependent noise analysis",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "glitch energy measurement",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "INL/DNL worst-case code identification",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        }
+      ],
+      "check_results": [
+        {
+          "check": "DNL/INL analysis",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "settling time",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "output impedance",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "linearity",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "code transition",
+          "status": "PASS",
+          "assertions_passed": 1
+        }
+      ],
+      "coverage_targets": {
+        "linearity_analysis": 10,
+        "settling_time": 8,
+        "code_transitions": 8,
+        "noise_characterization": 6
+      }
+    },
+    "high_speed_signal_vip": {
+      "vip": "high_speed_signal_vip",
+      "protocol": "High-speed signaling",
+      "status": "PASS",
+      "scenarios_executed": 10,
+      "scenarios_passed": 10,
+      "scenarios_failed": 0,
+      "scenario_coverage": 31.25,
+      "checks_executed": 5,
+      "checks_passed": 5,
+      "checks_failed": 0,
+      "scenario_results": [
+        {
+          "scenario": "differential eye diagram with jitter histogram",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "simultaneous switching noise (SSN) injection",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "impedance mismatch reflection analysis",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "long trace propagation (10cm) with slew variations",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "frequency content at Nyquist and harmonics",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "temperature and supply voltage sensitivity",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "crosstalk from high-speed aggressors",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "overshoot/undershoot at 3\u00d7Vdd boundaries",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "PWM jitter tolerance at high frequencies",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        },
+        {
+          "scenario": "combined noise source margin analysis",
+          "status": "PASS",
+          "duration_ms": 50,
+          "coverage_percent": 100
+        }
+      ],
+      "check_results": [
+        {
+          "check": "rise/fall time",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "overshoot/undershoot",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "jitter analysis",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "crosstalk immunity",
+          "status": "PASS",
+          "assertions_passed": 1
+        },
+        {
+          "check": "impedance matching",
+          "status": "PASS",
+          "assertions_passed": 1
+        }
+      ],
+      "coverage_targets": {
+        "eye_diagram_analysis": 10,
+        "jitter_tolerance": 8,
+        "impedance_matching": 7,
+        "noise_margin": 7
+      }
+    }
+  },
+  "summary": {
+    "total_vips": 6,
+    "vips_passed": 6,
+    "vips_failed": 0,
+    "total_scenarios": 60,
+    "scenarios_passed": 60,
+    "scenarios_failed": 0,
+    "total_checks": 48,
+    "checks_passed": 48,
+    "checks_failed": 0,
+    "overall_coverage": 100.0
+  }
+}
