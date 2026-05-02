@@ -1630,6 +1630,30 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "supply noise injection: 100mV peak ripple at 10MHz with phase jitter contribution measurement",
             "substrate coupling: simultaneous TX and RX with crosstalk measurement and BER impact",
             "magnetic interference: externally injected 50/60Hz common-mode signal with immunity verification"
+        ],
+        "protocol_scenarios": [
+            "idle_to_transmission: carrier sense detection with 5µs delay, SFD detection within ±100ns, data path setup",
+            "frame_collision_handling: two simultaneous transmitters with jam signal (32-bit pattern) within 4µs, backoff countdown (0-1023 slots)",
+            "crc_validation_stress: sequential frames with intentional CRC corruption at bytes 1-6, error flag assertion within 1 frame",
+            "auto_negotiation_sequence: FLP pulse exchange (16-bit), LINK_ACQUIRED assertion within 1.5 seconds, speed resolution confirmation",
+            "manchester_encoding_verification: all 16 Manchester bit patterns (0000-FFFF) with clock recovery phase error <±50ns",
+            "reception_under_noise: AWGN injection (SNR=10dB) with error rates <1e-6 for frames >100 bytes",
+            "interface_mode_switching: 10Mbps to 100Mbps transition with zero frame loss, link recovery <50ms",
+            "power_save_state_transitions: MAC enters idle after IFG completion, PHY enters low-power standby (<50mW)",
+            "multicast_frame_filtering: destination address matching for broadcast and multicast groups with proper rejection",
+            "statistics_counter_overflow: frame/byte/error counters increment for 1M frames with no saturation errors"
+        ],
+        "validation_coverage": [
+            "frame_format_compliance: 64-1518 byte range, destination (6B), source (6B), type (2B), payload, FCS (4B)",
+            "crc32_polynomial: test vectors 0x00000000, 0xFFFFFFFF, alternating 0xAAAA/0x5555 patterns with correct FCS generation",
+            "link_speed_accuracy: 10Mbps ±5%, 100Mbps ±3% with phase-locked timing reference and 1M symbol measurement",
+            "collision_detection_latency: jam signal assertion <400ns after both drivers active, backoff timing 0-1023 slots ±5%",
+            "manchester_threshold_margin: minimum 40% eye opening at receiver, clock phase margin >60° at recovered clock",
+            "interframe_gap_enforcement: minimum 96 bit times (9.6µs @ 100Mbps) between frames with ±10ns tolerance",
+            "transmit_jitter: <100ps RMS cumulative over 10 consecutive frames, clock-to-Q variation <50ps",
+            "receiver_threshold: differential voltage detection 100-200mV with hysteresis <50mV, no false triggers >50V/ns CM transients",
+            "carrier_sense_accuracy: idle bus <5mV differential, active bus >200mV differential with detection latency <100ns",
+            "power_consumption_profile: idle <500mW, transmission <2W, reception <1.8W peak at 100Mbps frame rate"
         ]
     },
     "profibus_vip": {
@@ -1681,6 +1705,30 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "supply voltage sensitivity: ±10% VBAT variation impact on biasing and detection thresholds",
             "parameter drift with aging: leakage current and resistance changes over 100k frame cycles",
             "multi-driver contention: simultaneous transmission detection and driver disable latency <100ns"
+        ],
+        "protocol_scenarios": [
+            "token_passing: master token holder (TTH) timeout initiates search, token passes through 8-slave network <50ms",
+            "slave_address_collision: two nodes with same address respond with parity error, arbitration recovery in <1 frame period",
+            "frame_fragmentation: 64-byte payload split across 3 PROFIBUS frames with frame_more_follows flag, reassembly verification",
+            "crc_error_recovery: CCITT-CRC error in byte 4 triggers NAK, transmitter resends within 10ms timeout",
+            "failsafe_biasing_verification: idle bus pulled to 7.5V midpoint by 680Ω resistor pair, noise margin >200mV",
+            "noise_immunity_stress: 50% amplitude reduction (250mV) still maintains threshold detection and no bit slips",
+            "multinode_arbitration: 12-node network with prioritized token passing, latency <100µs per slave",
+            "idle_line_watchdog: 11-bit silent interval triggers watchdog, automatic retry with fresh token generation",
+            "baudrate_transitions: frequency switching 9.6k->19.2k->56k with zero frame loss, resynchronization <100µs",
+            "electromagnetic_environment_compliance: conducted/radiated immunity per IEC 61326-1, recovery within 1 frame"
+        ],
+        "validation_coverage": [
+            "baud_rate_accuracy: 9.6kbps to 12Mbps with ±5% tolerance verification across -40 to +85°C range",
+            "frame_structure: mandatory start bit, 8 data bits, parity, 1-2 stop bits per PROFIBUS spec",
+            "crc_polynomial: CCITT-16 polynomial with test vectors for single-bit and multi-bit errors",
+            "token_passing_latency: max token holding time (THT) <100ms, token pass <1ms between adjacent nodes",
+            "slave_response_time: slave receives master query, responds within <100ms station address timeout",
+            "collision_detection: simultaneous transmission stopped within <1µs, arbitration via lower address priority",
+            "failsafe_idle_voltage: 7.5V ±0.5V midpoint with <100µA leakage, threshold hysteresis <100mV",
+            "noise_immunity_margin: minimum 200mV differential threshold with 50% overdrive capability",
+            "slew_rate_control: 10-30V/µs programmable to minimize EMI and inter-symbol interference",
+            "receiver_threshold_margin: 100% recognition of 200mV differential signals, no false triggers on 50V/µs CM events"
         ]
     },
     "canopen_vip": {
@@ -1739,6 +1787,30 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "temperature drift: bit timing error accumulation from -40°C to +125°C ramp",
             "frequency accuracy: crystal oscillator ±500ppm drift over calendar month simulation",
             "simultaneous 8-node arbitration: collision-free arbitration with lowest ID winning at 1Mbps"
+        ],
+        "protocol_scenarios": [
+            "sdo_expedited_download: 4-byte data transfer in single SDO DOWNLOAD INITIATE, toggle bit toggle on next transfer",
+            "sdo_segmented_upload: multi-segment file read with 7-byte chunks, toggle bit alternation, CRC validation per segment",
+            "pdo_event_triggered: event-flag set triggers immediate PDO transmission, jitter <100µs over 10 consecutive events",
+            "pdo_time_triggered: fixed 10ms SYNC interval with PDO response synchronized within ±10µs window",
+            "nmt_state_transitions: BOOT->PRE_OP->OPERATIONAL->STOPPED with proper command codes (0x01, 0x80, 0x81)",
+            "heartbeat_timeout_recovery: producer misses heartbeat, consumer detects within 200ms and signals error",
+            "emcy_priority_transmission: EMERGENCY message interrupts normal PDO traffic, transmitted with highest CAN ID priority",
+            "arbitration_collision: 11-bit ID collision resolved by CAN arbitration (lower ID wins) within <8µs settling",
+            "error_frame_recovery: reception of ERROR FRAME stops transmission and initiates bus recovery sequence",
+            "bus_off_to_recovery: 128 consecutive error frames trigger BUS_OFF state, cycling through 11 bit times for recovery"
+        ],
+        "validation_coverage": [
+            "can_frame_structure: 11-bit standard ID or 29-bit extended ID, 0-8 bytes data, CRC, ACK, EOF per ISO 11898-1",
+            "arbitration_mechanism: lower CAN ID has higher priority, collision resolution <8µs, no frame corruption",
+            "sdo_toggle_bit_protocol: toggle bit (bit 4 of SDO header byte) alternates per segment for synchronization",
+            "pdo_timing_accuracy: SYNC-triggered PDO response within ±10µs, event-triggered latency <100µs from event flag",
+            "nmt_guard_time_enforcement: transmit timeout guard >2× producer heartbeat interval for NMT recovery",
+            "bit_timing_accuracy: sample point 75-85% of bit time, ±5% overall tolerance across -40 to +85°C",
+            "receiver_threshold: 200-400mV differential voltage detection with >100mV hysteresis for noise immunity",
+            "error_state_machine: ERROR_ACTIVE (0 errors), ERROR_PASSIVE (>127 errors), BUS_OFF (>255 errors) state transitions",
+            "recovery_sequence: BUS_OFF recovery requires 11 consecutive bit times of dominant recessive pattern observation",
+            "network_arbitration_latency: multi-node arbitration completion <8µs for 8-node network at 1Mbps CAN speed"
         ]
     },
     "clock_gating_vip": {
@@ -1795,6 +1867,30 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "enable slew rate impact: fast (<50ps) and slow (>5ns) enable transitions with different glitch behavior",
             "output loading effect: capacitive load variation 10pF-1nF with propagation delay change <100ps",
             "setup/hold margin with CDC: cross-domain enable with variable delay synchronizer (1-3 flip-flop stages)"
+        ],
+        "protocol_scenarios": [
+            "glitch_free_gating: enable held high for exactly 1 clock cycle with peak glitch voltage <0.5V,recovery <100ps",
+            "enable_setup_margin: enable transitions with <1ns setup margin to clock edge, no metastability observable",
+            "cascaded_gating_synchronization: 4-level gating hierarchy with <50ps inter-stage skew, accumulated delay <500ps",
+            "power_domain_shutdown_safety: clock gates held inactive during power-off transition with no spurious edges",
+            "cross_domain_enable: enable signal from different clock domain synchronized through CDC flip-flops with <3 cycle latency",
+            "fifo_integration: clock gating coordinated with FIFO empty/full gray-coded flags with no data corruption",
+            "frequency_scaling_support: dynamic frequency scaling (DVFS) coordinated with gating enable without glitches",
+            "very_low_frequency_operation: 1kHz input clock gating with proper settling and no spurious edge generation",
+            "reset_interaction: asynchronous reset de-assertion properly sequenced before enable signal transitions",
+            "multi_enable_logic: OR/AND of up to 4 enable sources from different clock domains with proper synthesis"
+        ],
+        "validation_coverage": [
+            "gating_latency: clock shutdown latency <2ns typical, <3ns worst-case across PVT corners",
+            "enable_synchronization: enable signal sampled at clock rising edge with ±0.5ns timing tolerance",
+            "glitch_immunity: no glitches >0.5V peak on output for any enable edge timing relative to clock",
+            "output_frequency_cap: gated clock frequency never exceeds input clock frequency (gate cannot create edges)",
+            "duty_cycle_preservation: gated clock maintains ±5% symmetry through gating cell across 1M cycles",
+            "skew_matching: maximum skew between parallel gated clock outputs <50ps for 8-gate array",
+            "propagation_delay: clock-to-gated-output delay <3ns typ with ±500ps PVT variation bounds",
+            "clock_tree_settling: gated clock reaches steady state within 5 clock cycles after enable assertion",
+            "enable_pulse_width_detection: minimum enable pulse of 1 clock cycle properly gated with no partial cycles",
+            "temperature_coefficient: gate delay drift <50ps per 25°C across -40 to +125°C range, monotonic behavior"
         ]
     },
     "precision_dac_vip": {
@@ -1824,6 +1920,42 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "code-dependent noise analysis",
             "glitch energy measurement",
             "INL/DNL worst-case code identification"
+        ],
+        "protocol_scenarios": [
+            "ramp_sweep_linearity: sequential 0x000 to 0xFFF code sweep with linear regression analysis, R² >0.9999",
+            "code_transition_glitch: 0x7FF to 0x800 (MSB transition) with glitch energy <100pJ and peak <50mV",
+            "settling_accuracy_window: output settles to within 0.1% of final value within 500ns (12-bit resolution)",
+            "monotonicity_across_corners: no code inversion observed in SS, TT, FF corners across 256 transitions",
+            "dac_update_latency: digital-to-analog propagation delay <100ns from DIN strobe to VOUT change",
+            "reference_voltage_sensitivity: VREF variation ±5% produces proportional output change ±0.5% (ratiometric correction)",
+            "output_impedance_stability: output impedance <50Ω DC to 1MHz, <100Ω at 10MHz, load-independent within ±20%",
+            "power_supply_ripple_immunity: 100mV peak 1kHz ripple on VDD produces <10mV ripple on VOUT (PSRR >60dB)",
+            "temperature_drift_compensation: output drift <50ppm/°C across -40 to +125°C without trimming",
+            "dynamic_range_utilization: full-scale swing 0V to VREF with no missing codes or non-monotonic jumps"
+        ],
+        "mixed_signal_regressions": [
+            "thermal_drift_impact: output value shift <100µV from -40°C to +125°C, monotonic change with temperature",
+            "supply_noise_coupling: 100mV peak 10MHz ripple on VDD causes <5mV transient on VOUT peak",
+            "reference_noise_sensitivity: bandgap reference noise <10µV RMS integrated results in <20µV RMS output noise",
+            "load_transient_response: 1kΩ to 10MΩ load change causes <1µs settling with <5% overshoot",
+            "code_dependent_switching: simultaneous transitions of all bits cause <50mV glitch peak with <500ps duration",
+            "process_corner_variations: DNL/INL changes <0.5LSB across SS/TT/FF corners for 12-bit resolution",
+            "clock_feedthrough: digital clock (>10MHz) feedthrough to analog output <1mV peak with no data corruption",
+            "bias_current_variation: ±10% bias current change produces <0.1% output scale factor change",
+            "substrate_coupling: simultaneous digital switching causes <10mV transient on DAC output with<500ps settling",
+            "aging_drift_simulation: 10-year equivalent aging produces <100ppm total output drift with <50ppm permanent shift"
+        ],
+        "validation_coverage": [
+            "dnl_inl_specification: DNL <±0.5LSB (12-bit), INL <±1LSB end-to-end across all codes",
+            "settling_time_precision: 0.1% accuracy in <500ns, 0.01% accuracy in <2µs (12-bit target)",
+            "monotonicity_guarantee: all 4096 codes produce unique outputs with no code inversions across PVT",
+            "glitch_energy_bound: code transition glitch impulse <100pJ typical, <50pJ for best-case transitions",
+            "linearity_metrics: code histogram R² >0.9999 for linear regression fit across full range",
+            "output_impedance_specification: 50Ω nominal DC, <100Ω at 10MHz, stable to ±20% load variation",
+            "psrr_specification: >60dB at 1kHz, >50dB at 10MHz, measured with 100mV peak supply ripple",
+            "temperature_coefficient: <50ppm/°C output drift from -40 to +125°C with linear correlation",
+            "power_consumption_profile: <10mW static (1.8V supply, 10µA typical), <50mW dynamic per MHz switching",
+            "reference_voltage_ratiometric_accuracy: output proportional to VREF within ±0.1% for 2.5V to 3.3V range"
         ]
     },
     "high_speed_signal_vip": {
@@ -1853,6 +1985,42 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "overshoot/undershoot at 3×Vdd boundaries",
             "PWM jitter tolerance at high frequencies",
             "combined noise source margin analysis"
+        ],
+        "protocol_scenarios": [
+            "eye_diagram_measurement: differential signal eye opening >30% at bit rate (1Gbps target), jitter histogram <50ps RMS",
+            "timing_margin_analysis: minimum eye crossing point >100mV from reference threshold with >60° phase margin",
+            "pulse_width_distortion: PWD <5% of bit period for 50% duty cycle signals across temperature range",
+            "crosstalk_victim_response: victim signal jitter <50ps RMS with 2 active aggressors switching at 2V/ns",
+            "reflections_and_ringing: impedance mismatch (±10%) causes <20% overshoot with settling <5 bit periods",
+            "equalization_optimization: receiver continuous-time linear equalizer (CTLE) or feed-forward equalizer (FFE)",
+            "clock_data_recovery: CDR PLL lock-in time <1µs from random state, jitter transfer <0.3 at data rate",
+            "output_driver_strength: configurable 50Ω, 75Ω, 100Ω impedance with <5% variation across corners",
+            "common_mode_range: receiver tolerates ±2V common-mode offset on differential pair without data errors",
+            "frequency_dependent_response: gain flatness ±3dB from DC to Nyquist frequency (500MHz for 1Gbps signaling)"
+        ],
+        "mixed_signal_regressions": [
+            "jitter_accumulation: phase-locked loop jitter multiplies through cascade, cumulative <200ps RMS at receiver",
+            "thermal_effects_on_propagation: propagation delay changes <100ps per 25°C across -40 to +125°C",
+            "supply_induced_jitter: ±10% VDD variation produces <50ps clock-to-Q timing shift with <3% frequency error",
+            "substrate_noise_coupling: simultaneous digital switching injects <10mV transient on high-speed differential pair",
+            "electromagnetic_interference: 1-400MHz RF field injection causes <1% BER degradation with proper shielding",
+            "crosstalk_far_end_crosstalk: FEXT from parallel traces 1mm spacing produces <20% of aggressor amplitude response",
+            "dispersion_effects: frequency-dependent attenuation produces <5% eye closure over 10cm trace length",
+            "impedance_discontinuities: vias and connectors cause <10% reflection coefficient with ringing <3 cycles",
+            "temperature_gradient_effects: ±5°C local temperature variation produces <50ps timing skew between differential pair",
+            "aging_and_degradation: 10-year NBTI/HCI simulation produces <100ps timing degradation with <5% frequency shift"
+        ],
+        "validation_coverage": [
+            "rise_fall_time_specification: 10-90% transition time <200ps with <50ps skew between rising and falling edges",
+            "overshoot_undershoot_limits: peak voltage excursion <10% VDDIO above VDD and below GND for <50ps duration",
+            "jitter_specifications: deterministic jitter <20ps, random jitter <50ps RMS, total jitter <100ps at 1e-12 BER",
+            "differential_impedance: 100Ω nominal (±10% tolerance) measured over 1MHz-1GHz frequency range",
+            "return_loss_specification: >15dB return loss at data rate frequency with >5dB margin to connector discontinuities",
+            "insertion_loss_measurement: <3dB insertion loss at Nyquist frequency (500MHz for 1Gbps) for 10cm trace",
+            "group_delay_variation: <50ps group delay deviation across frequency band to minimize symbol ISI",
+            "common_mode_rejection: receiver CMRR >40dB at data rate with <1% BER impact from ±2V common-mode swings",
+            "power_consumption_profile: idle <100mW, active transmission <500mW per differential pair at 1Gbps",
+            "temperature_coefficient: all timing parameters drift <100ps per 25°C with monotonic temperature dependence"
         ]
     },
 }
