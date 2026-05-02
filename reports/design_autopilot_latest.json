@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-03T01:14:10.940360",
+  "generated_at": "2026-05-03T01:32:40.758380",
   "python_executable": "C:\\Users\\vinay\\My Simulator\\.venv\\Scripts\\python.exe",
   "strict_mode": true,
   "overall": "PASS",
@@ -163,7 +163,7 @@
       {
         "path": "C:\\Users\\vinay\\My Simulator\\reports\\design_portfolio_overview.pptx",
         "exists": true,
-        "size_bytes": 34317
+        "size_bytes": 34316
       }
     ]
   }

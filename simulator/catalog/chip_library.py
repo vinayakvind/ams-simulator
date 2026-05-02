@@ -730,10 +730,18 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "output swing: 0V to VDD (100mV to VDD-100mV available with load), transition time <100ps",
             "latch-up testing: >100mA hold current margin per corner, ESD immunity >2kV HBM with integrated clamps",
             "jitter analysis: input jitter transfer <0.3, clock-to-Q jitter <50ps RMS on 5-tap cascade",
-            "frequency response: -3dB bandwidth >500MHz, phase margin >60° with capacitive load up to 500pF"
+            "frequency response: -3dB bandwidth >500MHz, phase margin >60° with capacitive load up to 500pF",
+            "slew rate dependency: inject 50-500V/µs input slew with hysteresis tracking accuracy ±5mV",
+            "metastability characterization: critically-biased threshold sweep with timing histogram (1000-sample distribution)",
+            "array matching: 8-16 comparator skew measurement with common-centroid layout validation <0.1ns skew",
+            "frequency response: -3dB bandwidth measurement with 10MHz to 500MHz sweep showing phase margin >60°",
+            "rms jitter: 100-sample histogram of propagation delay distribution with peak-to-peak <150ps",
+            "power supply rejection: 0.1-10MHz ripple injection with gain measurement >50dB at all frequencies",
+            "thermal drift: 1°C step characterization from 0-125°C showing <50ppm/°C total drift",
+            "latch_up_immunity: ESD pulse injection >2kV HBM with recovery time <100ns"
         ],
         "generator_params": {
-            "circuit_variants": ["single-stage", "cascode-gain", "telescopic", "folded-cascode", "dynamic-latch-comparator", "regenerative-comparator-array"],
+            "circuit_variants": ["single-stage-high-gain", "cascode-gain-two-stage", "telescopic-cascode-low-power", "folded-cascode-rail-to-rail", "dynamic-latch-comparator", "regenerative-comparator-array"],
             "process_corner_generators": {
                 "FF_SS_mix": {"vth_delta": -0.05, "beta_boost": 1.25, "delay_reduction": "15-20%"},
                 "SS_FF_mix": {"vth_delta": 0.08, "beta_reduction": 0.80, "delay_increase": "30-40%"},
@@ -748,7 +756,30 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "noise_floor": "<10µV RMS integrated, <100nV/√Hz spectral density",
             "cmrr": ">60dB at 1kHz, >40dB at 100kHz with input common-mode range = 0V to VDD-0.5V",
             "psrr": ">65dB at 1MHz with 100mV peak supply ripple test",
-            "output_drive": "High-speed CMOS inverter with 100µA to 500µA source/sink current capability"
+            "output_drive": "High-speed CMOS inverter with 100µA to 500µA source/sink current capability",
+            "enhanced_validation_scenarios": [
+                "slew_rate_dependency: inject 50-500V/µs input slew with hysteresis tracking",
+                "metastability_characterization: critically-biased threshold sweep with timing histogram",
+                "array_matching: 8-16 comparator skew measurement with common-centroid layout",
+                "frequency_response: -3dB bandwidth measurement with 10MHz to 500MHz sweep",
+                "rms_jitter: 100-sample histogram of propagation delay distribution",
+                "power_supply_rejection: 0.1-10MHz ripple injection with gain measurement",
+                "thermal_drift: 1°C step characterization from 0-125°C",
+                "latch_up_immunity: ESD pulse injection with recovery time measurement"
+            ],
+            "mixed_signal_integration_rules": {
+                "sar_adc_feedback": {
+                    "matched_pair_layout": "<1mm trace length mismatch",
+                    "common_centroid_connection": "all array cells",
+                    "max_skew": "<0.5 LSB across comparator array",
+                    "monotonic_code_progression": "guaranteed across all PVT corners"
+                },
+                "ethernet_slicer": {
+                    "cascade_stages": 4,
+                    "cumulative_jitter": "<100ps",
+                    "eye_diagram_margin": ">30%"
+                }
+            }
         },
         "example_config": {
             "sar_adc_16bit": {
@@ -868,7 +899,13 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "output swing: <100mV from rail with >10mA sourcing/sinking capability",
             "frequency response (Bode): 1MHz -3dB BW for 1x gain, 10MHz phase margin >70° for 100x gain",
             "phase matching between P and N output paths: <3° across 10Hz-100kHz",
-            "input-output latency: <100ns time-delay (gain independent) for control loops"
+            "input-output latency: <100ns time-delay (gain independent) for control loops",
+            "frequency sweep: 1Hz-10MHz Bode plot with gain/phase margin extraction",
+            "offset drift: ±5µV/°C characterization across -40 to +125°C",
+            "cmrr_frequency_dependent: 1kHz->1MHz CMRR degradation with systematic characterization",
+            "psrr_both_rails: separate VDD and VSS ripple injection with independent measurement",
+            "thd_plus_n_sweep: 1kHz fundamental with harmonic sweep 2-10 times fundamental",
+            "settling_time_precision: 0.1% and 0.01% settling time with step response analysis"
         ],
         "generator_params": {
             "gain_configurations": [
@@ -892,6 +929,30 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
                 "supply_voltage_sensitivity_correction": "PSRR optimization with supply bypass filtering and feedback",
                 "phase_margin_enforcement": "Stability checking with >60° phase margin guaranteed across all gain settings",
                 "noise_figure_optimization": "Input-referred noise minimization with bias current tuning for minimum NEF"
+            },
+            "enhanced_validation_scenarios": [
+                "frequency_sweep: 1Hz-10MHz Bode plot with gain/phase margin extraction",
+                "offset_drift: ±5µV/°C characterization across -40 to +125°C with automatic compensation",
+                "cmrr_frequency_dependent: 1kHz->1MHz CMRR degradation measurement",
+                "psrr_both_rails: VDD and VSS ripple injection with independent PSRR tracking",
+                "thd_plus_n_sweep: 1kHz fundamental with 2-10x harmonic content analysis",
+                "settling_time_precision: 0.1% and 0.01% settling verification",
+                "phase_matching_p_n: <3° phase difference between differential outputs",
+                "gain_accuracy_pnp_matching": "Resistor network tolerance and temperature tracking"
+            ],
+            "mixed_signal_integration": {
+                "bridge_sensor_frontend": {
+                    "gain": "10-100 V/V",
+                    "cmrr_target": ">100dB",
+                    "offset_drift_max": "<5µV/°C",
+                    "gain_accuracy": "±0.1%"
+                },
+                "current_sense_monitor": {
+                    "gain": 50,
+                    "sense_resistor": "50mOhm",
+                    "measurement_accuracy": "±0.5%",
+                    "offset_drift_max": "<10µV/°C"
+                }
             }
         },
         "example_config": {
@@ -1014,7 +1075,13 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "buffer DC gain and frequency response: flat ±0.5dB response 100Hz-100kHz, -3dB BW >500kHz",
             "startup settling: <1µs to final value after power-on or enable signal transition",
             "latency from DIN to VOUT: <100ns digital-to-analog propagation delay plus settling time",
-            "code-to-code glitch behavior: measured pulse width <100ns, amplitude <±50mV for adjacent codes"
+            "code-to-code glitch behavior: measured pulse width <100ns, amplitude <±50mV for adjacent codes",
+            "dac_linearity: DNL/INL sweep across all 2^N codes with systematic testing",
+            "code_transition_glitch: pedestal energy measurement for 1LSB transitions",
+            "settling_time: 8-bit to 16-bit settling verification with precision measurement",
+            "output_impedance: frequency-dependent Z_out measurement 10Hz-10MHz",
+            "temperature_drift: monotonicity across -40 to +125°C with ramp testing",
+            "supply_sensitivity: PSRR measurement 0.1-10MHz with ripple injection"
         ],
         "generator_params": {
             "resolution_options": ["8-bit", "10-bit", "12-bit", "14-bit", "16-bit"],
@@ -1036,7 +1103,29 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
                 "SS@125C": "DNL <±0.5LSB, INL <±1.2LSB"
             },
             "temperature_compensation": "Gain and offset tracking -40°C to +125°C with embedded sensor",
-            "monotonicity_guarantee": "Hardware-verified monotonic progression across all PVT corners"
+            "monotonicity_guarantee": "Hardware-verified monotonic progression across all PVT corners",
+            "enhanced_validation_scenarios": [
+                "dac_linearity: DNL/INL sweep across all 2^N codes",
+                "code_transition_glitch: pedestal energy measurement",
+                "settling_time: 8-bit to 16-bit settling verification",
+                "output_impedance: frequency-dependent Z_out measurement",
+                "temperature_drift: monotonicity across -40 to +125°C",
+                "supply_sensitivity: PSRR measurement 0.1-10MHz"
+            ],
+            "mixed_signal_integration": {
+                "sar_adc_setpoint": {
+                    "resolution": "12-14 bit",
+                    "settling_to_0.1pct": "<500ns",
+                    "update_rate": "up to 1MHz",
+                    "reference_tracking": "VREF-to-output ratio stability <0.01%"
+                },
+                "precision_trim": {
+                    "resolution": "14-16 bit",
+                    "settling_to_0.01pct": "<2µs",
+                    "trim_range": "±20% around nominal",
+                    "temperature_stability": "<50ppm/°C"
+                }
+            }
         },
         "example_config": {
             "12bit_sar_adc_setpoint": {
@@ -1193,7 +1282,14 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "simultaneous switching noise (SSN): <10mV peak noise injection with 100ps pulse, no logic errors",
             "electrostatic discharge (ESD): >2kV HBM with integrated clamping on differential pair",
             "temperature-dependent behavior: propagation delay variation <100ps from -40 to +125°C",
-            "multi-lane phase alignment: <50ps maximum skew for N-channel receiver arrays in parallel applications"
+            "multi-lane phase alignment: <50ps maximum skew for N-channel receiver arrays in parallel applications",
+            "eye_diagram: 100M UI samples with margin analysis at 1-3.2Gbps",
+            "differential_threshold: 50-200mV sweep with hysteresis measurement",
+            "common_mode_range: ±500mV injection with threshold shift characterization",
+            "jitter_tolerance: 100ps-1ns input jitter sweep with BER tracking",
+            "pattern_dependent_jitter: PRBS 7/15/23 with histograms",
+            "frequency_response: AC coupling effect on low-frequency <1kHz",
+            "crosstalk_injection: adjacent line capacitive coupling measurement"
         ],
         "generator_params": {
             "data_rate_support": ["155Mbps", "250Mbps", "500Mbps", "1Gbps", "2.5Gbps", "3.125Gbps", "3.2Gbps"],
@@ -1214,7 +1310,24 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
                 "cmti_immunity": "Common-mode transient injection up to ±50V/ns with latching prevention",
                 "emi_filtering": "Integrated RC filter on differential input for sub-1MHz EMI rejection without signal degradation",
                 "multi_lane_skew_control": "Matched delay across up to 8 receiver lanes with <50ps maximum relative skew"
-            }
+            },
+            "enhanced_validation_scenarios": [
+                "eye_diagram: 100M UI samples with margin analysis",
+                "differential_threshold: 50-200mV sweep with hysteresis",
+                "common_mode_range: ±500mV injection with threshold shift",
+                "jitter_tolerance: 100ps-1ns input jitter sweep",
+                "pattern_dependent_jitter: PRBS 7/15/23 with histograms",
+                "frequency_response: AC coupling effect on low-frequency",
+                "crosstalk_injection: adjacent line capacitive coupling",
+                "cmti_injection: common-mode transient immunity testing"
+            ],
+            "circuit_variants": [
+                "passive-termination-direct-input",
+                "active-termination-current-sink",
+                "fully-differential-transimpedance",
+                "cable-equalizer-linear",
+                "cable-equalizer-adaptive-dfe"
+            ]
         },
         "example_config": {
             "gigabit_ethernet_receiver": {
