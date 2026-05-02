@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Reference: Ethernet Sensor Hub</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        h1, h2, h3 { color: #333; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #007bff; }
+        .metadata { background: #f8f9fa; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        .block-list { columns: 2; }
+        .block-item { padding: 5px; }
+        .status-valid { color: green; font-weight: bold; }
+        .status-invalid { color: red; font-weight: bold; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Ethernet Sensor Hub</h1>
+    <div class="metadata">
+        <p><strong>Generated:</strong> 2026-05-02T20:16:14.706567</p>
+        <p><strong>Technology:</strong> generic130</p>
+    </div>
+    <div class="section">
+        <h2>Summary</h2>
+        <p>Networked sensor aggregation node with Ethernet PHY, multi-channel I2C/SPI, and precision analog.</p>
+    </div>
+    <div class="section">
+        <h3>Headline</h3>
+        <p>Industrial sensor hub with Ethernet connectivity for distributed measurement systems.</p>
+    </div>
+    <div class="section">
+        <h3>Narrative</h3>
+        <p>This profile assembles a complete sensor aggregation and networking device combining Ethernet connectivity, multi-protocol sensor interfaces (I2C, SPI), precision analog front-ends, and data buffering for industrial process monitoring and control. Reference implementation includes calibration framework, timestamp synchronization with IEEE 1588 PTP, and deterministic packet scheduling for time-critical measurements.</p>
+    </div>
+    <div class="section">
+        <h2>Specification</h2>
+        <table>
+            <tr><th>Attribute</th><th>Value</th></tr>
+            <tr><td>Standard</td><td>IEEE 802.3, Ethernet TSN-capable, IEC 61588 (PTP) compatible</td></tr>
+            <tr><td>Tags</td><td>sensor, hub, ethernet, precision, measurement, industrial</td></tr>
+            <tr><td>Technology Support</td><td>generic130, generic65, bcd180</td></tr>
+        </table>
+    </div>
+    <div class="section">
+        <h2>Reusable IP Blocks (15)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>bandgap</code></div>
+            <div class="block-item"><code>ldo_analog</code></div>
+            <div class="block-item"><code>ldo_digital</code></div>
+            <div class="block-item"><code>ethernet_phy</code></div>
+            <div class="block-item"><code>i2c_controller</code></div>
+            <div class="block-item"><code>spi_controller</code></div>
+            <div class="block-item"><code>precision_voltage_reference</code></div>
+            <div class="block-item"><code>operational_amplifier</code></div>
+            <div class="block-item"><code>sar_adc_top</code></div>
+            <div class="block-item"><code>low_pass_filter</code></div>
+            <div class="block-item"><code>comparator_array</code></div>
+            <div class="block-item"><code>uart_controller</code></div>
+            <div class="block-item"><code>register_file</code></div>
+            <div class="block-item"><code>interrupt_controller</code></div>
+            <div class="block-item"><code>control_logic</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Verification IPs (5)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>ethernet_vip</code></div>
+            <div class="block-item"><code>i2c_vip</code></div>
+            <div class="block-item"><code>adc_transient_vip</code></div>
+            <div class="block-item"><code>analog_snapshot_vip</code></div>
+            <div class="block-item"><code>power_sequence_vip</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Digital Subsystems (2)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>ethernet_control_plane</code></div>
+            <div class="block-item"><code>sensor_aggregation_plane</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Design Collateral (8 items)</h2>
+        <ul>
+            <li>sensor hub reference platform with sensor array</li>
+            <li>IEEE 1588 PTP implementation for time synchronization</li>
+            <li>multi-channel sensor input conditioning</li>
+            <li>deterministic Ethernet packet scheduling</li>
+            <li>calibration framework with EEPROM storage</li>
+            <li>integration examples for common industrial sensors</li>
+            <li>timestamp injection into Ethernet frames</li>
+            <li>multi-channel ADC synchronized sampling</li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2>Automation Coverage (6 items)</h2>
+        <ul>
+            <li>PTP synchronization accuracy <1µs across 8-node network</li>
+            <li>multi-channel ADC linearity (INL <±1LSB) and settling (<500µs)</li>
+            <li>TSN scheduling compliance with <100µs latency</li>
+            <li>multi-slave I2C arbitration at 400kHz</li>
+            <li>power efficiency: standby <1mW, active <500mW</li>
+            <li>sensor calibration repeatability ±0.1% over 6 months</li>
+        </ul>
+    </div>
+    <hr>
+    <footer style="color: #666; font-size: 0.9em;">
+        <p>Generated by Cycle 25 Reference Implementation Generator</p>
+        <p>Timestamp: 2026-05-02T20:16:14.706567</p>
+    </footer>
+</body>
+</html>

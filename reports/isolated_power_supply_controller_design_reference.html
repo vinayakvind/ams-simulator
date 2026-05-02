@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Reference: Isolated Power Supply Controller</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        h1, h2, h3 { color: #333; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #007bff; }
+        .metadata { background: #f8f9fa; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        .block-list { columns: 2; }
+        .block-item { padding: 5px; }
+        .status-valid { color: green; font-weight: bold; }
+        .status-invalid { color: red; font-weight: bold; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Isolated Power Supply Controller</h1>
+    <div class="metadata">
+        <p><strong>Generated:</strong> 2026-05-02T20:16:14.706567</p>
+        <p><strong>Technology:</strong> generic130</p>
+    </div>
+    <div class="section">
+        <h2>Summary</h2>
+        <p>Isolated PMIC with multiple isolated rails, boost/buck converters, and high-side gate drivers.</p>
+    </div>
+    <div class="section">
+        <h3>Headline</h3>
+        <p>Industrial-grade multi-isolated power management IC for modular and resilient systems.</p>
+    </div>
+    <div class="section">
+        <h3>Narrative</h3>
+        <p>This profile creates a comprehensive isolated power controller combining multiple LDO rails with galvanic isolation, boost/buck conversion, high-side gate drivers, and power sequencing for industrial equipment requiring multiple isolated supplies. Design collateral includes fault protection logic, isolated measurement circuits, and automated burn-in test patterns.</p>
+    </div>
+    <div class="section">
+        <h2>Specification</h2>
+        <table>
+            <tr><th>Attribute</th><th>Value</th></tr>
+            <tr><td>Standard</td><td>IEC 61010-1, ISO 13849-1 SIL-rated capable</td></tr>
+            <tr><td>Tags</td><td>isolated, power, pmic, industrial, multi-rail, safety</td></tr>
+            <tr><td>Technology Support</td><td>generic130, generic65, bcd180</td></tr>
+        </table>
+    </div>
+    <div class="section">
+        <h2>Reusable IP Blocks (15)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>bandgap</code></div>
+            <div class="block-item"><code>boost_converter</code></div>
+            <div class="block-item"><code>buck_converter</code></div>
+            <div class="block-item"><code>ldo_analog</code></div>
+            <div class="block-item"><code>ldo_digital</code></div>
+            <div class="block-item"><code>isolated_gate_driver</code></div>
+            <div class="block-item"><code>charge_pump</code></div>
+            <div class="block-item"><code>temperature_sensor</code></div>
+            <div class="block-item"><code>frequency_detector</code></div>
+            <div class="block-item"><code>watchdog_timer</code></div>
+            <div class="block-item"><code>reset_generator</code></div>
+            <div class="block-item"><code>spi_controller</code></div>
+            <div class="block-item"><code>register_file</code></div>
+            <div class="block-item"><code>interrupt_controller</code></div>
+            <div class="block-item"><code>control_logic</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Verification IPs (5)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>power_sequence_vip</code></div>
+            <div class="block-item"><code>thermal_monitoring_vip</code></div>
+            <div class="block-item"><code>current_consumption_vip</code></div>
+            <div class="block-item"><code>voltage_regulation_vip</code></div>
+            <div class="block-item"><code>frequency_accuracy_vip</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Digital Subsystems (3)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>multi_rail_power_control</code></div>
+            <div class="block-item"><code>thermal_management_plane</code></div>
+            <div class="block-item"><code>power_conversion_plane</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Design Collateral (8 items)</h2>
+        <ul>
+            <li>isolation barrier schematic with creepage rules</li>
+            <li>multi-isolated rail power tree with load sequencing</li>
+            <li>galvanic isolation measurement circuits</li>
+            <li>automated burn-in test patterns and sequences</li>
+            <li>safety FMEA with isolation failure modes</li>
+            <li>layout guidelines for isolated domains with EMI isolation</li>
+            <li>isolation barrier self-test with leakage monitoring</li>
+            <li>cross-domain handshake synchronization logic</li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2>Automation Coverage (6 items)</h2>
+        <ul>
+            <li>hi-pot isolation testing (2kV DC, 60 seconds)</li>
+            <li>multi-isolated rail bring-up with cross-domain timing</li>
+            <li>isolation fault injection and detection (>99% confidence)</li>
+            <li>temperature coupling between isolated domains</li>
+            <li>10,000 power cycle reliability testing</li>
+            <li>EMC immunity per IEC 61010-1</li>
+        </ul>
+    </div>
+    <hr>
+    <footer style="color: #666; font-size: 0.9em;">
+        <p>Generated by Cycle 25 Reference Implementation Generator</p>
+        <p>Timestamp: 2026-05-02T20:16:14.706567</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-05-02T20:16:14.706567",
+  "technology": "generic130",
+  "profiles": {
+    "automotive_infotainment_soc": {
+      "profile": "automotive_infotainment_soc",
+      "status": "VALID",
+      "blocks_count": 14,
+      "blocks_valid": 14,
+      "blocks_invalid": [],
+      "vips_count": 5,
+      "vips_valid": 5,
+      "vips_invalid": [],
+      "subsystems_count": 3,
+      "subsystems_valid": 3,
+      "subsystems_invalid": [],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "tech_available": true
+    },
+    "industrial_iot_gateway": {
+      "profile": "industrial_iot_gateway",
+      "status": "VALID",
+      "blocks_count": 14,
+      "blocks_valid": 14,
+      "blocks_invalid": [],
+      "vips_count": 5,
+      "vips_valid": 5,
+      "vips_invalid": [],
+      "subsystems_count": 3,
+      "subsystems_valid": 3,
+      "subsystems_invalid": [],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "tech_available": true
+    },
+    "isolated_power_supply_controller": {
+      "profile": "isolated_power_supply_controller",
+      "status": "VALID",
+      "blocks_count": 15,
+      "blocks_valid": 15,
+      "blocks_invalid": [],
+      "vips_count": 5,
+      "vips_valid": 5,
+      "vips_invalid": [],
+      "subsystems_count": 3,
+      "subsystems_valid": 3,
+      "subsystems_invalid": [],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "tech_available": true
+    },
+    "ethernet_sensor_hub": {
+      "profile": "ethernet_sensor_hub",
+      "status": "VALID",
+      "blocks_count": 15,
+      "blocks_valid": 15,
+      "blocks_invalid": [],
+      "vips_count": 5,
+      "vips_valid": 5,
+      "vips_invalid": [],
+      "subsystems_count": 2,
+      "subsystems_valid": 2,
+      "subsystems_invalid": [],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "tech_available": true
+    },
+    "safe_motor_drive_controller": {
+      "profile": "safe_motor_drive_controller",
+      "status": "VALID",
+      "blocks_count": 13,
+      "blocks_valid": 13,
+      "blocks_invalid": [],
+      "vips_count": 5,
+      "vips_valid": 5,
+      "vips_invalid": [],
+      "subsystems_count": 3,
+      "subsystems_valid": 3,
+      "subsystems_invalid": [],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "tech_available": true
+    }
+  },
+  "summary": {
+    "total_profiles": 5,
+    "valid_profiles": 5,
+    "invalid_profiles": 0,
+    "total_blocks": 71,
+    "total_vips": 25,
+    "total_subsystems": 14
+  }
+}

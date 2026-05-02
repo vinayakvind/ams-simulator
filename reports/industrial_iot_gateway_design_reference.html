@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Reference: Industrial IoT Gateway</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        h1, h2, h3 { color: #333; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #007bff; }
+        .metadata { background: #f8f9fa; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        .block-list { columns: 2; }
+        .block-item { padding: 5px; }
+        .status-valid { color: green; font-weight: bold; }
+        .status-invalid { color: red; font-weight: bold; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Industrial IoT Gateway</h1>
+    <div class="metadata">
+        <p><strong>Generated:</strong> 2026-05-02T20:16:14.706567</p>
+        <p><strong>Technology:</strong> generic130</p>
+    </div>
+    <div class="section">
+        <h2>Summary</h2>
+        <p>Multi-protocol industrial gateway with PROFIBUS, CANopen, Ethernet, and security acceleration.</p>
+    </div>
+    <div class="section">
+        <h3>Headline</h3>
+        <p>Comprehensive industrial edge node for protocol translation and secure data aggregation.</p>
+    </div>
+    <div class="section">
+        <h3>Narrative</h3>
+        <p>This profile assembles a complete industrial IoT gateway from multiple protocol interfaces (PROFIBUS, CANopen, Ethernet), cryptographic security acceleration, and robust power management for distributed industrial control and data collection. Includes reference integration with protocol stacks, DMA-based packet handling, and ECC error correction for memory-critical data paths.</p>
+    </div>
+    <div class="section">
+        <h2>Specification</h2>
+        <table>
+            <tr><th>Attribute</th><th>Value</th></tr>
+            <tr><td>Standard</td><td>IEC 61131-3, PROFIBUS PA/DP, CANopen, EtherCAT-capable</td></tr>
+            <tr><td>Tags</td><td>industrial, iot, gateway, fieldbus, security, edge</td></tr>
+            <tr><td>Technology Support</td><td>generic130, generic65, bcd180</td></tr>
+        </table>
+    </div>
+    <div class="section">
+        <h2>Reusable IP Blocks (14)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>bandgap</code></div>
+            <div class="block-item"><code>ldo_analog</code></div>
+            <div class="block-item"><code>ldo_digital</code></div>
+            <div class="block-item"><code>profibus_transceiver</code></div>
+            <div class="block-item"><code>canopen_controller</code></div>
+            <div class="block-item"><code>ethernet_phy</code></div>
+            <div class="block-item"><code>aes_accelerator</code></div>
+            <div class="block-item"><code>sha_accelerator</code></div>
+            <div class="block-item"><code>true_random_number_generator</code></div>
+            <div class="block-item"><code>uart_controller</code></div>
+            <div class="block-item"><code>spi_controller</code></div>
+            <div class="block-item"><code>register_file</code></div>
+            <div class="block-item"><code>interrupt_controller</code></div>
+            <div class="block-item"><code>control_logic</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Verification IPs (5)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>profibus_vip</code></div>
+            <div class="block-item"><code>canopen_vip</code></div>
+            <div class="block-item"><code>ethernet_vip</code></div>
+            <div class="block-item"><code>crypto_vip</code></div>
+            <div class="block-item"><code>power_sequence_vip</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Digital Subsystems (3)</h2>
+        <div class="block-list">
+            <div class="block-item"><code>ethernet_control_plane</code></div>
+            <div class="block-item"><code>security_crypto_plane</code></div>
+            <div class="block-item"><code>power_sequencer</code></div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Design Collateral (8 items)</h2>
+        <ul>
+            <li>gateway architecture with protocol routing</li>
+            <li>multi-protocol packet router with DMA support</li>
+            <li>security accelerator integration examples</li>
+            <li>industrial protocol stacks (PROFIBUS, CANopen, EtherCAT)</li>
+            <li>DMA controller design for >100Mbps throughput</li>
+            <li>field calibration procedures and sensor integration guide</li>
+            <li>redundant Ethernet failover logic (<50ms switchover)</li>
+            <li>CRC polynomial validation for all protocols</li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2>Automation Coverage (6 items)</h2>
+        <ul>
+            <li>simultaneous protocol traffic (PROFIBUS@12Mbps, CAN@1Mbps, Eth@100Mbps)</li>
+            <li>AES-256 and SHA-512 workload simulation</li>
+            <li>multi-protocol collision detection and arbitration</li>
+            <li>long-duration stress tests (168 hours) with 0.1-1% packet loss</li>
+            <li>end-to-end packet latency <10ms verification</li>
+            <li>packet buffer sizing for 100Mbps sustained throughput</li>
+        </ul>
+    </div>
+    <hr>
+    <footer style="color: #666; font-size: 0.9em;">
+        <p>Generated by Cycle 25 Reference Implementation Generator</p>
+        <p>Timestamp: 2026-05-02T20:16:14.706567</p>
+    </footer>
+</body>
+</html>
