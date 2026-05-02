@@ -751,26 +751,35 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
                 "hysteresis": "2 mV",
                 "propagation_delay": "0.6-0.7 ns (typical)",
                 "output_slew": "500mV/100ps transition",
-                "applications": "16-bit SAR ADC comparator with <0.5 LSB skew matching"
+                "applications": "16-bit SAR ADC comparator with <0.5 LSB skew matching",
+                "layout_considerations": "matched pair routing with <1mm trace length mismatch, common-centroid connection pattern",
+                "power_consumption": "50-100 µW per comparator, minimal static current in reset state"
             },
             "rf_data_recovery": {
                 "bias_current": "50 µA (high-speed mode)",
                 "hysteresis": "0 mV",
                 "propagation_delay": "<0.4 ns (FF corner)",
                 "jitter_tolerance": "<200ps RMS",
-                "applications": "High-speed LVDS receiver with eye-diagram margin"
+                "applications": "High-speed LVDS receiver with eye-diagram margin",
+                "design_margin": "eye opening >30% after AC coupling, threshold optimization for 50mV to 200mV sweep",
+                "clock_recovery": "CDR loop gain tuning for <100ps jitter contribution, <50ps phase margin preservation"
             },
             "precision_monitoring": {
                 "bias_current": "5 µA (low-power mode)",
                 "hysteresis": "50 mV",
                 "response_time": "1-2 µs (lower bias, low-power operation)",
-                "applications": "Temperature/voltage threshold monitoring with low power"
+                "applications": "Temperature/voltage threshold monitoring with low power",
+                "temperature_compensation": "offset and hysteresis temperature tracking <10µV/°C, <1%/°C gain variation",
+                "low_power_modes": "sleep mode with watchdog reset arm capability, wake-on-threshold interrupt"
             },
             "flash_converter": {
                 "comparator_array_size": "127 comparators for 7-bit",
                 "bias_shared": "Single bias generator with matched copy",
                 "hysteresis": "Programmable 0-50mV to avoid oscillation",
-                "applications": "Flash ADC with thermometric encoding and priority"
+                "applications": "Flash ADC with thermometric encoding and priority",
+                "thermometric_encoding": "All 128 one-hot outputs with thermometric-to-binary priority encoder",
+                "conversion_speed": "<5ns encode time from comparator settle to thermometric output ready",
+                "monotonicity": "Guaranteed monotonic code progression with no missing codes across all PVT corners"
             }
         },
         "integration_example": {
@@ -866,7 +875,14 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "rail_swing_capability": "near-rail (100mV) to full-rail (50mV) configurable",
             "output_buffer_drive": "10mA to 100mA source/sink current configurable",
             "noise_optimization": "low-noise input stage biasing with adjustable current levels",
-            "power_consumption": "1-50mW depending on gain and bandwidth configuration"
+            "power_consumption": "1-50mW depending on gain and bandwidth configuration",
+            "robust_generator_features": {
+                "process_corner_tuning": "Gain and CMRR adjusted via trim DAC based on corner detection (SS/FF/TT)",
+                "temperature_compensation": "Dynamic offset and gain tracking with embedded temperature sensor feedback",
+                "supply_voltage_sensitivity_correction": "PSRR optimization with supply bypass filtering and feedback",
+                "phase_margin_enforcement": "Stability checking with >60° phase margin guaranteed across all gain settings",
+                "noise_figure_optimization": "Input-referred noise minimization with bias current tuning for minimum NEF"
+            }
         },
         "example_config": {
             "unity_buffer_1mhz": {
@@ -1011,7 +1027,12 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
                 "settling_to_0.1pct": "<500ns",
                 "reference": "External VREF input",
                 "update_rate": "Up to 1MHz SPI compatible",
-                "applications": "SAR ADC reference tuning, ADC gain calibration"
+                "applications": "SAR ADC reference tuning, ADC gain calibration",
+                "robust_features": {
+                    "settling_verification": "Glitch-free settle with <1ns overshoot monitoring",
+                    "reference_tracking": "VREF-to-output ratio stability <0.01% with temperature",
+                    "code_transition_margin": "DNL/INL maintained within ±0.5LSB across all 4096 codes"
+                }
             },
             "14bit_precision_trim": {
                 "resolution": "14-bit",
@@ -1019,21 +1040,50 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
                 "output_impedance": "<50Ω for low-load effect",
                 "settling_to_0.01pct": "<2µs for precision settling",
                 "reference": "Internal bandgap with trimming",
-                "applications": "Bandgap trim tuning, bias current generation, sub-threshold device control"
+                "applications": "Bandgap trim tuning, bias current generation, sub-threshold device control",
+                "robust_features": {
+                    "trim_range": "±20% around nominal with 1 LSB resolution",
+                    "hysteresis_prevention": "monotonic output guarantee for forward/reverse code sweeps",
+                    "load_regulation": "Output impedance <50Ω maintains regulation with 100Ω to 100kΩ loads",
+                    "temperature_stability": "<50ppm/°C temperature coefficient with on-die sensor feedback"
+                }
             },
             "10bit_low_power_led": {
                 "resolution": "10-bit",
                 "output_range": "0 to 3.3V rail-to-rail",
                 "update_rate": "100Hz to 1kHz",
                 "power_consumption": "<1mW",
-                "applications": "LED brightness control, backlight PWM intensity setting"
+                "applications": "LED brightness control, backlight PWM intensity setting",
+                "robust_features": {
+                    "pwm_integration": "Compatible with PWM duty cycle modulation for flicker-free dimming",
+                    "low_power_mode": "Sleep mode with <1µW quiescent current, retain last setting in flash latch",
+                    "brightness_perception": "Logarithmic lookup table integration for human eye perception matching"
+                }
             },
             "8bit_audio_dac_out": {
                 "resolution": "8-bit",
                 "output_range": "Full rail-to-rail swing",
                 "glitch_energy": "<100pJ",
                 "buffer_current": "±50mA drive capability",
-                "applications": "Audio codec output buffer, speaker driver predriver"
+                "applications": "Audio codec output buffer, speaker driver predriver",
+                "robust_features": {
+                    "audio_quality": "THD+N <1% at 1kHz, SNR >70dB for 8-bit resolution",
+                    "update_timing": "Synchronous to audio clock (48/96kHz) for glitch-free updates",
+                    "click_pop_suppression": "Soft-start mute function with adjustable ramp time (1-100ms)"
+                }
+            },
+            "programmable_reference_tuning": {
+                "resolution": "14-bit for ±10% trim range",
+                "output_range": "Adjustable around nominal reference",
+                "settling_time": "<100ns for AC response",
+                "temperature_tracking": "Auto-trim every 10ms based on on-die temperature sensor",
+                "applications": "Bandgap reference fine-tuning, distributed bias current calibration",
+                "robust_features": {
+                    "auto_calibration": "Background trim adjustment without DAC output glitches",
+                    "hysteresis": "Trim dead-zone (±1 LSB) to prevent excessive updates",
+                    "nvm_storage": "Trim codes stored in embedded flash with CRC verification on boot",
+                    "fallback_strategy": "Last-known-good trim values loaded if calibration fails"
+                }
             }
         },
         "integration_example": {
@@ -1138,7 +1188,14 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "output_swing": "Rail-to-rail (0V to VDD) full logic swing",
             "multi_channel_support": "1 to 8 parallel receivers with shared bias and matched delay",
             "input_coupling": ["AC-coupled-highpass", "DC-coupled", "back-termination"],
-            "output_buffer_drive": "High-speed CMOS inverter with 50-200µA current capability"
+            "output_buffer_drive": "High-speed CMOS inverter with 50-200µA current capability",
+            "mixed_signal_robust_features": {
+                "process_corner_tuning": "Threshold trim across fast/slow corners with ±50mV offset correction and DAC-based programming",
+                "temperature_compensation": "Receiver propagation delay compensated -40°C to +125°C with <100ps variation using on-die temperature sensor feedback",
+                "supply_voltage_correction": "VDD sensitivity <0.5ps per 1% rail variation, adaptive bias current for threshold centering",
+                "crosstalk_mitigation": "Differential pair routing with Kelvin sense and per-lane capacitive coupling cancellation up to 10% parasitic",
+                "jitter_optimization": "Output buffer slew rate tuning (100ps-1ns transition time) to minimize accumulated jitter in cascaded arrays"
+            }
         },
         "example_config": {
             "gigabit_ethernet_receiver": {
@@ -1653,7 +1710,10 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "transmit_jitter: <100ps RMS cumulative over 10 consecutive frames, clock-to-Q variation <50ps",
             "receiver_threshold: differential voltage detection 100-200mV with hysteresis <50mV, no false triggers >50V/ns CM transients",
             "carrier_sense_accuracy: idle bus <5mV differential, active bus >200mV differential with detection latency <100ns",
-            "power_consumption_profile: idle <500mW, transmission <2W, reception <1.8W peak at 100Mbps frame rate"
+            "power_consumption_profile: idle <500mW, transmission <2W, reception <1.8W peak at 100Mbps frame rate",
+            "link_fault_recovery: auto-recovery after collision/carrier-loss within <100ms with CRC validation on first frame post-recovery",
+            "frame_buffering: support for back-to-back frames at max baud with FIFO depth >256 bytes, water-level interrupt support",
+            "IEEE_1588_PTP_precision: nanosecond-level timestamp injection at PHY interface, <500ns latency from MDI transition to timestamp capture"
         ]
     },
     "profibus_vip": {
@@ -1786,8 +1846,8 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "ground coupling: simultaneous TX/RX with crosstalk and jitter measurement",
             "temperature drift: bit timing error accumulation from -40°C to +125°C ramp",
             "frequency accuracy: crystal oscillator ±500ppm drift over calendar month simulation",
-            "simultaneous 8-node arbitration: collision-free arbitration with lowest ID winning at 1Mbps"
-        ],
+             "simultaneous 8-node arbitration: collision-free arbitration with lowest ID winning at 1Mbps"
+         ],
         "protocol_scenarios": [
             "sdo_expedited_download: 4-byte data transfer in single SDO DOWNLOAD INITIATE, toggle bit toggle on next transfer",
             "sdo_segmented_upload: multi-segment file read with 7-byte chunks, toggle bit alternation, CRC validation per segment",
@@ -2226,6 +2286,18 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "link-fail-safe: automatic fallback to alternative PHY or reduced-speed mode",
             "auto-MDI polarity correction: RX pair swapping on link negotiation failure",
             "real-time priority: control plane register access with QoS arbitration"
+        ],
+        "design_assembly_rules": [
+            "Differential pair routing: 100Ω characteristic impedance ±10% with <5mm length matching between TX+/-, RX+/- pairs",
+            "Guard trace shielding: Return path guards around differential pairs, connected to ground every <1λ_eff per frequency",
+            "MDI transceiver bias: Failsafe 50kΩ pull-down resistors on unused differential lines to center idle state at mid-supply",
+            "CRC validation timing: Hardware CRC computed in <1 frame period with parallel polynomial engine to minimize PHY latency",
+            "Link quality indicator: 4-level RSSI mapping (LED: off/red/yellow/green) with hysteresis >5% to prevent flicker",
+            "Auto-negotiation sequencing: FLP pulse exchange (16-bit pattern) complete within 1.5s, speed negotiation within 500ms",
+            "Manchester clock recovery: Sampling clock locked to midpoint of Manchester bit with ±50ns tolerance per symbol",
+            "Register access serialization: SPI/UART access to registers during RX without blocking (register reads sampled synchronously)",
+            "Collision jam signal: 32-bit jam pattern (0x55555555 Manchester) transmitted within <4µs of collision detection",
+            "Reset assertion: Watchdog-triggered PHY reset held for >100ns with clean power-up sequencing"
         ]
     },
     "safety_monitor_plane": {
@@ -2267,6 +2339,18 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "temperature-triggered shutdown: threshold crossing with interrupt-first fallback",
             "reset sequencing: watchdog, thermal, and power-on reset priority ordering",
             "safety certification: health monitor with continuous self-test and fault injection"
+        ],
+        "design_assembly_rules": [
+            "Watchdog oscillator isolation: Independent RC circuit (>1MΩ, <1nF) on separate power domain with <±10% frequency tolerance over temperature",
+            "Temperature sensor placement: Located in hottest thermal zone (near power converter) with >5mm clearance from edge sensor to prevent edge artifacts",
+            "Reset signal routing: Asynchronous reset routed separately from data signals, buffered with low-slew output (>100ns rise time) to prevent timing issues",
+            "Safety interrupt priority: NMI (non-maskable) level routing directly to CPU core with <1µs latency guarantee independent of system clock",
+            "Multi-rail shutdown sequencing: Watchdog disables boost/buck switchers in priority order (high-current rails first) with staggered 10ms delays",
+            "Hysteresis implementation: Separate rising/falling thresholds (+5°C/-5°C) with Schmitt-trigger comparator to prevent chatter in threshold region",
+            "Signal replication for SIL-2: Dual independent comparators (one primary, one monitor) with voted output to fault-injection logic",
+            "Over-temperature latch: Once asserted, remains latched until power cycle or explicit firmware reset via dedicated register bit",
+            "Watchdog kick verification: Software write to UART/SPI register with random challenge-response token to prevent stuck-software false negatives",
+            "Reset de-assertion timing: Synchronized de-assertion with 2-stage flip-flops on safety domain, release only after all power supplies stable"
         ]
     },
     "infotainment_control_plane": {
@@ -2308,6 +2392,18 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "console-control: dual UART for debug console and modem communication",
             "audio-crossfade: synchronized rate change with mute/unmute coordination",
             "i2c-clock-stretching: slave timeout with transparent clock re-sync"
+        ],
+        "design_assembly_rules": [
+            "I2S clock routing: Master clock (48-192kHz) distributed with <50ps skew to all audio subsystems, glitch-free mux for sample rate switching",
+            "I2S data path: Separate TX and RX data lines with AC coupling (>1kHz high-pass) to audio codec, impedance matching 50Ω for high-speed data",
+            "I2C bus pull-ups: Open-drain 10kΩ pull-ups (±5% tolerance) with parasitic capacitance <50pF per node, clock stretching timeout logic on SCL",
+            "UART baud rate generator: Precision divider with <±2% error at 115.2kbps achieved through PLL-generated reference clock (not integer dividers)",
+            "Audio codec interface: Right-justify or left-justify data format selectable, mono/stereo channel assignment per register field",
+            "DMA arbitration: I2S audio DMA highest priority (48kHz continuous), I2C sensor reads lower priority with preemption logic",
+            "Noise isolation: Audio ground plane separate from I2C/UART digital ground with isolated star point to main GND via ferrite bead",
+            "LRCLK alignment: Frame sync pulse width 1-4 bit periods, positive or negative polarity configurable, edge-aligned to data sampling point",
+            "Clock stretching timeout: SCL held low monitored with timeout >100ms, automatic bus release on timeout with debounce filter (>10µs)",
+            "UART FIFO threshold: Configurable water level (1-16 bytes) to coordinate DMA transfers, prevents FIFO overrun at 1M baud"
         ]
     },
     "power_conversion_plane": {
@@ -2349,6 +2445,18 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "isolated-gate-drive: bootstrap capacitor charging for high-side switches",
             "synchronous-rectification: MOSFET switching on output diode for efficiency",
             "adaptive-frequency: dynamic frequency scaling for EMI/efficiency tradeoff"
+        ],
+        "design_assembly_rules": [
+            "buck converter PCB layout: inductor <10mm from IC, bulk capacitors at IC pins, feedback divider shielded from switching nodes",
+            "boost converter bootstrap: bootstrap capacitor >10µF with diode to power source, 100nF ceramic for high-frequency decoupling",
+            "multi-output sequencing: core rail must rise before I/O rail by >100ms to prevent I/O-to-core current backflow",
+            "PWM frequency synchronization: all converters locked to common reference clock with ±5% tolerance for harmonic alignment",
+            "feedback network filtering: low-pass cutoff <500kHz to attenuate switching frequency ripple before ADC input",
+            "current sensing resistor placement: sense resistor <1mm from comparator inputs, Kelvin connection for low offset drift",
+            "compensation network design: PI compensator with crossover frequency 10× lower than PWM frequency for stability",
+            "thermal design: IC junction temperature margin >20°C at maximum load with heat sink for >10W dissipation",
+            "input filtering: LC filter with L>1µH, C>10µF before switching stage to minimize EMI on supply rails",
+            "output decoupling: multilayer capacitor array (bulk + ceramic) with ESR <50mΩ for transient response <10% ripple"
         ]
     },
 }
@@ -2620,6 +2728,44 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "1000-hour burn-in at 125°C with biased power cycling and stress patterns",
             "safety watchdog verification with independent oscillator drift (<±10%)",
             "ASIL-B partitioning with fault containment zones"
+        ],
+        "design_assembly_rules": [
+            "Power domain isolation: Separate analog/audio rail (3.3V) from core (1.8V) with LC filtering and >60dB cross-talk attenuation",
+            "Clock tree: Master oscillator → watchdog independent clock + PLL-generated audio clocks with <50ps jitter contribution",
+            "Interface routing: CAN/Ethernet on opposite board sides, 100Ω differential impedance control with guard traces",
+            "Thermal placement: Audio amplifier and switch-mode PSU positioned at board corners with >20mm clearance from temperature sensor",
+            "Reset sequencing: Watchdog → core domains → I/O domains with 1ms staggered hold-time to prevent metastability",
+            "Memory hierarchy: Register file in core domain, I2S buffer in dedicated audio domain with CDC synchronizers at boundaries"
+        ],
+        "top_level_integration_patterns": [
+            {
+                "pattern": "infotainment_boot_sequence",
+                "description": "Controlled startup of audio, network, and safety subsystems with staged voltage ramps",
+                "steps": ["power_on → bandgap_stable (1ms) → analog_ldo_ready (2ms) → core_ldo_ready (1ms) → watchdog_armed (0.5ms) → safety_init (1ms) → i2s_clock_enable (0.5ms) → can_transceiver_enable → ethernet_phy_negotiation"],
+                "timeout_per_stage": "500ms total boot window",
+                "rollback_trigger": "Any stage exceeds timeout or watchdog fault detected"
+            },
+            {
+                "pattern": "audio_to_network_switching",
+                "description": "Priority arbitration when simultaneous high-bandwidth demands occur (e.g., audio burst + network packet)",
+                "rules": ["Audio DMA gets highest priority (48kHz continuous); CAN 100ms window; Ethernet 10ms bursts; CPU lowest priority",
+                         "I2S buffer maintains >4ms buffering to tolerate network interrupt latency",
+                         "Bandwidth throttling: audio 2Mbps reserved, network peaks 100Mbps with backpressure to I2C/SPI"]
+            },
+            {
+                "pattern": "thermal_derate_strategy",
+                "description": "Automatic power reduction as temperature rises above thresholds",
+                "temp_zones": ["0-85°C: full performance (no throttling)", "85-105°C: audio DSP 80%, I/O 90%, core 100%", "105-125°C: audio DSP 50%, I/O 80%, core 90%", ">125°C: shutdown with watchdog recovery"],
+                "monitoring_rate": "10ms update cycle via on-die sensor"
+            },
+            {
+                "pattern": "safety_partition_enforcement",
+                "description": "ASIL-B safety isolation with independent watchdog and memory scrubbing",
+                "isolated_domains": ["safety_monitor_plane (independent 1.2V rail) executes watchdog tasks and fault detection logic",
+                                    "watchdog_oscillator operates from internal RC with <±10% drift for 10s timeout margin",
+                                    "safety_sram (512B dedicated) holds fault log with ECC protection"],
+                "cross_domain_handshakes": "Synchronized with 2-stage flip-flops and parity checkers on critical signals"
+            }
         ]
     },
     "industrial_iot_gateway": {
@@ -2655,6 +2801,46 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "protocol switching with <100ms reconfiguration time and zero packet drop",
             "cryptographic acceleration speedup verification (AES >100 Mbps, SHA >200 Mbps)",
             "DMA coherency and memory ordering with ECC protection on critical buffers"
+        ],
+        "design_assembly_rules": [
+            "Protocol isolation: PROFIBUS on dedicated low-noise analog rail, CAN on separate I/O domain, Ethernet on high-speed digital domain",
+            "DMA channels assignment: 3 independent DMA units with round-robin arbiter (PROFIBUS→SRAM, CAN→SRAM, ETH→SRAM with no stalling)",
+            "Crypto accelerator placement: Dedicated high-speed clock domain for AES/SHA engines, isolated from protocol clocks to avoid side-channel timing variation",
+            "Memory protection: Multi-rail ECC on packet buffers (SRAM protected), separate parity on register file, watchdog monitor on free-running counter",
+            "Clock tree: Multi-oscillator with independent clocks for each protocol domain, phase-locked PLL for Ethernet MAC, independent dividers for PROFIBUS",
+            "CDC (Clock Domain Crossing): Synchronized with Gray code counters and 2-stage FF for all multi-domain handshakes"
+        ],
+        "top_level_integration_patterns": [
+            {
+                "pattern": "gateway_packet_forwarding",
+                "description": "Intelligent multi-protocol packet routing with priority and rate-limiting",
+                "forwarding_rules": ["PROFIBUS (token-pass) →  CAN priority queue (urgent messages first)",
+                                    "CAN (11-bit/29-bit) → Ethernet with VLAN tagging per source",
+                                    "Ethernet → protocol-selector based on frame type (PROFIBUS or CAN destination)"],
+                "latency_budget": "Per-packet <5ms end-to-end, DMA minimize context-switch overhead"
+            },
+            {
+                "pattern": "security_pipeline",
+                "description": "Crypto acceleration for sensitive fields in gateway messages",
+                "pipeline": ["incoming packet → CRC check → AES-256-GCM decrypt (if encrypted) → SHA-512 verify → forward or queue",
+                            "acceleration speedup: line-rate 100Mbps Ethernet with encrypted payload, <10% CPU load"],
+                "key_storage": "Encrypted key storage in OTP with secure SPI interface"
+            },
+            {
+                "pattern": "protocol_failover",
+                "description": "Automatic switchover if primary interface fails",
+                "monitoring": ["PROFIBUS: token pass timeout (>100ms) → raise fault",
+                              "CAN: error frame count >1000/sec or arbitration failures → switch to redundant bus",
+                              "Ethernet: link down or excessive retransmissions → fallback to CAN-only mode"],
+                "recovery_time": "<50ms switchover with packet buffering to prevent loss"
+            },
+            {
+                "pattern": "thermal_power_management",
+                "description": "Crypto workload reduction as temperature climbs",
+                "strategies": ["85-105°C: enable fast-path forwarding (skip AES on non-critical frames)",
+                             "105-125°C: AES encryption disabled, HMAC-only for protocol handshakes",
+                             ">125°C: gateway enters monitoring-only mode, no forwarding"]
+            }
         ]
     },
     "isolated_power_supply_controller": {
@@ -2690,6 +2876,48 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "EMC immunity per IEC 61010-1 (conducted, radiated, burst, surge)",
             "current limiting accuracy across isolated domains (<5% variation)",
             "efficiency characterization at 10%, 50%, 100% load for each output rail"
+        ],
+        "design_assembly_rules": [
+            "Isolation barrier placement: Creepage/clearance >5mm (IEC 60664) between primary and secondary windings, optocoupler photocoupler isolation",
+            "Primary-secondary clock domains: Independent oscillators on each domain with <5% frequency tolerance; CDC synchronizers with dual-rank flip-flops for all domain crossings",
+            "Power sequencing: Primary domain → secondary domains with staggered ramp-up (primary first, 100ms delay before secondary startup)",
+            "Current limiting: Per-output foldback current limit with <50mA overshoot, settable via SPI with 8-bit DAC granularity",
+            "Isolation barrier self-test: Periodic injection of test patterns through optocoupler, failure triggers watchdog reset",
+            "Feedback isolation: Isolated voltage divider on each output with galvanic isolation via independent feedback paths"
+        ],
+        "top_level_integration_patterns": [
+            {
+                "pattern": "multi_rail_sequencing",
+                "description": "Coordinated bring-up of isolated power rails to prevent inrush and ensure fault-free startup",
+                "sequence": ["VBAT input → primary LDO (5V, 200ms ramp) → hi-pot test pass → secondary isolated supplies enable",
+                            "Each secondary: ramp 0V→Vout over 100ms with foldback current limit (50mA max)",
+                            "Watchdog armed after all rails stable for 200ms"],
+                "abort_conditions": "Hi-pot fault, secondary current exceeds 100mA, voltage overshoot >10%"
+            },
+            {
+                "pattern": "isolation_barrier_monitoring",
+                "description": "Continuous health check of isolation barriers with automatic recovery",
+                "monitoring": ["Periodic injection of test signal through optocoupler (every 1s)",
+                              "Measure response in secondary domain, flag as fault if signal not received within 1ms",
+                              "3-strike fault detection: 3 consecutive test failures → trigger watchdog reset"],
+                "self_healing": "After watchdog reset, reinitialize optocouplers and retry"
+            },
+            {
+                "pattern": "cross_domain_handshake",
+                "description": "Safe signaling between isolated domains with robust synchronization",
+                "handshake_protocol": ["Primary → secondary: send request → secondary samples 2 clock cycles → response back",
+                                      "Synchronization: dual-stage DFF with setup-hold checking",
+                                      "Timeout: if no response in 10µs, abort and log error"],
+                "example_use_case": "Enable signal for secondary rails, fault report from secondary to primary"
+            },
+            {
+                "pattern": "thermal_derating_isolated",
+                "description": "Temperature monitoring with per-domain derate strategies",
+                "strategy": ["Shared thermal sensor on primary, isolated measurement on secondary via optocoupler feedback",
+                            "85°C: reduce secondary output current by 20%",
+                            "105°C: reduce by 50%, disable non-critical secondary rails",
+                            ">125°C: shut down all secondary rails, keep primary alive for safety"]
+            }
         ]
     },
     "ethernet_sensor_hub": {
@@ -2728,6 +2956,49 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "Ethernet CRC validation and frame error detection with automatic re-request",
             "ADC-to-Ethernet latency <10ms with buffering for burst transfers",
             "cross-channel isolation verification (crosstalk <-80dB between adjacent channels)"
+        ],
+        "design_assembly_rules": [
+            "Sensor input conditioning: Each channel isolated AC-coupled (1µF, 1MHz corner) with ±10V protection clamps and 100kΩ series impedance",
+            "ADC sampling synchronization: Master trigger distributed to all 16 channels with <100ns skew matched routing (equal-length traces)",
+            "Ethernet and sensor clock domains: Separate clocks with <0.1% frequency offset, PLL-based frequency synchronization to PTP grandmaster",
+            "I2C/SPI buses: Isolated from Ethernet digital noise with separate ground planes; I2C pull-ups powered from analog rail",
+            "Calibration storage: Dedicated I2C EEPROM with CRC protection for per-channel gains and offsets, updated every power-down",
+            "Precision reference network: Bandgap reference distributed to all analog blocks with <1% voltage matching via matched resistor strings"
+        ],
+        "top_level_integration_patterns": [
+            {
+                "pattern": "sensor_data_acquisition",
+                "description": "Synchronized multi-channel sampling with automatic calibration and outlier rejection",
+                "sampling_flow": ["Master ADC trigger every 100µs (10kHz) → all 16 channels sample simultaneously",
+                                 "Each channel: anti-alias filter settling (5µs) + ADC conversion (10µs) + local calibration (offset/gain applied in digital)",
+                                 "Data buffered in SRAM, timestamp inserted via PTP interface, Ethernet transmission on fixed schedule"],
+                "outlier_handling": "3-sigma deviation triggers re-sampling; persistent errors logged to watchdog counter"
+            },
+            {
+                "pattern": "ptp_time_sync",
+                "description": "IEEE 1588 precision time protocol for nanosecond-accurate network time",
+                "sync_mechanism": ["Grandmaster node broadcasts PTP Announce every 1s",
+                                  "Ethernet MAC timestamps all Sync/DelayReq frames at PHY interface (TX/RX)",
+                                  "This node calculates path delay and offset, updates local oscillator trim DAC every 100ms"],
+                "accuracy_target": "<1µs offset from grandmaster on a 8-node network"
+            },
+            {
+                "pattern": "sensor_calibration_engine",
+                "description": "Automatic offset/gain calibration with EEPROM storage and power-on auto-load",
+                "calibration_procedure": ["Known reference applied to each channel (or all grounded for offset cal)",
+                                         "10 measurements averaged per channel",
+                                         "Gain/offset DAC trimmed to center reading, stored to EEPROM with CRC",
+                                         "Power-down triggers EEPROM backup of current trim values"],
+                "recalibration_interval": "On-demand via SPI command or automatic if ADC linearity exceeds threshold"
+            },
+            {
+                "pattern": "deterministic_packet_scheduling",
+                "description": "TSN-based priority queuing for time-critical sensor packets",
+                "priority_queues": ["Queue-0 (highest): PTP frames and safety-critical sensor data",
+                                   "Queue-1: Real-time sensor aggregation packets (<100µs latency guarantee)",
+                                   "Queue-2: Best-effort diagnostic and calibration data"],
+                "scheduling_guarantee": "Queue-0 packets dequeued within 100µs regardless of other traffic"
+            }
         ]
     },
     "safe_motor_drive_controller": {
@@ -2768,9 +3039,61 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "motor speed estimation error <2% with hall sensor input and sensorless fallback modes",
             "thermal time constant characterization with junction-to-case transient response",
             "EMC immunity per IEC 60204-1 (burst, surge, conducted/radiated emissions)"
+        ],
+        "design_assembly_rules": [
+            "PWM gate drivers: Three high-side drivers + three low-side drivers with integrated 50-200ns dead-time, shoot-through protection via AND-gated enable",
+            "Current sensing: Shunt resistors (10mΩ typical) with amplifier (50V/V) sampled at 3x PWM frequency for cycle-by-cycle current limiting",
+            "Phase voltage measurement: 3 channels ADC-interfaced with RC filtering (100kHz cutoff) for BEMF reconstruction and sensorless control",
+            "Watchdog independent oscillator: On-die RC oscillator with <±10% drift, guaranteed operating from 0.8V supply for safe shutdown",
+            "Reset sequencing: Internal reset signal delayed 1ms after watchdog timeout, driving all latches to safe state (all gate drivers off)",
+            "Safety output isolation: Independent NAND gate with forced logic '1' until watchdog armed, guarantees safe state until confirmed ready"
+        ],
+        "top_level_integration_patterns": [
+            {
+                "pattern": "commutation_logic",
+                "description": "Six-step and sinusoidal PWM with smooth transitions and dead-time insertion",
+                "commutation_modes": ["six_step: 120° commutation with hall sensor inputs, 2 transistors ON per phase",
+                                     "sinusoidal: three independent 16-bit PWM with space-vector modulation for low ripple",
+                                     "transition: when switching modes, ramp PWM duty from 0% over 100µs to avoid current transient"],
+                "dead_time": "Configurable 50-200ns via SPI to prevent shoot-through, automatically inserted on all phase transitions"
+            },
+            {
+                "pattern": "current_limiting",
+                "description": "Cycle-by-cycle and latching overcurrent protection with safe shutdown",
+                "thresholds": ["cycle_limit: if Iphase > Ilimit during any PWM cycle, disable that phase at next zero-crossing",
+                              "latching_fault: if 3 consecutive cycles exceed limit, disable all drivers and trigger watchdog interrupt",
+                              "hysteresis: 50mA below limit required to re-enable after latch fault"],
+                "safe_state": "All gate drivers OFF within <500ns of overcurrent detection"
+            },
+            {
+                "pattern": "thermal_derating",
+                "description": "Temperature-based motor output current reduction with fixed hold-off time",
+                "thresholds": ["85-100°C: reduce PWM duty by 20% by lowering Ilimit ceiling",
+                             "100-110°C: reduce by 50%, initiate soft-stop sequence (ramp speed reference to zero over 100ms)",
+                             ">110°C: force all gate drivers OFF, trigger watchdog with fault logged"],
+                "thermal_sensor": "On-die sensor sampled every 100ms, updated to derate DAC immediately"
+            },
+            {
+                "pattern": "watchdog_timeout_escalation",
+                "description": "Multi-level fault escalation with safe shutdown guarantee",
+                "escalation": ["Level-1 (timeout pending): ~100ms before timeout → software has chance to reset watchdog",
+                             "Level-2 (timeout occur): gate drivers forced OFF, fault interrupt asserted, reset signal held 1ms",
+                             "Level-3 (post-reset): safe output asserted, requires explicit software command to re-enable drive",
+                             "independent oscillator ensures timeout occurs even if main clock fails"],
+                "recovery": "Software must verify motor stopped, manually clear fault bit via SPI before re-enabling"
+            },
+            {
+                "pattern": "sensorless_commutation_fallback",
+                "description": "Back-EMF estimation for motor speed when hall sensors fail",
+                "estimation": ["Sample all three phase voltages and reconstruct back-EMF via 3-axis transformation",
+                              "Estimate rotor position every 10µs via zero-crossing detection on BEMF",
+                              "Commutation timing adjusted dynamically based on estimated speed"],
+                "fallback_trigger": "If hall sensor data invalid for >50ms, switch to sensorless mode automatically"
+            }
         ]
     },
     }
+
 
 
 def _ordered_unique(items: list[str]) -> list[str]:
