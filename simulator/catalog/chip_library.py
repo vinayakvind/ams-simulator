@@ -2002,7 +2002,21 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "Simultaneous enabling of 4 gating stages with timing closure verification",
             "Enable signal metastability injection at CDC boundaries",
             "Clock tree analysis with gate insertion delay impact",
-            "Duty cycle preservation over 10M clock cycles"
+            "Duty cycle preservation over 10M clock cycles",
+            "Single-cycle enable pulse glitch detection (peak <0.5V)",
+            "4-level cascaded gate delay analysis with <50ps skew accumulation",
+            "Clock domain crossing with 100ns skew injection and proper gate switching",
+            "Power gating interaction: clock gates held inactive during power-off with no spurious edges",
+            "Reset deassertion timing: clean gate disable before enable signal transitions",
+            "Very low frequency operation: 1kHz-1MHz gating with proper settling",
+            "FIFO empty/full signal interaction with clock gating control"
+        ],
+        "design_patterns": [
+            "single-domain gating: enable tied to register bit with synchronous reset",
+            "multi-domain gating: OR/AND of up to 4 enables from different clock domains",
+            "hierarchical gating: 2-4 level cascades with accumulated delay tracking",
+            "power-aware gating: coordination with power gating control signals",
+            "frequency scaling: gating coordinated with DVFS voltage/frequency changes"
         ]
     },
     "ethernet_control_plane": {
@@ -2028,7 +2042,22 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "Back-to-back frame reception at 100 Mbps with CRC validation",
             "Auto-negotiation with link-up confirmation in <2 seconds",
             "Register access via UART/SPI during active frame transmission",
-            "Collision scenario with exponential backoff timing verification"
+            "Collision scenario with exponential backoff timing verification",
+            "Long frame transmission (1518-byte payload) with inter-frame gap timing",
+            "FCS error injection and CRC error handling",
+            "MDI eye diagram measurement at TX/RX pins with >30% eye opening",
+            "Manchester decoder alignment with bit slip injection and recovery",
+            "Link loss detection and re-acquisition with <100ms settling",
+            "Multi-frame simultaneous reception with queuing and DMA transfer",
+            "Control plane register updates during mid-frame RX with no data corruption",
+            "Collision jam signal generation with proper bit timing verification"
+        ],
+        "design_patterns": [
+            "single-PHY integration: simple point-to-point MAC-to-PHY interface",
+            "multi-PHY stacking: multiple Ethernet segments aggregated with forwarding rules",
+            "link-fail-safe: automatic fallback to alternative PHY or reduced-speed mode",
+            "auto-MDI polarity correction: RX pair swapping on link negotiation failure",
+            "real-time priority: control plane register access with QoS arbitration"
         ]
     },
     "safety_monitor_plane": {
@@ -2054,7 +2083,22 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "Watchdog timeout with clock glitch injection (verify independent timing verification)",
             "Temperature threshold crossing with ±10°C overshoot and hysteresis response",
             "Simultaneous watchdog timeout and over-temperature event prioritization",
-            "Reset signal persistence during main clock stoppage"
+            "Reset signal persistence during main clock stoppage",
+            "Two consecutive watchdog misses with reset assertion confirmation",
+            "Temperature sensor accuracy across process corners (±3°C worst-case)",
+            "Watchdog oscillator frequency stability over temperature (-40C to 125C)",
+            "Reset de-assertion timing with power supply ramp-up from 0V to nominal",
+            "Interrupt latency measurement with realistic interrupt handler execution",
+            "Over-temperature shutdown cascade: interrupt assertion, reset generation, latch-up hold",
+            "Dual watchdog independent verification at both rising and falling edges",
+            "Safety signal voting with 2-of-3 fault masking and SIL-2 certification"
+        ],
+        "design_patterns": [
+            "single-watchdog: simple timeout with direct reset generation",
+            "dual-watchdog redundancy: independent oscillators with majority voting",
+            "temperature-triggered shutdown: threshold crossing with interrupt-first fallback",
+            "reset sequencing: watchdog, thermal, and power-on reset priority ordering",
+            "safety certification: health monitor with continuous self-test and fault injection"
         ]
     },
     "infotainment_control_plane": {
@@ -2080,13 +2124,28 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "Stereo I2S audio streaming with sample rate changes (48kHz to 192kHz)",
             "Multi-slave I2C bus arbitration and clock stretching timeout",
             "UART at 1M baud with back-to-back character transmission",
-            "I2S LRCLK timing with ±10ns margin to SDATA transitions"
+            "I2S LRCLK timing with ±10ns margin to SDATA transitions",
+            "I2S to I2C simultaneous operation: audio DMA and sensor polling without glitch",
+            "I2C multi-master arbitration with collision on both SDA and SCL within same clock",
+            "UART baud rate generator accuracy across 5 standard rates (9.6k, 38.4k, 115.2k, 460.8k, 1M)",
+            "I2S left/right channel alignment after sample rate change with <1 sample skew",
+            "I2C slave clock stretching hold >100ms with timeout recovery",
+            "UART FIFO overflow handling at 1M baud with DMA backpressure",
+            "I2S frame sync pulse width verification (1-4 bit periods with edge alignment)",
+            "Multi-channel audio mixing coordination with fixed 48kHz reference clock"
+        ],
+        "design_patterns": [
+            "single-audio-output: simple I2S stereo DAC interface",
+            "multi-sensor-aggregation: I2C multi-master with up to 16 sensor nodes",
+            "console-control: dual UART for debug console and modem communication",
+            "audio-crossfade: synchronized rate change with mute/unmute coordination",
+            "i2c-clock-stretching: slave timeout with transparent clock re-sync"
         ]
     },
     "power_conversion_plane": {
         "name": "Power Conversion Plane",
         "blocks": ["boost_converter", "buck_converter", "pwm_controller", "frequency_detector", "control_logic", "register_file"],
-        "description": "Integrated power conversion control plane for multi-output PMIC and power management.",
+        "description": "Integrated power conversion control plane for multi-output PMIC and power management. Provides robust DC-DC conversion with voltage regulation, current limiting, and adaptive frequency scaling. Integration rules: PWM frequency must be synchronized across buck and boost stages for EMI control, dead-time insertion mandatory for shoot-through prevention, loop response must settle within 100µs for dynamic load steps.",
         "technology_support": ["generic180", "generic130", "generic65", "bcd180"],
         "integration_rules": [
             "buck/boost frequency phase alignment for EMI control",
@@ -2106,7 +2165,22 @@ DIGITAL_SUBSYSTEM_LIBRARY: dict[str, dict[str, Any]] = {
             "Multi-output transient response with simultaneous load steps on different rails",
             "Frequency detector alarm triggering at 90% and 110% of nominal frequency",
             "Current limiting activation at 120% nominal load with current sense margin",
-            "Soft-start ramp with controlled dV/dt <1V/ms"
+            "Soft-start ramp with controlled dV/dt <1V/ms",
+            "Buck converter steady-state ripple <2% at full load with ±5V input variation",
+            "Boost converter 10V to 30V conversion with efficiency >90% at 80% load",
+            "Cross-regulation between core (1.2V) and I/O (3.3V) with shared inductor",
+            "Over-voltage protection shutdown with <100ns latency followed by soft-restart",
+            "Frequency sweep from 50% to 150% nominal with loop stability verification",
+            "Load step response: 0% to 100% in <1ms with <5% overshoot",
+            "Phase-locked frequency synchronization with external clock within ±2%",
+            "Thermal throttling: frequency reduction from 1MHz to 500kHz at junction >110C"
+        ],
+        "design_patterns": [
+            "single-buck: basic 5V to 3.3V conversion for simple applications",
+            "buck-boost combo: dual-output with independent feedback control",
+            "isolated-gate-drive: bootstrap capacitor charging for high-side switches",
+            "synchronous-rectification: MOSFET switching on output diode for efficiency",
+            "adaptive-frequency: dynamic frequency scaling for EMI/efficiency tradeoff"
         ]
     },
 }
