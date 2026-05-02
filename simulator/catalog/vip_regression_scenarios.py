@@ -408,16 +408,378 @@ CLOCK_GATING_POWER_GATING_INTERACTION = MixedSignalScenario(
 )
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# ETHERNET VIP - Advanced Mixed Signal Regressions
+# ════════════════════════════════════════════════════════════════════════════
+
+ETHERNET_EMI_RFI_IMMUNITY = MixedSignalScenario(
+    name="ethernet_phy_emi_rfi_injection",
+    vip="ethernet_vip",
+    description="Ethernet PHY tolerance to external EMI/RFI with frame recovery",
+    
+    protocol_traffic={
+        "frame_pattern": "1518-byte max frames",
+        "line_rate": "100 Mbps",
+        "frame_count": 5000,
+        "traffic_pattern": "mixed unicast and broadcast",
+    },
+    
+    analog_coupling={
+        "emi_injection": {
+            "frequency_range": "10 MHz to 1 GHz",
+            "peak_voltage": "±2 V on differential pair",
+            "modulation": "AM 100% at 100 kHz envelope",
+            "duration": "random 10-100 ns bursts",
+        },
+        "antenna_coupling": {
+            "field_strength": "200 V/m radiated emissions",
+            "frequency_bands": ["ISM 2.4 GHz", "WiFi 5 GHz", "GSM 900 MHz"],
+            "effect": "Common-mode noise injection",
+        },
+    },
+    
+    validation_rules=[
+        "Frame integrity maintained: FCS validation 100% pass rate",
+        "No stuck-slip behavior: Clock recovery within <100 µs after EMI burst",
+        "Error frame generation: <1% false error detection rate",
+        "Link state stability: No unintended link-down events",
+        "Byte alignment: No synchronization loss during EMI transients",
+    ],
+    
+    expected_behavior={
+        "fcs_pass_rate": "99.9%+",
+        "frame_recovery_time": "<100 µs",
+        "clock_slip_occurrence": "0 per 5000 frames",
+        "false_errors": "<50 ppm",
+    }
+)
+
+ETHERNET_THERMAL_STRESS = MixedSignalScenario(
+    name="ethernet_phy_temperature_extremes",
+    vip="ethernet_vip",
+    description="Ethernet PHY operation across temperature corners with timing closure",
+    
+    protocol_traffic={
+        "frame_pattern": "64-byte through 1518-byte mixed",
+        "line_rate": "100 Mbps",
+        "duration_seconds": 60,
+        "traffic_frequency": "continuous 80% link utilization",
+    },
+    
+    analog_coupling={
+        "temperature_sweep": {
+            "start_temp": -40,
+            "end_temp": 125,
+            "ramp_rate": "5°C/second",
+            "dwell_time": "10 seconds at corners",
+        },
+        "vth_variation": {
+            "corner_ss": {"vth_delta": 0.08, "propagation_delay_increase": "35%"},
+            "corner_ff": {"vth_delta": -0.05, "propagation_delay_decrease": "20%"},
+            "corner_tt": {"vth_delta": 0.0, "propagation_delay_nominal": 0},
+        },
+    },
+    
+    validation_rules=[
+        "Setup/hold timing: All propagation delays within specification",
+        "Jitter margin: <100 ps accumulated across temperature range",
+        "Link negotiation: Auto-negotiation success at all corners",
+        "Frequency offset: Crystal oscillator drift <±500 ppm",
+        "Threshold stability: Comparator hysteresis <±10% across temperature",
+    ],
+    
+    expected_behavior={
+        "timing_closure": "100%",
+        "link_negotiation_success": "100%",
+        "jitter_accumulation": "<100 ps",
+        "frequency_accuracy": "±500 ppm",
+    }
+)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# PROFIBUS VIP - Advanced Mixed Signal Regressions
+# ════════════════════════════════════════════════════════════════════════════
+
+PROFIBUS_MULTINODE_CONGESTION = MixedSignalScenario(
+    name="profibus_multinode_network_congestion",
+    vip="profibus_vip",
+    description="PROFIBUS PA/DP multi-node arbitration under heavy traffic load",
+    
+    protocol_traffic={
+        "node_count": 32,
+        "token_rotation_time": "500 ms",
+        "message_rate_per_node": "10 frames/second",
+        "collision_probability": "5% during token pass",
+        "total_network_utilization": "95%",
+    },
+    
+    analog_coupling={
+        "bus_loading": {
+            "stub_count": 8,
+            "stub_impedance": "680 Ω (failsafe biasing)",
+            "capacitive_load": "2 µF per node",
+        },
+        "signal_degradation": {
+            "reflections": "±500 mV overshoot at stub junctions",
+            "rise_time_degradation": "10-30V/µs (from 100V/µs nominal)",
+            "settling_time": "<10 µs for valid data window",
+        },
+    },
+    
+    validation_rules=[
+        "Token arbitration: No token loss over 10000 rotations",
+        "CRC validation: <1 error per 1M frames under congestion",
+        "Collision resolution: <1 ms for collision detection and retry",
+        "Node fairness: Each node transmits within ±10% of target rate",
+        "Failsafe biasing: Bus idle state maintained at 7.5V ±0.5V",
+    ],
+    
+    expected_behavior={
+        "token_preservation": "100%",
+        "error_rate": "<1 ppm",
+        "collision_resolution_time": "<1 ms",
+        "node_fairness": "±10%",
+    }
+)
+
+PROFIBUS_FAILSAFE_RECOVERY = MixedSignalScenario(
+    name="profibus_failsafe_bus_recovery",
+    vip="profibus_vip",
+    description="PROFIBUS recovery from transient faults and failsafe state restoration",
+    
+    protocol_traffic={
+        "fault_injection": "Random bit flips in CRC field",
+        "fault_rate": "1 error per 1000 frames",
+        "recovery_scenario": "Transceiver failsafe biasing enforcement",
+    },
+    
+    analog_coupling={
+        "failsafe_biasing": {
+            "pull_up_resistor": 680,
+            "pull_down_resistor": 680,
+            "idle_voltage_a": 7.5,
+            "idle_voltage_b": 0.0,
+            "hysteresis": "<100 mV",
+        },
+        "transient_injection": {
+            "type": "Line break simulation",
+            "duration": "5-100 ms",
+            "effect": "Bus pulled to failsafe state",
+        },
+    },
+    
+    validation_rules=[
+        "Failsafe state achievement: <100 ms for bus voltage to stabilize",
+        "Watchdog timeout: Node declared offline after 3 consecutive missed heartbeats",
+        "Bus recovery: Re-initialization sequence within 500 ms",
+        "Error log recording: All faults logged before recovery attempt",
+        "No glitch generation: Transceiver glitch immunity >±10V/ns",
+    ],
+    
+    expected_behavior={
+        "failsafe_convergence_time": "<100 ms",
+        "watchdog_timeout": "3 heartbeat periods",
+        "recovery_time": "<500 ms",
+        "glitch_immunity": ">±10 V/ns",
+    }
+)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# CANOPEN VIP - Advanced Mixed Signal Regressions
+# ════════════════════════════════════════════════════════════════════════════
+
+CANOPEN_THERMAL_STRESS_STATE_MACHINE = MixedSignalScenario(
+    name="canopen_state_machine_thermal_stress",
+    vip="canopen_vip",
+    description="CANopen NMT state machine stability under temperature extremes",
+    
+    protocol_traffic={
+        "state_transitions": ["BOOT", "PRE_OPERATIONAL", "OPERATIONAL", "STOPPED"],
+        "transition_frequency": "1 per second",
+        "transition_count": 1000,
+        "simultaneous_state_requests": "8-node network",
+    },
+    
+    analog_coupling={
+        "temperature_profile": {
+            "start": -40,
+            "end": 125,
+            "ramp_rate": "10°C/s",
+            "dwell": "30 seconds per corner",
+        },
+        "oscillator_drift": {
+            "temperature_coefficient": "±50 ppm/°C",
+            "total_drift": "±10000 ppm across range",
+            "effect": "Timing deviation in heartbeat and sync",
+        },
+    },
+    
+    validation_rules=[
+        "State transition completeness: All nodes reach target state within guard time",
+        "Heartbeat timeout: Producer/consumer timing preserved across temperature",
+        "Guard time enforcement: <100 ms deviation from nominal across -40 to +125°C",
+        "Emergency message generation: EMCY transmitted within <500 µs of fault",
+        "SDO timeout: <100 ms abort on timeout (not thermal drift dependent)",
+    ],
+    
+    expected_behavior={
+        "state_transition_success": "99.9%+",
+        "heartbeat_accuracy": "±100 ms",
+        "emcy_latency": "<500 µs",
+        "sdo_abort_confidence": "99.9%+",
+    }
+)
+
+CANOPEN_PDO_TIMING_UNDER_NOISE = MixedSignalScenario(
+    name="canopen_pdo_sync_timing_noise_immunity",
+    vip="canopen_vip",
+    description="CANopen PDO synchronization timing resilience to CAN bus noise",
+    
+    protocol_traffic={
+        "pdo_count": 8,
+        "pdo_trigger": "SYNC frame at 1 kHz",
+        "pdo_response_window": "10 µs",
+        "node_count": 8,
+    },
+    
+    analog_coupling={
+        "can_bus_noise": {
+            "common_mode_noise": "±1 V at 10 MHz",
+            "differential_mode_noise": "±500 mV random",
+            "noise_injection_window": "±2 µs around SYNC edge",
+        },
+        "transceiver_mismatch": {
+            "propagation_delay_skew": "±50 ns across transceiver array",
+            "threshold_variation": "±50 mV",
+            "effect": "PDO response timing jitter",
+        },
+    },
+    
+    validation_rules=[
+        "SYNC detection jitter: <100 µs across all nodes",
+        "PDO response timing: All 8 PDOs within 10 µs window",
+        "PDO skew between nodes: <500 ns maximum",
+        "No missed SYNC frames: 0 errors over 100K SYNC cycles",
+        "Sequence consistency: PDO data coherency maintained",
+    ],
+    
+    expected_behavior={
+        "sync_jitter": "<100 µs",
+        "pdo_timing_closure": "100%",
+        "pdo_skew": "<500 ns",
+        "sync_detection_rate": "100%",
+    }
+)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# CLOCK GATING VIP - Advanced Mixed Signal Regressions
+# ════════════════════════════════════════════════════════════════════════════
+
+CLOCK_GATING_CROSS_DOMAIN_SYNC = MixedSignalScenario(
+    name="clock_gating_cross_domain_cdc_sync",
+    vip="clock_gating_vip",
+    description="Clock gating with cross-domain clock and enable signal synchronization",
+    
+    protocol_traffic={
+        "clock_domain_count": 4,
+        "clock_frequencies": ["1 MHz", "10 MHz", "100 MHz", "500 MHz"],
+        "frequency_ratios": [1.0, 0.1, 0.01, 0.002],
+        "enable_transitions": "Random domain crossings",
+    },
+    
+    analog_coupling={
+        "clock_skew": {
+            "max_skew": "2 ns between domains",
+            "effect": "Setup/hold violations at CDC flops",
+        },
+        "phase_relationship": {
+            "phase_offset": "Random 0 to 360 degrees",
+            "effect": "Metastability in synchronizers",
+        },
+        "substrate_coupling": {
+            "cross_talk": "±100 mV coupled noise",
+            "effect": "False edge detection in gating logic",
+        },
+    },
+    
+    validation_rules=[
+        "Metastability mean time between failures (MTBF): >100 years",
+        "CDC synchronizer settling: <10 clock cycles of slowest domain",
+        "No spurious clock edges: 0 glitches over 1M gate transitions",
+        "Enable-to-clock edge alignment: Valid across all frequency ratios",
+        "Arbitration between concurrent enable sources: Correct priority maintained",
+    ],
+    
+    expected_behavior={
+        "mtbf_years": ">100",
+        "settling_cycles": "<10",
+        "glitch_count": 0,
+        "arbitration_accuracy": "100%",
+    }
+)
+
+CLOCK_GATING_ULTRALOW_FREQUENCY = MixedSignalScenario(
+    name="clock_gating_ultra_low_frequency_operation",
+    vip="clock_gating_vip",
+    description="Clock gating behavior at ultra-low frequencies (1 Hz to 1 MHz)",
+    
+    protocol_traffic={
+        "clock_frequencies": ["1 Hz", "10 Hz", "100 Hz", "1 kHz", "10 kHz", "100 kHz", "1 MHz"],
+        "enable_hold_time": "Variable 1-10 clock periods",
+        "duration_per_frequency": "100 clock cycles",
+    },
+    
+    analog_coupling={
+        "leakage_effects": {
+            "subthreshold_leakage": "Variable with temperature",
+            "gate_leakage": "∝ clock frequency",
+            "effect": "Charge loss on capacitive nodes during gating",
+        },
+        "temperature_drift_slow_clock": {
+            "clock_period": "1 second at 1 Hz",
+            "temperature_change_per_period": "±0.1°C",
+            "vth_drift": "±10 mV per period",
+        },
+    },
+    
+    validation_rules=[
+        "Gate delay stability: <50% variation across 1Hz-1MHz range",
+        "Charge retention: No logic level corruption during long gate periods",
+        "Enable-to-output timing: Monotonic behavior (no timing inversion)",
+        "Glitch immunity: Zero glitches even at extremely slow clock rates",
+        "Leakage-induced failures: <1 ppm failure rate over 10K cycles per frequency",
+    ],
+    
+    expected_behavior={
+        "gate_delay_variation": "<50%",
+        "corruption_free_cycles": "100%",
+        "glitch_count": 0,
+        "failure_rate_ppm": "<1",
+    }
+)
+
+
 # Registry of all VIP regression scenarios
 VIP_REGRESSION_SCENARIOS = {
     "ethernet_phy_supply_noise_coupling": ETHERNET_PHY_SUPPLY_NOISE,
     "ethernet_simultaneous_tx_rx_collision": ETHERNET_SIMULTANEOUS_TX_RX,
+    "ethernet_phy_emi_rfi_injection": ETHERNET_EMI_RFI_IMMUNITY,
+    "ethernet_phy_temperature_extremes": ETHERNET_THERMAL_STRESS,
     "profibus_noise_immunity_field_conditions": PROFIBUS_NOISE_MARGIN,
     "profibus_clock_recovery_with_jitter": PROFIBUS_CLOCK_RECOVERY,
+    "profibus_multinode_network_congestion": PROFIBUS_MULTINODE_CONGESTION,
+    "profibus_failsafe_bus_recovery": PROFIBUS_FAILSAFE_RECOVERY,
     "canopen_multilevel_arbitration_with_crosstalk": CANOPEN_BUS_ARBITRATION,
     "canopen_rtr_response_latency_under_noise": CANOPEN_REMOTE_FRAME_RESPONSE,
+    "canopen_state_machine_thermal_stress": CANOPEN_THERMAL_STRESS_STATE_MACHINE,
+    "canopen_pdo_sync_timing_noise_immunity": CANOPEN_PDO_TIMING_UNDER_NOISE,
     "clock_gating_enable_metastability_injection": CLOCK_GATING_METASTABILITY,
     "clock_gating_power_domain_isolation": CLOCK_GATING_POWER_GATING_INTERACTION,
+    "clock_gating_cross_domain_cdc_sync": CLOCK_GATING_CROSS_DOMAIN_SYNC,
+    "clock_gating_ultra_low_frequency_operation": CLOCK_GATING_ULTRALOW_FREQUENCY,
 }
 
 

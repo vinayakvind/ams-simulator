@@ -1,6 +1,6 @@
 # Regression Report - sar_adc
 
-Generated: 2026-05-03T00:57:59.790187
+Generated: 2026-05-03T01:13:36.654286
 Overall: PASS
 
 ## Summary

@@ -1,7 +1,7 @@
 # Block Report: sar_adc_top
 
 ## Status: PASS
-Verified: 2026-05-03 00:57
+Verified: 2026-05-03 01:13
 
 ## Verification Results
 | Test | Result | Pass |

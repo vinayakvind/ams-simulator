@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-03T00:57:54.286370",
+  "generated_at": "2026-05-03T01:13:31.450488",
   "technology_filter": null,
   "summary": {
     "technology_count": 4,
@@ -4536,6 +4536,56 @@
           "cross_domain_handshakes": "Synchronized with 2-stage flip-flops and parity checkers on critical signals"
         }
       ],
+      "validation_matrix": {
+        "analog_domain_validation": [
+          "bandgap DC accuracy: \u00b10.5% across -40\u00b0C to +125\u00b0C, 4.5-5.5V supply range",
+          "ldo_analog ripple: <1mVpp at 100kHz, PSRR >60dB, load regulation <2%",
+          "ldo_digital ripple: <500\u00b5Vpp under 200mA load step, PSRR >65dB at 1MHz",
+          "power sequence timing: 1ms stagger margin between rail ramp-ups, soft-start <100\u00b5s"
+        ],
+        "digital_domain_validation": [
+          "control_logic SRAM retention: <1% data corruption at 1.2V over 1000h",
+          "register_file address decode: 100% fault coverage at design corners",
+          "interrupt controller latency: <2 clock cycles from IRQ pin to ISR entry",
+          "watchdog recovery: 99%+ detection of stuck processors, reset margin >10s timeout"
+        ],
+        "i2s_audio_validation": [
+          "frame synchronization jitter: <50ps RMS on 48kHz @ \u00b11ppm accuracy",
+          "audio THD+N @ 1kHz: <0.5% (S=60dB), SNR @ 20Hz-20kHz >90dB",
+          "DMA pre-fetch: 4ms minimum audio buffer before underrun, dynamic allocation",
+          "clock-to-data skew: <200ps max across L/R channels and frame edges"
+        ],
+        "can_transceiver_validation": [
+          "message filter accuracy: 100% CAN ID match with no false positives",
+          "arbitration throughput: 100 msg/sec sustained at 500kbps, 1000 msg bursts @ 1Mbps",
+          "failsafe biasing: VCan differential >0.5V nominal, <50mV noise tolerance",
+          "isolation level: >2kV HBM on all CAN pins, latch-up hold >100mA"
+        ],
+        "ethernet_phy_validation": [
+          "link negotiation: auto-detect 10/100Mbps with <500ms lock time",
+          "differential impedance: 100\u03a9 nominal, skew <5mm across PCB pairs",
+          "eye diagram margin: >30% opening after AC coupling, 50mV to 200mV threshold",
+          "MDI auto-correction: polarity reversal detection with no frame loss"
+        ],
+        "safety_validation": [
+          "watchdog independence: dedicated internal oscillator with \u00b110% accuracy",
+          "fault injection coverage: 99%+ detection of stuck bits in safety_sram",
+          "ASIL-B partitioning: 0 cross-domain data corruption in 1M cycle simulation",
+          "diagnostic access: full UDS memory read/write with CRC16-CCITT protection"
+        ],
+        "thermal_management_validation": [
+          "on-die sensor calibration: \u00b12\u00b0C accuracy across -40\u00b0C to +125\u00b0C",
+          "derate response: <100ms latency from threshold crossing to throttle apply",
+          "throttle accuracy: audio DSP 80% at 85\u00b0C, 50% at 105\u00b0C with \u00b15% margin",
+          "recovery hysteresis: 5\u00b0C window to prevent oscillation around threshold"
+        ],
+        "multi_rail_validation": [
+          "cross-rail isolation: >60dB attenuation from VDD_CORE noise to VDD_ANA",
+          "power-down sequencing: core \u2192 I/O \u2192 CAN with 1ms hold-time between rails",
+          "inrush current limiting: soft-start on each rail limits di/dt < 100mA/\u00b5s",
+          "brown-out detection: independent monitors on each rail with <50mV hysteresis"
+        ]
+      },
       "key": "automotive_infotainment_soc"
     },
     {
@@ -4825,6 +4875,56 @@
           "scheduling_guarantee": "Queue-0 packets dequeued within 100\u00b5s regardless of other traffic"
         }
       ],
+      "validation_matrix": {
+        "multi_sensor_fusion_validation": [
+          "sensor interface timing: I2C/SPI aggregation <100ms for 16 simultaneous sensor readouts",
+          "data fusion latency: kalman filtering <10ms per cycle at 100Hz update rate",
+          "sensor redundancy: voting logic detects 1-of-3 faulty sensors with >99% detection rate",
+          "cross-sensor synchronization: timestamp alignment <1ms across asynchronous I2C/SPI"
+        ],
+        "ethernet_streaming_validation": [
+          "UDP packet streaming: sensor data at 100Mbps line rate, 1000 packets/sec with <1ms jitter",
+          "TCP reliability: guaranteed delivery with retransmission <500ms for critical alerts",
+          "bandwidth efficiency: compressed sensor format >80% reduction vs. raw streaming",
+          "latency budget: end-to-end sensor-to-cloud <100ms under nominal network"
+        ],
+        "adc_precision_validation": [
+          "16-bit linearity: <0.5 LSB INL across -40\u00b0C to +85\u00b0C operating range",
+          "sampling rate: 100ksps per channel with 8-channel simultaneous multiplexing",
+          "noise floor: <10\u00b5V RMS integrated 10Hz-100kHz with <100nV/\u221aHz density",
+          "temperature drift: offset <100ppm/\u00b0C, gain <50ppm/\u00b0C over full range"
+        ],
+        "ptp_time_sync_validation": [
+          "IEEE 1588 grandmaster sync: <1\u00b5s offset on 8-node network",
+          "oscillator trim response: <100ms settling after PTP offset correction",
+          "path delay compensation: asymmetric link delay <200ns absolute error",
+          "leap second handling: automatic insertion with no timestamp discontinuities"
+        ],
+        "sensor_calibration_validation": [
+          "offset calibration: all-grounded reference with 10-sample averaging, <1 LSB residual",
+          "gain calibration: known reference with <0.1% calibration accuracy retained",
+          "EEPROM durability: 100k write cycles per channel with CRC integrity check",
+          "auto-load recovery: <100ms boot time after POR to read calibration"
+        ],
+        "power_efficiency_validation": [
+          "sensor standby: <100\u00b5W total current with sensors in low-power mode",
+          "active streaming: <500mW per hub during continuous 100Mbps Ethernet",
+          "wake-on-threshold: <1ms latency from sensor event to Ethernet activation",
+          "battery life simulation: >100 hours at 5-minute reporting interval"
+        ],
+        "data_integrity_validation": [
+          "CRC checking: 100% single-bit error detection on all sensor packets",
+          "timestamp accuracy: microsecond-resolution clock with <50ppm drift over 24h",
+          "buffer overflow: >1M sample SRAM buffer with DMA continuity",
+          "ECC protection: 1-bit correction on all SRAM storage"
+        ],
+        "deterministic_scheduling_validation": [
+          "TSN priority queuing: Queue-0 dequeued <100\u00b5s, Queue-1 <500\u00b5s",
+          "scheduling jitter: <1\u00b5s variance across multiple aggregation cycles",
+          "packet transmission: fixed-schedule Ethernet egress with no blocking",
+          "interrupt latency: sensor event to CAN/Ethernet <10ms guaranteed"
+        ]
+      },
       "key": "ethernet_sensor_hub"
     },
     {
@@ -5071,6 +5171,62 @@
           ]
         }
       ],
+      "validation_matrix": {
+        "profibus_interface_validation": [
+          "token-pass accuracy: 100% token inheritance on PROFIBUS slave nodes, <1% timing drift over 1000 messages",
+          "CRC validation: PROFIBUS CRC16 polynomial coverage >99%, no false positives on single-bit errors",
+          "baud rate accuracy: \u00b10.5% at 12Mbps, <50ns timing margin with 200pF capacitive load",
+          "failsafe biasing: A/B line differential >0.2V nominal, <10mV noise immunity"
+        ],
+        "canopen_validation": [
+          "protocol compliance: CANopen DS301/DS402 state machine transitions verified >99% coverage",
+          "arbitration throughput: 11-bit and 29-bit identifiers with 1000 msg/sec @ 1Mbps sustained",
+          "SDO/PDO mapping: object dictionary access <10ms roundtrip latency, 64-bit payload alignment",
+          "NMT state machine: all 5 states (INIT\u2192PRE-OP\u2192OP\u2194STOPPED) with proper guard time handling"
+        ],
+        "ethernet_routing_validation": [
+          "multiprotocol forwarding: PROFIBUS\u2192Ethernet, CAN\u2192Ethernet with <5ms latency per packet",
+          "VLAN tagging: IEEE 802.1Q VLAN insertion/removal at 100Mbps line rate, priority queue arbitration",
+          "MAC address learning: 4K MAC entry table with >99% hit rate, LRU replacement on table full",
+          "IPv4 routing: 256 route entries with longest-prefix-match, TTL decrement and checksum recomputation"
+        ],
+        "crypto_acceleration_validation": [
+          "AES-256-GCM throughput: >100 Mbps at line rate with variable plaintext/key sizes",
+          "SHA-512 throughput: >200 Mbps with 64-byte block streaming, padding auto-insertion",
+          "key storage: OTP-based key derivation with SHA-256 HKDF, <1\u00b5s key ready time",
+          "side-channel hardening: constant-time implementation verified via power/timing analysis"
+        ],
+        "dma_validation": [
+          "concurrent streams: 3 independent DMA units (PROFIBUS\u2192SRAM, CAN\u2192SRAM, ETH\u2192SRAM) at full bandwidth",
+          "coherency: no stale reads within 1-clock synchronization, ECC protection on critical buffers",
+          "descriptor queuing: up to 256 descriptors per channel with auto-chaining and interrupt coalescing",
+          "memory ordering: FIFO per-channel, 0% packet loss under 100% utilization + burst traffic"
+        ],
+        "security_validation": [
+          "CRC32 Ethernet FCS: 100% detection of random bit errors <32-bit payloads, polynomial coverage",
+          "authentication: HMAC-SHA512 message authentication with replay attack prevention (sequence numbers)",
+          "encryption: AES-GCM authenticated encryption with per-packet IV and 96-bit nonce",
+          "key rotation: OTP-based secure key derivation with no plaintext key storage on external buses"
+        ],
+        "failover_validation": [
+          "PROFIBUS timeout: token-pass timeout >100ms triggers failover flag and alarm interrupt",
+          "CAN error counting: >1000 error frames/sec or arbitration failures triggers redundant-bus switch",
+          "Ethernet monitoring: link-down or >1% frame loss for 5 seconds triggers CAN-only fallback",
+          "switchover latency: <50ms reconfiguration time with buffered packet preservation"
+        ],
+        "thermal_management_validation": [
+          "temperature sensor: \u00b12\u00b0C accuracy across 0-125\u00b0C, 10ms conversion time on 5-sample averaging",
+          "throttle latency: <100ms from temp threshold crossing to crypto workload reduction apply",
+          "multi-level derate: 100% crypto at 0-85\u00b0C, 50% fast-path at 85-105\u00b0C, HMAC-only at 105-125\u00b0C",
+          "recovery: 5\u00b0C hysteresis to prevent oscillation, smooth ramp-down of workload"
+        ],
+        "protocol_compliance_validation": [
+          "IEC 61131-3: standard function block compatibility, SIL1/SIL2 safe-state machines",
+          "packet tracing: end-to-end frame timestamp injection with microsecond accuracy over 168-hour duration",
+          "latency budgeting: per-packet <5ms end-to-end from ingress to egress, DMA context-switch overhead minimized",
+          "conformance testing: 168-hour stress with 0.1-1% injected packet loss on each interface, zero data corruption"
+        ]
+      },
       "key": "industrial_iot_gateway"
     },
     {
@@ -5332,6 +5488,44 @@
           ]
         }
       ],
+      "validation_matrix": {
+        "isolated_rail_validation": [
+          "galvanic isolation: >2kV withstand between primary/secondary rails with <1pF coupling capacitance",
+          "rail settling time: each isolated LDO <1ms from enable to regulation <2% within \u00b15\u00b0C band",
+          "current isolation: independent current sensing on each rail with <5% accuracy over 0-10A range",
+          "cross-coupling attenuation: >60dB isolation between neighboring rails at switching frequency"
+        ],
+        "power_conversion_validation": [
+          "boost converter efficiency: >85% at 24V input, 48V output, 5A load with 500kHz switching",
+          "buck converter ripple: <50mVpp output ripple at 12V/10A load, Cin/Cout ceramic capacitor filtering",
+          "gate driver slew rate: <50ns rising edge on high-side driver, <100ns dead-time insertion accuracy",
+          "shoot-through protection: <100ns blanking window prevents simultaneous top/bottom FET conduction"
+        ],
+        "isolation_monitoring_validation": [
+          "leakage current: <100\u00b5A per rail under 60\u00b0C ambient, <500\u00b5A at 85\u00b0C worst-case",
+          "isolation resistance: >1G\u03a9 under temperature/humidity cycling, <10pF parasite capacitance",
+          "remote sense accuracy: \u00b12% voltage feedback over 3m twisted-pair cabling, <5mV noise immunity",
+          "fault detection: continuous isolation health monitoring via I2C with interrupt on degradation"
+        ],
+        "sequencing_validation": [
+          "multi-rail boot: primary \u2192 isolated_1 \u2192 isolated_2 with 500ms stagger margin per rail",
+          "shutdown sequence: reverse sequencing with <100ms total",
+          "fault response: any rail brown-out triggers all dependent rails shutdown within 100\u00b5s",
+          "watchdog coordination: independent watchdog on primary rail with heartbeat monitoring"
+        ],
+        "thermal_management_validation": [
+          "temperature sensor: \u00b12\u00b0C accuracy across 0-125\u00b0C on heatsink thermistor",
+          "thermal shutdown: >125\u00b0C triggers master shutdown, 10\u00b0C hysteresis to prevent oscillation",
+          "thermal foldback: current derate 1%/\u00b0C above 85\u00b0C to limit power dissipation",
+          "efficiency tracking: >80% at full load, <50mW quiescent at no-load"
+        ],
+        "protection_validation": [
+          "over-voltage clamp: input surge >50% rated voltage triggers crowbar within 100\u00b5s",
+          "reverse polarity: schottky reverse block prevents damage at -20V input",
+          "ESD protection: >4kV HBM on all external pins",
+          "EMI filtering: <20dB peak coupling to analog reference layer"
+        ]
+      },
       "key": "isolated_power_supply_controller"
     },
     {
@@ -5852,6 +6046,62 @@
           "fallback_trigger": "If hall sensor data invalid for >50ms, switch to sensorless mode automatically"
         }
       ],
+      "validation_matrix": {
+        "pwm_driver_validation": [
+          "gate driver timing: <100ns edge placement accuracy with <50ns jitter on 6-IGBT switches",
+          "dead-time insertion: programmable 200-1000ns dead-time with \u00b110ns tolerance across PVT",
+          "gate peak current: 2A source, 3A sink per switch with <50ns transition time to 600V",
+          "fault response: <1\u00b5s shoot-through prevention upon desaturation fault detection"
+        ],
+        "current_sensing_validation": [
+          "3-phase current accuracy: \u00b11% across 0-50A range with 100\u00b5s sampling",
+          "phase coupling compensation: cross-coupling <0.5% between phase measurements",
+          "DC offset calibration: automatic offset trimming <10mA residual error at 0A",
+          "overcurrent detection: <500\u00b5s latency from 1.5x threshold to gate shutdown"
+        ],
+        "motor_control_loop_validation": [
+          "speed regulation: <2% steady-state error at 3000 RPM nominal with <50ms settling",
+          "torque ripple: <5% torque ripple under sensorless vector control",
+          "commutation timing: phase-current zero-crossing detection <100\u00b5s before event",
+          "soft-start ramp: 0-3000 RPM acceleration in <5 seconds without motor stalling"
+        ],
+        "position_encoding_validation": [
+          "encoder interface: 1000 PPR quadrature encoder with <100ns pulse-to-position latency",
+          "sensorless mode: back-EMF estimation at <200 RPM startup with <10% speed error",
+          "phase tracking: rotor angle estimation <5\u00b0 error across full operating range",
+          "lost-sync recovery: <200ms recovery time if encoder sync lost"
+        ],
+        "thermal_protection_validation": [
+          "junction temperature sensing: \u00b12\u00b0C accuracy on IGBT die temperature",
+          "over-temperature shutdown: >150\u00b0C limit with <100ms latency from threshold",
+          "thermal derating: current limit reduced 1%/\u00b0C above 85\u00b0C",
+          "cooldown time: motor coast-down enables soft restart after thermal shutdown"
+        ],
+        "short_circuit_protection_validation": [
+          "fault detection: phase-phase short detected <2\u00b5s after fault inception",
+          "gate inhibit: all 6 gates off within <5\u00b5s of fault signal",
+          "fault latch: requires software reset after fault",
+          "energy dump: freewheeling diodes absorb motor back-EMF <50ms after fault"
+        ],
+        "communication_validation": [
+          "CAN interface: 1Mbps CANopen messaging for speed command, torque feedback",
+          "command response: <10ms latency from CAN speed command to acceleration",
+          "status reporting: encoder position, current, temperature at 100ms update",
+          "fault diagnostics: 32-bit fault code with timestamp for post-mortem analysis"
+        ],
+        "safety_validation": [
+          "safe-state enforcement: loss of CAN comms triggers motor coast-down <100ms",
+          "cross-domain monitoring: independent watchdog on gate drive supply",
+          "phase rotation verification: phase ABC sequence check with phase reversal alarm",
+          "ground fault detection: <100mA residual current to earth triggers shutdown"
+        ],
+        "emc_compliance_validation": [
+          "conducted emissions: <50dB\u00b5A per FCC Part 15 on power leads",
+          "radiated emissions: <40dB\u00b5V/m per IEC 61000-6-2 in 150kHz-1GHz band",
+          "ESD immunity: >4kV HBM on all external connectors",
+          "RF immunity: >20V/m conducted RF immunity at 80-1000MHz"
+        ]
+      },
       "key": "safe_motor_drive_controller"
     },
     {
