@@ -3179,7 +3179,45 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
                             "105°C: reduce by 50%, disable non-critical secondary rails",
                             ">125°C: shut down all secondary rails, keep primary alive for safety"]
             }
-        ]
+        ],
+        "validation_matrix": {
+            "isolated_rail_validation": [
+                "galvanic isolation: >2kV withstand between primary/secondary rails with <1pF coupling capacitance",
+                "rail settling time: each isolated LDO <1ms from enable to regulation <2% within ±5°C band",
+                "current isolation: independent current sensing on each rail with <5% accuracy over 0-10A range",
+                "cross-coupling attenuation: >60dB isolation between neighboring rails at switching frequency"
+            ],
+            "power_conversion_validation": [
+                "boost converter efficiency: >85% at 24V input, 48V output, 5A load with 500kHz switching",
+                "buck converter ripple: <50mVpp output ripple at 12V/10A load, Cin/Cout ceramic capacitor filtering",
+                "gate driver slew rate: <50ns rising edge on high-side driver, <100ns dead-time insertion accuracy",
+                "shoot-through protection: <100ns blanking window prevents simultaneous top/bottom FET conduction"
+            ],
+            "isolation_monitoring_validation": [
+                "leakage current: <100µA per rail under 60°C ambient, <500µA at 85°C worst-case",
+                "isolation resistance: >1GΩ under temperature/humidity cycling, <10pF parasite capacitance",
+                "remote sense accuracy: ±2% voltage feedback over 3m twisted-pair cabling, <5mV noise immunity",
+                "fault detection: continuous isolation health monitoring via I2C with interrupt on degradation"
+            ],
+            "sequencing_validation": [
+                "multi-rail boot: primary → isolated_1 → isolated_2 with 500ms stagger margin per rail",
+                "shutdown sequence: reverse sequencing with <100ms total",
+                "fault response: any rail brown-out triggers all dependent rails shutdown within 100µs",
+                "watchdog coordination: independent watchdog on primary rail with heartbeat monitoring"
+            ],
+            "thermal_management_validation": [
+                "temperature sensor: ±2°C accuracy across 0-125°C on heatsink thermistor",
+                "thermal shutdown: >125°C triggers master shutdown, 10°C hysteresis to prevent oscillation",
+                "thermal foldback: current derate 1%/°C above 85°C to limit power dissipation",
+                "efficiency tracking: >80% at full load, <50mW quiescent at no-load"
+            ],
+            "protection_validation": [
+                "over-voltage clamp: input surge >50% rated voltage triggers crowbar within 100µs",
+                "reverse polarity: schottky reverse block prevents damage at -20V input",
+                "ESD protection: >4kV HBM on all external pins",
+                "EMI filtering: <20dB peak coupling to analog reference layer"
+            ]
+        }
     },
     "ethernet_sensor_hub": {
         "name": "Ethernet Sensor Hub",
@@ -3306,7 +3344,57 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
                                    "Queue-2: Best-effort diagnostic and calibration data"],
                 "scheduling_guarantee": "Queue-0 packets dequeued within 100µs regardless of other traffic"
             }
-        ]
+        ],
+        "validation_matrix": {
+            "multi_sensor_fusion_validation": [
+                "sensor interface timing: I2C/SPI aggregation <100ms for 16 simultaneous sensor readouts",
+                "data fusion latency: kalman filtering <10ms per cycle at 100Hz update rate",
+                "sensor redundancy: voting logic detects 1-of-3 faulty sensors with >99% detection rate",
+                "cross-sensor synchronization: timestamp alignment <1ms across asynchronous I2C/SPI"
+            ],
+            "ethernet_streaming_validation": [
+                "UDP packet streaming: sensor data at 100Mbps line rate, 1000 packets/sec with <1ms jitter",
+                "TCP reliability: guaranteed delivery with retransmission <500ms for critical alerts",
+                "bandwidth efficiency: compressed sensor format >80% reduction vs. raw streaming",
+                "latency budget: end-to-end sensor-to-cloud <100ms under nominal network"
+            ],
+            "adc_precision_validation": [
+                "16-bit linearity: <0.5 LSB INL across -40°C to +85°C operating range",
+                "sampling rate: 100ksps per channel with 8-channel simultaneous multiplexing",
+                "noise floor: <10µV RMS integrated 10Hz-100kHz with <100nV/√Hz density",
+                "temperature drift: offset <100ppm/°C, gain <50ppm/°C over full range"
+            ],
+            "ptp_time_sync_validation": [
+                "IEEE 1588 grandmaster sync: <1µs offset on 8-node network",
+                "oscillator trim response: <100ms settling after PTP offset correction",
+                "path delay compensation: asymmetric link delay <200ns absolute error",
+                "leap second handling: automatic insertion with no timestamp discontinuities"
+            ],
+            "sensor_calibration_validation": [
+                "offset calibration: all-grounded reference with 10-sample averaging, <1 LSB residual",
+                "gain calibration: known reference with <0.1% calibration accuracy retained",
+                "EEPROM durability: 100k write cycles per channel with CRC integrity check",
+                "auto-load recovery: <100ms boot time after POR to read calibration"
+            ],
+            "power_efficiency_validation": [
+                "sensor standby: <100µW total current with sensors in low-power mode",
+                "active streaming: <500mW per hub during continuous 100Mbps Ethernet",
+                "wake-on-threshold: <1ms latency from sensor event to Ethernet activation",
+                "battery life simulation: >100 hours at 5-minute reporting interval"
+            ],
+            "data_integrity_validation": [
+                "CRC checking: 100% single-bit error detection on all sensor packets",
+                "timestamp accuracy: microsecond-resolution clock with <50ppm drift over 24h",
+                "buffer overflow: >1M sample SRAM buffer with DMA continuity",
+                "ECC protection: 1-bit correction on all SRAM storage"
+            ],
+            "deterministic_scheduling_validation": [
+                "TSN priority queuing: Queue-0 dequeued <100µs, Queue-1 <500µs",
+                "scheduling jitter: <1µs variance across multiple aggregation cycles",
+                "packet transmission: fixed-schedule Ethernet egress with no blocking",
+                "interrupt latency: sensor event to CAN/Ethernet <10ms guaranteed"
+            ]
+        }
     },
     "safe_motor_drive_controller": {
         "name": "Safe Motor Drive Controller",
@@ -3443,7 +3531,63 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
                               "Commutation timing adjusted dynamically based on estimated speed"],
                 "fallback_trigger": "If hall sensor data invalid for >50ms, switch to sensorless mode automatically"
             }
-        ]
+        ],
+        "validation_matrix": {
+            "pwm_driver_validation": [
+                "gate driver timing: <100ns edge placement accuracy with <50ns jitter on 6-IGBT switches",
+                "dead-time insertion: programmable 200-1000ns dead-time with ±10ns tolerance across PVT",
+                "gate peak current: 2A source, 3A sink per switch with <50ns transition time to 600V",
+                "fault response: <1µs shoot-through prevention upon desaturation fault detection"
+            ],
+            "current_sensing_validation": [
+                "3-phase current accuracy: ±1% across 0-50A range with 100µs sampling",
+                "phase coupling compensation: cross-coupling <0.5% between phase measurements",
+                "DC offset calibration: automatic offset trimming <10mA residual error at 0A",
+                "overcurrent detection: <500µs latency from 1.5x threshold to gate shutdown"
+            ],
+            "motor_control_loop_validation": [
+                "speed regulation: <2% steady-state error at 3000 RPM nominal with <50ms settling",
+                "torque ripple: <5% torque ripple under sensorless vector control",
+                "commutation timing: phase-current zero-crossing detection <100µs before event",
+                "soft-start ramp: 0-3000 RPM acceleration in <5 seconds without motor stalling"
+            ],
+            "position_encoding_validation": [
+                "encoder interface: 1000 PPR quadrature encoder with <100ns pulse-to-position latency",
+                "sensorless mode: back-EMF estimation at <200 RPM startup with <10% speed error",
+                "phase tracking: rotor angle estimation <5° error across full operating range",
+                "lost-sync recovery: <200ms recovery time if encoder sync lost"
+            ],
+            "thermal_protection_validation": [
+                "junction temperature sensing: ±2°C accuracy on IGBT die temperature",
+                "over-temperature shutdown: >150°C limit with <100ms latency from threshold",
+                "thermal derating: current limit reduced 1%/°C above 85°C",
+                "cooldown time: motor coast-down enables soft restart after thermal shutdown"
+            ],
+            "short_circuit_protection_validation": [
+                "fault detection: phase-phase short detected <2µs after fault inception",
+                "gate inhibit: all 6 gates off within <5µs of fault signal",
+                "fault latch: requires software reset after fault",
+                "energy dump: freewheeling diodes absorb motor back-EMF <50ms after fault"
+            ],
+            "communication_validation": [
+                "CAN interface: 1Mbps CANopen messaging for speed command, torque feedback",
+                "command response: <10ms latency from CAN speed command to acceleration",
+                "status reporting: encoder position, current, temperature at 100ms update",
+                "fault diagnostics: 32-bit fault code with timestamp for post-mortem analysis"
+            ],
+            "safety_validation": [
+                "safe-state enforcement: loss of CAN comms triggers motor coast-down <100ms",
+                "cross-domain monitoring: independent watchdog on gate drive supply",
+                "phase rotation verification: phase ABC sequence check with phase reversal alarm",
+                "ground fault detection: <100mA residual current to earth triggers shutdown"
+            ],
+            "emc_compliance_validation": [
+                "conducted emissions: <50dBµA per FCC Part 15 on power leads",
+                "radiated emissions: <40dBµV/m per IEC 61000-6-2 in 150kHz-1GHz band",
+                "ESD immunity: >4kV HBM on all external connectors",
+                "RF immunity: >20V/m conducted RF immunity at 80-1000MHz"
+            ]
+        }
     },
     }
 
