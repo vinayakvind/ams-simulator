@@ -1,0 +1,357 @@
+{
+  "reusable_ips": {
+    "high_speed_comparator": {
+      "checks": {
+        "exists": true,
+        "has_validation_coverage": true,
+        "has_generator_params": true,
+        "has_example_config": true,
+        "has_integration_example": true,
+        "technology_support_count": 4
+      },
+      "enhancement_metrics": {
+        "validation_scenarios": 12,
+        "example_configs": 4,
+        "integration_examples": 6,
+        "total_enhancements": 22
+      },
+      "status": "enhanced"
+    },
+    "differential_amplifier": {
+      "checks": {
+        "exists": true,
+        "has_validation_coverage": true,
+        "has_generator_params": true,
+        "has_example_config": true,
+        "has_integration_example": true,
+        "technology_support_count": 4
+      },
+      "enhancement_metrics": {
+        "validation_scenarios": 15,
+        "example_configs": 4,
+        "integration_examples": 6,
+        "total_enhancements": 25
+      },
+      "status": "enhanced"
+    },
+    "buffered_precision_dac": {
+      "checks": {
+        "exists": true,
+        "has_validation_coverage": true,
+        "has_generator_params": true,
+        "has_example_config": true,
+        "has_integration_example": true,
+        "technology_support_count": 4
+      },
+      "enhancement_metrics": {
+        "validation_scenarios": 14,
+        "example_configs": 5,
+        "integration_examples": 6,
+        "total_enhancements": 25
+      },
+      "status": "enhanced"
+    },
+    "lvds_receiver": {
+      "checks": {
+        "exists": true,
+        "has_validation_coverage": true,
+        "has_generator_params": true,
+        "has_example_config": true,
+        "has_integration_example": true,
+        "technology_support_count": 4
+      },
+      "enhancement_metrics": {
+        "validation_scenarios": 14,
+        "example_configs": 4,
+        "integration_examples": 6,
+        "total_enhancements": 24
+      },
+      "status": "enhanced"
+    }
+  },
+  "vips": {
+    "ethernet_vip": {
+      "checks": {
+        "exists": true,
+        "has_protocol": true,
+        "has_checks": true,
+        "has_design_scenarios": true,
+        "has_enhanced_scenarios": true,
+        "has_mixed_signal_regressions": true
+      },
+      "scenario_metrics": {
+        "protocol_checks": 9,
+        "design_scenarios": 10,
+        "enhanced_scenarios": 14,
+        "mixed_signal_regressions": 8,
+        "total_scenarios": 32
+      },
+      "status": "enhanced"
+    },
+    "profibus_vip": {
+      "checks": {
+        "exists": true,
+        "has_protocol": true,
+        "has_checks": true,
+        "has_design_scenarios": true,
+        "has_enhanced_scenarios": true,
+        "has_mixed_signal_regressions": true
+      },
+      "scenario_metrics": {
+        "protocol_checks": 9,
+        "design_scenarios": 8,
+        "enhanced_scenarios": 12,
+        "mixed_signal_regressions": 8,
+        "total_scenarios": 28
+      },
+      "status": "enhanced"
+    },
+    "canopen_vip": {
+      "checks": {
+        "exists": true,
+        "has_protocol": true,
+        "has_checks": true,
+        "has_design_scenarios": true,
+        "has_enhanced_scenarios": true,
+        "has_mixed_signal_regressions": true
+      },
+      "scenario_metrics": {
+        "protocol_checks": 10,
+        "design_scenarios": 9,
+        "enhanced_scenarios": 15,
+        "mixed_signal_regressions": 10,
+        "total_scenarios": 34
+      },
+      "status": "enhanced"
+    },
+    "clock_gating_vip": {
+      "checks": {
+        "exists": true,
+        "has_protocol": true,
+        "has_checks": true,
+        "has_design_scenarios": true,
+        "has_enhanced_scenarios": true,
+        "has_mixed_signal_regressions": true
+      },
+      "scenario_metrics": {
+        "protocol_checks": 10,
+        "design_scenarios": 8,
+        "enhanced_scenarios": 14,
+        "mixed_signal_regressions": 10,
+        "total_scenarios": 32
+      },
+      "status": "enhanced"
+    }
+  },
+  "digital_subsystems": {
+    "clock_gating_plane": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_integration_rules": true,
+        "has_validation_scenarios": true,
+        "has_design_patterns": true,
+        "has_technology_support": true
+      },
+      "detail_metrics": {
+        "block_count": 4,
+        "integration_rules": 12,
+        "validation_scenarios": 11,
+        "design_patterns": 5,
+        "total_details": 32
+      },
+      "status": "enhanced"
+    },
+    "ethernet_control_plane": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_integration_rules": true,
+        "has_validation_scenarios": true,
+        "has_design_patterns": true,
+        "has_technology_support": true
+      },
+      "detail_metrics": {
+        "block_count": 6,
+        "integration_rules": 12,
+        "validation_scenarios": 12,
+        "design_patterns": 5,
+        "total_details": 35
+      },
+      "status": "enhanced"
+    },
+    "safety_monitor_plane": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_integration_rules": true,
+        "has_validation_scenarios": true,
+        "has_design_patterns": true,
+        "has_technology_support": true
+      },
+      "detail_metrics": {
+        "block_count": 5,
+        "integration_rules": 12,
+        "validation_scenarios": 12,
+        "design_patterns": 5,
+        "total_details": 34
+      },
+      "status": "enhanced"
+    },
+    "infotainment_control_plane": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_integration_rules": true,
+        "has_validation_scenarios": true,
+        "has_design_patterns": true,
+        "has_technology_support": true
+      },
+      "detail_metrics": {
+        "block_count": 6,
+        "integration_rules": 12,
+        "validation_scenarios": 12,
+        "design_patterns": 5,
+        "total_details": 35
+      },
+      "status": "enhanced"
+    },
+    "power_conversion_plane": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_integration_rules": true,
+        "has_validation_scenarios": true,
+        "has_design_patterns": true,
+        "has_technology_support": true
+      },
+      "detail_metrics": {
+        "block_count": 6,
+        "integration_rules": 12,
+        "validation_scenarios": 12,
+        "design_patterns": 5,
+        "total_details": 35
+      },
+      "status": "enhanced"
+    }
+  },
+  "chip_profiles": {
+    "automotive_infotainment_soc": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_vips": true,
+        "has_digital_subsystems": true,
+        "has_power_domains": false,
+        "has_integration_rules": false,
+        "has_automation_steps": true,
+        "has_design_reference": false
+      },
+      "assembly_metrics": {
+        "block_count": 14,
+        "vip_count": 5,
+        "subsystem_count": 3,
+        "power_domain_count": 0,
+        "integration_rules": 0,
+        "automation_steps": 10,
+        "total_components": 22
+      },
+      "status": "partial"
+    },
+    "industrial_iot_gateway": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_vips": true,
+        "has_digital_subsystems": true,
+        "has_power_domains": false,
+        "has_integration_rules": false,
+        "has_automation_steps": true,
+        "has_design_reference": false
+      },
+      "assembly_metrics": {
+        "block_count": 14,
+        "vip_count": 5,
+        "subsystem_count": 3,
+        "power_domain_count": 0,
+        "integration_rules": 0,
+        "automation_steps": 10,
+        "total_components": 22
+      },
+      "status": "partial"
+    },
+    "isolated_power_supply_controller": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_vips": true,
+        "has_digital_subsystems": true,
+        "has_power_domains": false,
+        "has_integration_rules": false,
+        "has_automation_steps": true,
+        "has_design_reference": false
+      },
+      "assembly_metrics": {
+        "block_count": 15,
+        "vip_count": 5,
+        "subsystem_count": 3,
+        "power_domain_count": 0,
+        "integration_rules": 0,
+        "automation_steps": 10,
+        "total_components": 23
+      },
+      "status": "partial"
+    },
+    "ethernet_sensor_hub": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_vips": true,
+        "has_digital_subsystems": true,
+        "has_power_domains": false,
+        "has_integration_rules": false,
+        "has_automation_steps": true,
+        "has_design_reference": false
+      },
+      "assembly_metrics": {
+        "block_count": 15,
+        "vip_count": 5,
+        "subsystem_count": 2,
+        "power_domain_count": 0,
+        "integration_rules": 0,
+        "automation_steps": 10,
+        "total_components": 22
+      },
+      "status": "partial"
+    },
+    "safe_motor_drive_controller": {
+      "checks": {
+        "exists": true,
+        "has_blocks": true,
+        "has_vips": true,
+        "has_digital_subsystems": true,
+        "has_power_domains": false,
+        "has_integration_rules": false,
+        "has_automation_steps": true,
+        "has_design_reference": false
+      },
+      "assembly_metrics": {
+        "block_count": 13,
+        "vip_count": 5,
+        "subsystem_count": 3,
+        "power_domain_count": 0,
+        "integration_rules": 0,
+        "automation_steps": 10,
+        "total_components": 21
+      },
+      "status": "partial"
+    }
+  },
+  "summary": {
+    "total_items_validated": 4,
+    "total_checks": 118,
+    "passed_checks": 103,
+    "pass_rate_percent": 87.28813559322035,
+    "overall_status": "PASS"
+  }
+}

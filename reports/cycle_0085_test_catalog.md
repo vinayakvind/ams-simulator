@@ -1,0 +1,5779 @@
+{
+  "generated_at": "2026-05-03T00:15:19.286928",
+  "technology_filter": "generic130",
+  "summary": {
+    "technology_count": 4,
+    "reusable_ip_count": 69,
+    "verification_ip_count": 35,
+    "digital_subsystem_count": 25,
+    "chip_profile_count": 24,
+    "compatible_ip_count": 69,
+    "compatible_digital_subsystem_count": 25,
+    "compatible_chip_profile_count": 24
+  },
+  "technologies": [
+    {
+      "name": "generic180",
+      "node": "180nm",
+      "vdd": 1.8,
+      "description": "Generic 180nm CMOS with HV options (automotive)"
+    },
+    {
+      "name": "generic130",
+      "node": "130nm",
+      "vdd": 1.2,
+      "description": "Generic 130nm CMOS"
+    },
+    {
+      "name": "generic65",
+      "node": "65nm",
+      "vdd": 1.0,
+      "description": "Generic 65nm CMOS (low-power)"
+    },
+    {
+      "name": "bcd180",
+      "node": "180nm",
+      "vdd": 1.8,
+      "description": "BCD 180nm - Bipolar/CMOS/DMOS for automotive HV"
+    }
+  ],
+  "reusable_ips": [
+    {
+      "name": "AES Cryptographic Accelerator",
+      "domain": "digital",
+      "category": "security",
+      "generator": "aes_accel",
+      "ports": [
+        "clk",
+        "rst_n",
+        "din",
+        "dout",
+        "key_in",
+        "mode_sel",
+        "valid_in",
+        "valid_out",
+        "ready"
+      ],
+      "aliases": [
+        "aes",
+        "crypto_aes"
+      ],
+      "description": "Hardware AES-128/256 encryption/decryption accelerator with DMA interface.",
+      "role": "Provides high-speed cryptographic acceleration for secure communications, authentication, and data protection.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "aes_accelerator",
+      "compatible": true
+    },
+    {
+      "name": "Analog Multiplexer",
+      "domain": "analog",
+      "category": "interface",
+      "generator": "analog_mux",
+      "ports": [
+        "VDD",
+        "GND",
+        "SEL",
+        "IN",
+        "OUT"
+      ],
+      "aliases": [
+        "mux",
+        "analog_switch"
+      ],
+      "description": "High-speed analog switch matrix for channel selection.",
+      "role": "Routes multiple analog signals to a single converter or processing path.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "analog_multiplexer",
+      "compatible": true
+    },
+    {
+      "name": "Bandgap Reference",
+      "domain": "analog",
+      "category": "reference",
+      "generator": "bandgap_ref",
+      "ports": [
+        "VDD",
+        "VREF",
+        "GND",
+        "EN"
+      ],
+      "aliases": [
+        "bandgap_ref",
+        "bandgap_reference"
+      ],
+      "description": "Master 1.2 V reference for mixed-signal chips.",
+      "role": "Provides a stable reference for regulators, comparators, and analog bias paths.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "bandgap",
+      "compatible": true
+    },
+    {
+      "name": "Battery Cell Monitor and Balancer",
+      "domain": "analog",
+      "category": "power",
+      "generator": "cell_monitor",
+      "ports": [
+        "VDD",
+        "VDD_ISO",
+        "GND",
+        "CELL_P",
+        "CELL_N",
+        "BALANCE",
+        "I2C_SCL",
+        "I2C_SDA"
+      ],
+      "aliases": [
+        "bms_monitor",
+        "cell_balance"
+      ],
+      "description": "Single or multi-cell battery voltage and temperature monitor with integrated cell balancing switches.",
+      "role": "Monitors battery health, enforces safe charge/discharge limits, and balances multi-cell packs for longevity.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "battery_cell_monitor",
+      "compatible": true
+    },
+    {
+      "name": "Bias Generator",
+      "domain": "analog",
+      "category": "bias",
+      "generator": "bias_gen",
+      "ports": [
+        "VDD",
+        "GND",
+        "BIAS_OUT",
+        "TRIM_CODE"
+      ],
+      "aliases": [
+        "bias",
+        "self_bias"
+      ],
+      "description": "Self-biasing circuit with programmable trim for distributed bias.",
+      "role": "Generates precision bias currents for analog blocks without external reference.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "bias_generator",
+      "compatible": true
+    },
+    {
+      "name": "Bluetooth Low Energy Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "ble_txrx",
+      "ports": [
+        "VDD",
+        "VDD_IO",
+        "GND",
+        "RF_ANT",
+        "SPI_CLK",
+        "SPI_MOSI",
+        "SPI_MISO",
+        "SPI_CS",
+        "IRQ"
+      ],
+      "aliases": [
+        "ble",
+        "bluetooth_low_energy"
+      ],
+      "description": "Integrated BLE 5.0+ radio transceiver with on-chip antenna interface and SPI control.",
+      "role": "Provides wireless connectivity for IoT edge nodes and sensor aggregation in industrial and consumer applications.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "ble_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "Battery Management System Controller",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "bms_ctrl",
+      "ports": [
+        "clk",
+        "rst_n",
+        "cell_voltage",
+        "cell_temp",
+        "charger_in",
+        "load_out",
+        "status",
+        "I2C_SCL",
+        "I2C_SDA"
+      ],
+      "aliases": [
+        "bms",
+        "battery_mgmt"
+      ],
+      "description": "Advanced battery management system controller with multi-cell monitoring, pack balancing, and load switching.",
+      "role": "Manages overall battery pack safety, lifespan, and performance through intelligent charging, discharging, and fault detection.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "bms_controller",
+      "compatible": true
+    },
+    {
+      "name": "Boost Converter",
+      "domain": "analog",
+      "category": "power",
+      "generator": "boost_converter",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND",
+        "EN",
+        "FREQ_DIV"
+      ],
+      "aliases": [
+        "boost",
+        "step_up_converter"
+      ],
+      "description": "Boost regulator for generating higher voltage rails from lower supply.",
+      "role": "Steps up lower input voltage to higher output voltage for high-side drivers and special bias networks.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "boost_converter",
+      "compatible": true
+    },
+    {
+      "name": "Buck Converter",
+      "domain": "analog",
+      "category": "power",
+      "source": "examples/standard_circuits/buck_converter.spice",
+      "ports": [],
+      "aliases": [
+        "buck"
+      ],
+      "description": "Switching regulator reference for PMIC and power-management chip assembly.",
+      "role": "Generates efficient lower-voltage rails from higher-voltage sources.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "buck_converter",
+      "compatible": true
+    },
+    {
+      "name": "Buffered Precision DAC",
+      "domain": "analog",
+      "category": "converter",
+      "generator": "buf_dac",
+      "ports": [
+        "VDD",
+        "GND",
+        "DIN",
+        "VOUT",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "buffered_dac",
+        "precision_dac_with_buffer"
+      ],
+      "description": "High-resolution DAC with integrated output buffer for low-impedance analog signal generation.",
+      "role": "Converts digital control words into precise, low-impedance analog voltages for accurate setpoint control.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "validation_coverage": [
+        "DNL (Differential Non-Linearity): SS@125C: <\u00b10.5LSB, FF@-40C: <\u00b10.3LSB, TT@27C: <\u00b10.4LSB across all codes",
+        "INL (Integral Non-Linearity): SS@125C: <\u00b11LSB, FF@-40C: <\u00b10.8LSB, TT@27C: <\u00b11LSB end-to-end",
+        "settling time precision: 0.1% accuracy in <500ns at TT, 0.01% accuracy in <2\u00b5s with glitch-free guarantee",
+        "glitch impulse energy: <100pJ typical per LSB transition, <50pJ at binary transitions (0x7FF to 0x800)",
+        "monotonicity verification: guaranteed monotonic across all PVT corners and temperature ramps",
+        "temperature drift: <50ppm/\u00b0C on full-scale value, offset drift <20\u00b5V/\u00b0C over -40 to +125\u00b0C",
+        "supply sensitivity: <10ppm/V on full-scale with \u00b110% supply variation, PSRR >60dB at 100kHz",
+        "output noise floor: <100\u00b5V RMS integrated 1kHz-100kHz, <10\u00b5V RMS at 10Hz-1kHz for low-frequency control",
+        "THD+N measurement: <0.5% at mid-scale, <1% full-scale at 1kHz output frequency",
+        "buffer output impedance: <50\u03a9 DC to 1MHz, <100\u03a9 at 10MHz with load capability 1k\u03a9 to 10M\u03a9",
+        "buffer DC gain and frequency response: flat \u00b10.5dB response 100Hz-100kHz, -3dB BW >500kHz",
+        "startup settling: <1\u00b5s to final value after power-on or enable signal transition",
+        "latency from DIN to VOUT: <100ns digital-to-analog propagation delay plus settling time",
+        "code-to-code glitch behavior: measured pulse width <100ns, amplitude <\u00b150mV for adjacent codes"
+      ],
+      "generator_params": {
+        "resolution_options": [
+          "8-bit",
+          "10-bit",
+          "12-bit",
+          "14-bit",
+          "16-bit"
+        ],
+        "resolution": "8-14 bit configurable",
+        "dac_architecture": [
+          "R-2R-ladder",
+          "Charge-redistribution",
+          "Segmented-switch"
+        ],
+        "output_impedance": "<50\u03a9 for driving ADC inputs and low-impedance loads",
+        "settling_time_0.1pct": "<500ns typical at 12-bit",
+        "settling_time_0.01pct": "<2\u00b5s typical at 12-bit",
+        "buffer_topology": [
+          "rail-to-rail-CMOS",
+          "current-output-amplifier",
+          "open-drain"
+        ],
+        "reference_configurations": [
+          "internal-bandgap",
+          "external-VREF-input",
+          "ratiometric-biasing"
+        ],
+        "update_rate": "DC to 10MHz with glitch-free latch or transparent latch options",
+        "power_supply_rejection": ">60dB at 100kHz with dual-supply option",
+        "output_drive_capability": "\u00b110mA to \u00b1100mA sourcing/sinking depending on buffer sizing",
+        "power_consumption": "0.5-5mW depending on update rate and buffer drive"
+      },
+      "example_config": {
+        "12bit_sar_adc_setpoint": {
+          "resolution": "12-bit",
+          "output_range": "0 to VREF",
+          "settling_to_0.1pct": "<500ns",
+          "reference": "External VREF input",
+          "update_rate": "Up to 1MHz SPI compatible",
+          "applications": "SAR ADC reference tuning, ADC gain calibration",
+          "robust_features": {
+            "settling_verification": "Glitch-free settle with <1ns overshoot monitoring",
+            "reference_tracking": "VREF-to-output ratio stability <0.01% with temperature",
+            "code_transition_margin": "DNL/INL maintained within \u00b10.5LSB across all 4096 codes"
+          }
+        },
+        "14bit_precision_trim": {
+          "resolution": "14-bit",
+          "output_range": "-VREF/2 to +VREF/2",
+          "output_impedance": "<50\u03a9 for low-load effect",
+          "settling_to_0.01pct": "<2\u00b5s for precision settling",
+          "reference": "Internal bandgap with trimming",
+          "applications": "Bandgap trim tuning, bias current generation, sub-threshold device control",
+          "robust_features": {
+            "trim_range": "\u00b120% around nominal with 1 LSB resolution",
+            "hysteresis_prevention": "monotonic output guarantee for forward/reverse code sweeps",
+            "load_regulation": "Output impedance <50\u03a9 maintains regulation with 100\u03a9 to 100k\u03a9 loads",
+            "temperature_stability": "<50ppm/\u00b0C temperature coefficient with on-die sensor feedback"
+          }
+        },
+        "10bit_low_power_led": {
+          "resolution": "10-bit",
+          "output_range": "0 to 3.3V rail-to-rail",
+          "update_rate": "100Hz to 1kHz",
+          "power_consumption": "<1mW",
+          "applications": "LED brightness control, backlight PWM intensity setting",
+          "robust_features": {
+            "pwm_integration": "Compatible with PWM duty cycle modulation for flicker-free dimming",
+            "low_power_mode": "Sleep mode with <1\u00b5W quiescent current, retain last setting in flash latch",
+            "brightness_perception": "Logarithmic lookup table integration for human eye perception matching"
+          }
+        },
+        "8bit_audio_dac_out": {
+          "resolution": "8-bit",
+          "output_range": "Full rail-to-rail swing",
+          "glitch_energy": "<100pJ",
+          "buffer_current": "\u00b150mA drive capability",
+          "applications": "Audio codec output buffer, speaker driver predriver",
+          "robust_features": {
+            "audio_quality": "THD+N <1% at 1kHz, SNR >70dB for 8-bit resolution",
+            "update_timing": "Synchronous to audio clock (48/96kHz) for glitch-free updates",
+            "click_pop_suppression": "Soft-start mute function with adjustable ramp time (1-100ms)"
+          }
+        },
+        "programmable_reference_tuning": {
+          "resolution": "14-bit for \u00b110% trim range",
+          "output_range": "Adjustable around nominal reference",
+          "settling_time": "<100ns for AC response",
+          "temperature_tracking": "Auto-trim every 10ms based on on-die temperature sensor",
+          "applications": "Bandgap reference fine-tuning, distributed bias current calibration",
+          "robust_features": {
+            "auto_calibration": "Background trim adjustment without DAC output glitches",
+            "hysteresis": "Trim dead-zone (\u00b11 LSB) to prevent excessive updates",
+            "nvm_storage": "Trim codes stored in embedded flash with CRC verification on boot",
+            "fallback_strategy": "Last-known-good trim values loaded if calibration fails"
+          }
+        }
+      },
+      "integration_example": {
+        "trim_calibration_engine": {
+          "description": "Precision DAC for post-silicon temperature-compensated trim tuning of analog IP (bandgap, bias, reference)",
+          "specs": {
+            "resolution": "14-bit for 0.01% trim accuracy",
+            "update_rate": "SPI interface at 10MHz",
+            "trim_range": "\u00b120% around nominal values",
+            "temperature_compensation": "Trimmed values updated every 10ms based on onboard temperature sensor",
+            "nvm_storage": "Trim codes stored in embedded FLASH or OTP with CRC verification",
+            "example_use_case": "Bandgap reference trim, current mirror bias tuning, oscillator frequency calibration"
+          }
+        },
+        "power_supply_loop_control": {
+          "description": "DAC for generating precision feedback signals in buck/boost converter feedback loops",
+          "specs": {
+            "resolution": "12-bit for 0.1% regulation accuracy",
+            "settling_time": "<500ns for fast transient response",
+            "output_impedance": "<50\u03a9 to drive high-impedance divider networks",
+            "update_rate": "100kHz for loop bandwidth optimization",
+            "example_use_case": "PMIC output voltage programming, LDO setpoint control, multi-rail sequencing"
+          }
+        },
+        "analog_comparator_reference": {
+          "description": "DAC-generated programmable reference thresholds for analog comparator arrays",
+          "specs": {
+            "resolution": "10-bit for threshold step size ~2mV",
+            "output_impedance": "<50\u03a9 for stable threshold independent of comparator input impedance",
+            "settling_time": "<100ns for real-time threshold adjustment",
+            "reference_current": "Ratiometric biasing from same bandgap as comparator bias",
+            "example_use_case": "Over-voltage/under-voltage monitoring thresholds, temperature monitoring hysteresis"
+          }
+        },
+        "precision_sensor_excitation": {
+          "description": "Precision DAC for sensor bridge excitation voltage and ratiometric biasing",
+          "specs": {
+            "resolution": "12-bit for 0.025% excitation voltage accuracy",
+            "reference": "Ratiometric to same bandgap as bridge sensor amplifier",
+            "temperature_tracking": "Excitation voltage temperature coefficient matches sensor output TC",
+            "glitch_suppression": "Slow settle mode for noise-sensitive analog frontend",
+            "example_use_case": "Load cell excitation, pressure sensor ratiometric biasing, strain gauge bridge drive"
+          }
+        },
+        "audio_dac_interface": {
+          "description": "Low-noise audio DAC output buffer for line-level audio signal generation",
+          "specs": {
+            "resolution": "8-bit to 10-bit for audio quality",
+            "thd_plus_n": "<1% at 1kHz (target for audio codec output)",
+            "buffer_drive": "\u00b120mA typical for driving 10k\u03a9 load",
+            "output_impedance": "<100\u03a9 for low-impedance audio line standards",
+            "glitch_free_update": "Synchronized to audio clock for click-pop avoidance",
+            "example_use_case": "Audio codec output stage, headphone preamp output, line-level mixing output"
+          }
+        },
+        "programmable_current_dac": {
+          "description": "DAC generating precision current outputs (I-out) for tuning high-impedance analog circuits",
+          "specs": {
+            "resolution": "10-14 bit",
+            "current_range": "1\u00b5A to 100\u00b5A programmable",
+            "output_impedance": ">100M\u03a9 for ideal current source",
+            "temperature_drift": "<100ppm/\u00b0C on full-scale current",
+            "example_use_case": "Bias current tuning, leakage current compensation, oscillator frequency tuning"
+          }
+        }
+      },
+      "key": "buffered_precision_dac",
+      "compatible": true
+    },
+    {
+      "name": "CAN Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "can_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "txd",
+        "rxd",
+        "int_n"
+      ],
+      "aliases": [
+        "can"
+      ],
+      "description": "CAN protocol engine for automotive messaging.",
+      "role": "Implements CAN 2.0A/B protocol state machine and frame handling.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "can_controller",
+      "compatible": true
+    },
+    {
+      "name": "CAN Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "can_transceiver",
+      "ports": [
+        "VDD",
+        "GND",
+        "TXD",
+        "RXD",
+        "CANH",
+        "CANL",
+        "EN"
+      ],
+      "aliases": [
+        "can_txrx",
+        "can_phy"
+      ],
+      "description": "CAN bus physical layer interface for automotive networking.",
+      "role": "Bridges digital CAN protocol signals to automotive CAN bus.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "can_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "CANopen Protocol Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "canopen_ctrl",
+      "ports": [
+        "clk",
+        "rst_n",
+        "txd",
+        "rxd",
+        "int_n",
+        "sdo_mosi",
+        "sdo_miso",
+        "pdo_in",
+        "pdo_out"
+      ],
+      "aliases": [
+        "canopen",
+        "can_open_stack"
+      ],
+      "description": "Full-stack CANopen protocol implementation with SDO, PDO, and NMT state machine.",
+      "role": "Implements CANopen protocol for industrial machinery, robotics, and distributed control systems.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22"
+      ],
+      "validation_coverage": [
+        "CAN 2.0A/2.0B frame format compliance",
+        "SDO (Service Data Object) transfer verification",
+        "PDO mapping and event-triggered transmission",
+        "NMT state machine (BOOT\u2192OPERATIONAL\u2192STOPPED)",
+        "heartbeat producer/consumer timing",
+        "emergency (EMCY) message handling"
+      ],
+      "generator_params": {
+        "node_ids": "0-127",
+        "baud_rates": "10k to 1M bps",
+        "heartbeat_timing": "1ms-65.535s"
+      },
+      "example_config": {
+        "node_id": "0 to 127 (0 reserved for NMT)",
+        "baudrate": "10k, 20k, 50k, 125k, 250k, 500k, 800k, 1M bps",
+        "heartbeat_period": "1ms to 65.535 seconds"
+      },
+      "integration_example": {
+        "robot_control": "Robot joint control with CANopen master/slave coordination",
+        "machinery_gateway": "Machinery gateway and coordinator with PDO mapping",
+        "safety_networks": "Safety networks with deterministic timing and EMCY handling"
+      },
+      "key": "canopen_controller",
+      "compatible": true
+    },
+    {
+      "name": "Charge Pump",
+      "domain": "analog",
+      "category": "power",
+      "generator": "charge_pump",
+      "ports": [
+        "VDD",
+        "GND",
+        "VOUT",
+        "CLK",
+        "EN"
+      ],
+      "aliases": [
+        "pump",
+        "voltage_multiplier"
+      ],
+      "description": "Switched-capacitor voltage converter for high-voltage generation.",
+      "role": "Creates higher-voltage rails or negative voltages from single-supply sources.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "charge_pump",
+      "compatible": true
+    },
+    {
+      "name": "Clock Divider",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "clock_divider",
+      "ports": [
+        "clk_in",
+        "rst_n",
+        "div_ratio",
+        "clk_out"
+      ],
+      "aliases": [
+        "clkdiv"
+      ],
+      "description": "Programmable clock frequency divider for multi-rate systems.",
+      "role": "Generates slower clock domains for power-efficient processing.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "clock_divider",
+      "compatible": true
+    },
+    {
+      "name": "Multiplexed Comparator Array",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "comp_array",
+      "ports": [
+        "VDD",
+        "GND",
+        "IN_P",
+        "IN_N",
+        "SEL",
+        "OUT",
+        "VREF_ARRAY",
+        "HYSTERESIS"
+      ],
+      "aliases": [
+        "comp_mux",
+        "window_comparator"
+      ],
+      "description": "Array of analog comparators with multiplexed input and programmable thresholds.",
+      "role": "Enables multi-threshold analog monitoring with a single comparator array macro.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "comparator_array",
+      "compatible": true
+    },
+    {
+      "name": "CMOS Comparator",
+      "domain": "analog",
+      "category": "sense",
+      "source": "examples/adc/comparator_cmos.spice",
+      "ports": [],
+      "aliases": [
+        "comparator"
+      ],
+      "description": "Reusable comparator for converter and monitor macros.",
+      "role": "Compares analog levels for thresholding and bit decisions.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "comparator_cmos",
+      "compatible": true
+    },
+    {
+      "name": "Control Logic",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "control_logic",
+      "ports": [
+        "clk",
+        "rst_n",
+        "en_bgr",
+        "en_ana",
+        "en_dig",
+        "en_if"
+      ],
+      "aliases": [
+        "ctrl_logic"
+      ],
+      "description": "Chip-level sequencing and enable orchestration logic.",
+      "role": "Coordinates power-up order, mode transitions, and safety gating.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "control_logic",
+      "compatible": true
+    },
+    {
+      "name": "Current Mirror",
+      "domain": "analog",
+      "category": "bias",
+      "generator": "current_mirror",
+      "ports": [
+        "VDD",
+        "GND",
+        "I_IN",
+        "I_OUT"
+      ],
+      "aliases": [
+        "current_source",
+        "bias_cell"
+      ],
+      "description": "Precision current steering circuit for analog bias and reference generation.",
+      "role": "Duplicates reference currents for distributed bias across analog blocks.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "current_mirror",
+      "compatible": true
+    },
+    {
+      "name": "Current Reference Generator",
+      "domain": "analog",
+      "category": "reference",
+      "generator": "current_ref_gen",
+      "ports": [
+        "VDD",
+        "GND",
+        "IREF_OUT",
+        "TRIM_CODE",
+        "EN"
+      ],
+      "aliases": [
+        "iref",
+        "curent_source_ref",
+        "bandgap_iref"
+      ],
+      "description": "Temperature-compensated current reference generator based on bandgap principle.",
+      "role": "Provides precision reference current for distributed analog bias without external components.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "current_reference",
+      "compatible": true
+    },
+    {
+      "name": "R-2R DAC 4-bit",
+      "domain": "analog",
+      "category": "converter",
+      "source": "examples/adc/dac_r2r_4bit.spice",
+      "ports": [],
+      "aliases": [
+        "r2r_dac"
+      ],
+      "description": "Reusable DAC building block for converter and mixed-signal control designs.",
+      "role": "Converts digital control words into analog voltage levels.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "dac_r2r_4bit",
+      "compatible": true
+    },
+    {
+      "name": "Differential Amplifier",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "diff_amp",
+      "ports": [
+        "VDD",
+        "VSS",
+        "VIN_P",
+        "VIN_N",
+        "VOUT_P",
+        "VOUT_N",
+        "VBIAS"
+      ],
+      "aliases": [
+        "diffamp",
+        "diff_stage"
+      ],
+      "description": "Precision differential amplifier with high CMRR for balanced signal conditioning and low-noise amplification.",
+      "role": "Provides differential gain for instrumentation, precision measurements, and audio front-end applications.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "validation_coverage": [
+        "DC gain characterization: SS@125C: >75dB, FF@-40C: >85dB, TT@27C: >80dB with gain flatness \u00b12dB",
+        "CMRR frequency sweep: 1kHz: >80dB, 10kHz: >70dB, 100kHz: >50dB, 1MHz: >35dB across all corners",
+        "input-referred noise density: <80nV/\u221aHz at 1kHz, <100nV/\u221aHz across 100Hz-1MHz, <50nV/\u221aHz at 10kHz",
+        "slew rate: 1x gain >1V/\u00b5s, 10x gain >0.3V/\u00b5s, 100x gain >0.05V/\u00b5s with stable loop operation",
+        "settling time: 1x gain <100ns to 0.1%, 10x gain <500ns to 0.1%, 100x gain <5\u00b5s to 0.01%",
+        "temperature drift: offset <5\u00b5V/\u00b0C, gain <50ppm/\u00b0C, CMRR <0.1dB/\u00b0C over -40 to +125\u00b0C",
+        "supply voltage sensitivity: PSRR >70dB with 100mV peak ripple at 100kHz on both rails",
+        "DC offset voltage: <\u00b15mV trim range with 10-bit DAC, <\u00b10.5mV post-trim accuracy",
+        "THD+N at 1kHz: 1x gain <0.1%, 10x gain <0.5%, 100x gain <1% at full-scale output",
+        "output impedance: 50-100\u03a9 typical (gain independent), load-independent frequency response",
+        "common-mode input range: 0.2V to VDD-0.2V typical with \u00b15% gain variation across range",
+        "output swing: <100mV from rail with >10mA sourcing/sinking capability",
+        "frequency response (Bode): 1MHz -3dB BW for 1x gain, 10MHz phase margin >70\u00b0 for 100x gain",
+        "phase matching between P and N output paths: <3\u00b0 across 10Hz-100kHz",
+        "input-output latency: <100ns time-delay (gain independent) for control loops"
+      ],
+      "generator_params": {
+        "gain_configurations": [
+          "1V/V (unity buffer)",
+          "2V/V",
+          "5V/V",
+          "10V/V",
+          "20V/V",
+          "50V/V",
+          "100V/V"
+        ],
+        "gain_control_method": [
+          "fixed-resistor",
+          "binary-weighted-DAC",
+          "programmable-gain-array"
+        ],
+        "bandwidth_setting": [
+          "1MHz",
+          "5MHz",
+          "10MHz",
+          "50MHz",
+          "100MHz"
+        ],
+        "cmrr_optimization": "enabled with common-mode feedback network",
+        "offset_cancellation": [
+          "static-trim-DAC (10-bit)",
+          "dynamic-trim-DAC (12-bit)",
+          "chopping"
+        ],
+        "input_stage_topology": [
+          "long-tail-pair",
+          "telescopic-cascode",
+          "folded-cascode"
+        ],
+        "rail_swing_capability": "near-rail (100mV) to full-rail (50mV) configurable",
+        "output_buffer_drive": "10mA to 100mA source/sink current configurable",
+        "noise_optimization": "low-noise input stage biasing with adjustable current levels",
+        "power_consumption": "1-50mW depending on gain and bandwidth configuration",
+        "robust_generator_features": {
+          "process_corner_tuning": "Gain and CMRR adjusted via trim DAC based on corner detection (SS/FF/TT)",
+          "temperature_compensation": "Dynamic offset and gain tracking with embedded temperature sensor feedback",
+          "supply_voltage_sensitivity_correction": "PSRR optimization with supply bypass filtering and feedback",
+          "phase_margin_enforcement": "Stability checking with >60\u00b0 phase margin guaranteed across all gain settings",
+          "noise_figure_optimization": "Input-referred noise minimization with bias current tuning for minimum NEF"
+        }
+      },
+      "example_config": {
+        "unity_buffer_1mhz": {
+          "gain": "1V/V (buffer mode)",
+          "bandwidth": "1 MHz (-3dB)",
+          "noise": "<50nV/\u221aHz",
+          "input_impedance": ">100M\u03a9",
+          "output_impedance": "<50\u03a9",
+          "applications": "High-impedance sensor buffering, precision signal routing"
+        },
+        "10x_instrumentation_10mhz": {
+          "gain": "10V/V",
+          "bandwidth": "10 MHz with >70\u00b0 phase margin",
+          "cmrr": ">80dB",
+          "offset_drift": "<5\u00b5V/\u00b0C",
+          "noise": "<100nV/\u221aHz",
+          "applications": "Bridge sensor amplification, instrumentation frontend"
+        },
+        "100x_audio_preamp_100khz": {
+          "gain": "100V/V",
+          "bandwidth": "100 kHz with flat response",
+          "thd_plus_n": "<1% at 1kHz",
+          "cmrr": ">70dB",
+          "phase_matching": "<3\u00b0 left-right channels",
+          "applications": "Stereo audio preamplifier, line-level conditioning"
+        },
+        "50x_transimpedance_5mhz": {
+          "gain": "50V/V",
+          "bandwidth": "5 MHz",
+          "input_mode": "Programmable gain with binary DAC",
+          "settling_time": "<1\u00b5s to 0.1%",
+          "applications": "Photodiode receiver, optical transceiver"
+        }
+      },
+      "integration_example": {
+        "bridge_sensor_frontend": {
+          "description": "Precision bridge sensor amplification with integrated gain, offset trim, and temperature compensation",
+          "specs": {
+            "gain": "10V/V to 100V/V depending on sensor output",
+            "gain_accuracy": "\u00b10.1% with resistor matching and temperature tracking",
+            "ratiometric_biasing": "Bridge excitation from same reference as amplifier VREF",
+            "temperature_compensation": "Sensor output TC matched by amplifier TC <50ppm/\u00b0C",
+            "example_use_case": "Load cell, pressure sensor, strain gauge measurement"
+          }
+        },
+        "stereo_audio_frontend": {
+          "description": "Low-noise stereo audio preamplifier with channel matching and THD optimization",
+          "specs": {
+            "gain": "Variable 0-100V/V with digital control",
+            "left_right_matching": "<3\u00b0 phase, <0.5dB gain matching across audio band",
+            "thd_plus_n": "<1% at 1kHz full scale",
+            "noise_floor": "<100nV/\u221aHz with <15\u00b5V RMS integrated output noise",
+            "headroom": ">20dB above noise floor for 94dB SPL equivalent",
+            "example_use_case": "Microphone preamplifier, line-level preamp, mixing console input"
+          }
+        },
+        "precision_power_monitor": {
+          "description": "Precision current measurement using low-value sense resistor and high-gain amplifier",
+          "specs": {
+            "gain": "50V/V to 200V/V for 50mV sense resistor drop",
+            "measurement_accuracy": "\u00b10.5% over 1mA to 10A range",
+            "bandwidth": "100kHz for ADC sampling compatibility",
+            "offset_trim": "10-bit DAC for zero-current calibration",
+            "example_use_case": "Battery charger, power supply current monitoring, load balancing"
+          }
+        },
+        "adc_input_buffer": {
+          "description": "Low-noise, high-impedance ADC input buffer with precise gain and phase alignment",
+          "specs": {
+            "gain": "1V/V to 10V/V programmable for full-scale matching",
+            "settling_time": "<100ns for 10-bit, <500ns for 12-bit accurate sampling",
+            "output_impedance": "<50\u03a9 for low source impedance to ADC",
+            "phase_linearity": "<1% deviation across 1kHz-100kHz",
+            "example_use_case": "Multi-channel data acquisition system, sensor signal conditioning"
+          }
+        },
+        "medical_biopotential_amplifier": {
+          "description": "Ultra-high CMRR amplifier for bio-signal acquisition (EMG, ECG, EEG) with artifact rejection",
+          "specs": {
+            "gain": "1000V/V to 10000V/V with gain control",
+            "cmrr": ">100dB for 50/60Hz rejection",
+            "input_referred_noise": "<50\u00b5V RMS integrated over 0.5Hz-10kHz",
+            "input_offset_range": "\u00b1500mV with precision trimming",
+            "example_use_case": "Portable ECG monitor, EEG headset, EMG rehabilitation system"
+          }
+        },
+        "precision_feedback_buffer": {
+          "description": "High-impedance output buffer for DAC or precision voltage reference feedback in closed-loop systems",
+          "specs": {
+            "gain": "1V/V unity or 0.5V/V attenuator for range compression",
+            "output_impedance": "<50\u03a9 for long cable runs (>10m) without loading errors",
+            "distortion": "<0.5% THD+N for control signal fidelity",
+            "example_use_case": "Power supply feedback sensing, precision voltage regulator compensation"
+          }
+        }
+      },
+      "key": "differential_amplifier",
+      "compatible": true
+    },
+    {
+      "name": "ESD Protection Diode Array",
+      "domain": "analog",
+      "category": "interface",
+      "generator": "esd_array",
+      "ports": [
+        "VDD",
+        "VSS",
+        "IO_RAIL"
+      ],
+      "aliases": [
+        "esd_clamp",
+        "esd_diode"
+      ],
+      "description": "On-chip ESD clamps and protection diodes for all I/O pins.",
+      "role": "Protects core circuitry from ESD transients during assembly, test, and use.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "esd_protection",
+      "compatible": true
+    },
+    {
+      "name": "Ethernet PHY (10/100 Base-T)",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "eth_phy",
+      "ports": [
+        "VDD",
+        "VDD_IO",
+        "GND",
+        "RXD_P",
+        "RXD_N",
+        "TXD_P",
+        "TXD_N",
+        "MDI_P",
+        "MDI_N",
+        "CLK"
+      ],
+      "aliases": [
+        "ethernet",
+        "eth_phy",
+        "rmii_interface"
+      ],
+      "description": "10Base-T/100Base-TX Ethernet transceiver PHY with integrated analog front-end and digital control.",
+      "role": "Provides Ethernet connectivity for networked IoT, industrial, and automotive applications.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22"
+      ],
+      "validation_coverage": [
+        "10Base-T and 100Base-TX IEEE 802.3 compliance",
+        "Manchester encoding/decoding precision \u00b15%",
+        "collision detection latency <100ns",
+        "auto-negotiation timing <2 seconds",
+        "CRC polynomial verification"
+      ],
+      "generator_params": {
+        "link_speeds": [
+          "10 Mbps",
+          "100 Mbps"
+        ],
+        "manchester_precision": "\u00b15%",
+        "crc": "CRC-32 accelerator"
+      },
+      "example_config": {
+        "link_speed": "10 Mbps or 100 Mbps auto-negotiated",
+        "media_type": "Cat5/Cat6 twisted pair",
+        "interface_voltage": "3.3V or 1.8V logic levels"
+      },
+      "integration_example": {
+        "industrial_gateway": "Industrial Ethernet gateway with protocol filtering and frame buffering",
+        "automotive_diagnostics": "Automotive diagnostics interface with CAN-Ethernet bridging",
+        "sensor_networks": "Sensor networks with IEEE 1588 PTP and TSN support"
+      },
+      "key": "ethernet_phy",
+      "compatible": true
+    },
+    {
+      "name": "Flash Memory Compiler",
+      "domain": "digital",
+      "category": "storage",
+      "generator": "flash_compiler",
+      "ports": [
+        "clk",
+        "rst_n",
+        "addr",
+        "din",
+        "dout",
+        "wr_en",
+        "erase_en"
+      ],
+      "aliases": [
+        "flash",
+        "nvm",
+        "nonvolatile_memory"
+      ],
+      "description": "Non-volatile flash memory for firmware storage and calibration data.",
+      "role": "Stores bootcode, calibration constants, and configuration across power cycles.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "flash_memory",
+      "compatible": true
+    },
+    {
+      "name": "Frequency Detector/Monitor",
+      "domain": "mixed",
+      "category": "sense",
+      "generator": "freq_detector",
+      "ports": [
+        "CLK_IN",
+        "VDD",
+        "GND",
+        "FREQ_VALID",
+        "FREQ_HI_N",
+        "CLK_DIV"
+      ],
+      "aliases": [
+        "freq_mon",
+        "clock_detector"
+      ],
+      "description": "Clock frequency detector and monitoring circuit for oscillator health checking.",
+      "role": "Validates oscillator frequency within expected range to prevent runaway clock faults.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "frequency_detector",
+      "compatible": true
+    },
+    {
+      "name": "GPIO Controller",
+      "domain": "digital",
+      "category": "interface",
+      "generator": "gpio_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "gpio_pad",
+        "gpio_out",
+        "gpio_in",
+        "gpio_oe"
+      ],
+      "aliases": [
+        "gpio",
+        "port_controller",
+        "io_mux"
+      ],
+      "description": "General-purpose I/O interface with configurable direction, pull-ups, and interrupt support.",
+      "role": "Provides flexible digital I/O for auxiliary control, status monitoring, and application-specific signals.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "gpio_controller",
+      "compatible": true
+    },
+    {
+      "name": "High-Speed Comparator",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "high_speed_comp",
+      "ports": [
+        "VDD",
+        "GND",
+        "VIN_P",
+        "VIN_N",
+        "VOUT",
+        "VBIAS"
+      ],
+      "aliases": [
+        "hyper_comp",
+        "speed_comp"
+      ],
+      "description": "Ultra-fast comparator for high-frequency signal detection and threshold crossing in RF and mixed-signal applications.",
+      "role": "Provides sub-nanosecond propagation delay for precision timing and high-speed ADC feedback paths.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "validation_coverage": [
+        "propagation delay (tpd) timing: SS@125C: <1.2ns, FF@-40C: <0.4ns, TT@27C: <0.7ns with slew-rate dependency",
+        "offset voltage DC sweep: -50mV to +50mV, linearity <2% across -50mV to +50mV, temperature drift <10\u00b5V/\u00b0C",
+        "hysteresis control: 0-100mV programmable, switching hysteresis \u00b15mV accuracy, metastability injection at critical thresholds",
+        "PSRR 1MHz: >65dB (SS, TT), >60dB (FF); 10MHz: >50dB across all corners with supply ripple injection",
+        "temperature coefficient: Tco < 50 ppm/\u00b0C offset, < 30 ppm/\u00b0C propagation delay over -40\u00b0C to +125\u00b0C",
+        "input-referred noise: <10\u00b5V RMS integrated 10Hz-1MHz, noise spectral density <100nV/\u221aHz",
+        "slew rate: 50-200V/\u00b5s dependent on bias current (5\u00b5A to 50\u00b5A), minimum slew >50V/\u00b5s at 5\u00b5A bias",
+        "common-mode input range: 0V to VDD-0.5V with gain flatness \u00b110% across range",
+        "output swing: 0V to VDD (100mV to VDD-100mV available with load), transition time <100ps",
+        "latch-up testing: >100mA hold current margin per corner, ESD immunity >2kV HBM with integrated clamps",
+        "jitter analysis: input jitter transfer <0.3, clock-to-Q jitter <50ps RMS on 5-tap cascade",
+        "frequency response: -3dB bandwidth >500MHz, phase margin >60\u00b0 with capacitive load up to 500pF"
+      ],
+      "generator_params": {
+        "circuit_variants": [
+          "single-stage",
+          "cascode-gain",
+          "telescopic",
+          "folded-cascode"
+        ],
+        "propagation_delay_target": "<0.8ns at TT@27C",
+        "gain": "50-100 V/V configurable",
+        "offset_trim": "\u00b150mV with 10-bit DAC trim, \u00b11mV resolution",
+        "hysteresis_trim": "0-100mV with 8-bit programmable control, <5mV resolution",
+        "vbias_range": "5-50\u00b5A tunable via external or programmable current DAC",
+        "slew_rate": ">50V/\u00b5s minimum at lowest bias current",
+        "noise_floor": "<10\u00b5V RMS integrated, <100nV/\u221aHz spectral density",
+        "cmrr": ">60dB at 1kHz, >40dB at 100kHz with input common-mode range = 0V to VDD-0.5V",
+        "psrr": ">65dB at 1MHz with 100mV peak supply ripple test",
+        "output_drive": "High-speed CMOS inverter with 100\u00b5A to 500\u00b5A source/sink current capability"
+      },
+      "example_config": {
+        "sar_adc_16bit": {
+          "bias_current": "20 \u00b5A",
+          "hysteresis": "2 mV",
+          "propagation_delay": "0.6-0.7 ns (typical)",
+          "output_slew": "500mV/100ps transition",
+          "applications": "16-bit SAR ADC comparator with <0.5 LSB skew matching",
+          "layout_considerations": "matched pair routing with <1mm trace length mismatch, common-centroid connection pattern",
+          "power_consumption": "50-100 \u00b5W per comparator, minimal static current in reset state"
+        },
+        "rf_data_recovery": {
+          "bias_current": "50 \u00b5A (high-speed mode)",
+          "hysteresis": "0 mV",
+          "propagation_delay": "<0.4 ns (FF corner)",
+          "jitter_tolerance": "<200ps RMS",
+          "applications": "High-speed LVDS receiver with eye-diagram margin",
+          "design_margin": "eye opening >30% after AC coupling, threshold optimization for 50mV to 200mV sweep",
+          "clock_recovery": "CDR loop gain tuning for <100ps jitter contribution, <50ps phase margin preservation"
+        },
+        "precision_monitoring": {
+          "bias_current": "5 \u00b5A (low-power mode)",
+          "hysteresis": "50 mV",
+          "response_time": "1-2 \u00b5s (lower bias, low-power operation)",
+          "applications": "Temperature/voltage threshold monitoring with low power",
+          "temperature_compensation": "offset and hysteresis temperature tracking <10\u00b5V/\u00b0C, <1%/\u00b0C gain variation",
+          "low_power_modes": "sleep mode with watchdog reset arm capability, wake-on-threshold interrupt"
+        },
+        "flash_converter": {
+          "comparator_array_size": "127 comparators for 7-bit",
+          "bias_shared": "Single bias generator with matched copy",
+          "hysteresis": "Programmable 0-50mV to avoid oscillation",
+          "applications": "Flash ADC with thermometric encoding and priority",
+          "thermometric_encoding": "All 128 one-hot outputs with thermometric-to-binary priority encoder",
+          "conversion_speed": "<5ns encode time from comparator settle to thermometric output ready",
+          "monotonicity": "Guaranteed monotonic code progression with no missing codes across all PVT corners"
+        }
+      },
+      "integration_example": {
+        "sar_adc_feedback": {
+          "description": "SAR ADC feedback path with tpd matching across 16-comparator array",
+          "specs": {
+            "feedback_delay_skew": "<0.5ns max (matched pair layout with common-centroid routing)",
+            "settling_window": "10ns with >0.1LSB accuracy at 16-bit resolution",
+            "comparator_array": "16 identical comparator cells with shared bias and offset trim",
+            "test_vectors": "Gray code, worst-case transitions (0\u21921, 15\u21920), monotonicity check"
+          }
+        },
+        "threshold_detection_bank": {
+          "description": "Multi-level threshold detection with 8-16 comparators and priority encoder",
+          "specs": {
+            "threshold_levels": "8 to 16 precision thresholds with independent hysteresis",
+            "priority_encoding": "Binary or thermometric output",
+            "detection_latency": "<100ns from threshold crossing to encoder output",
+            "example_use_case": "Over-voltage/under-voltage monitoring for multi-rail PMIC"
+          }
+        },
+        "rf_slicer_frontend": {
+          "description": "RF slicer with cascaded comparators for high-frequency data recovery (>100Mbps)",
+          "specs": {
+            "cascade_gain": "3-5 cascade stages for sub-100mV input signals",
+            "jitter": "<100ps RMS cumulative over cascade",
+            "frequency_range": "100Mbps to 500Mbps with <10% BER at 10dB margin",
+            "example_use_case": "Ethernet PHY receiver, CAN transceiver high-speed data path"
+          }
+        },
+        "precision_pmic_monitor": {
+          "description": "Precision supply/temperature monitoring with hysteresis and interrupt generation",
+          "specs": {
+            "monitoring_targets": "VCORE, VBAT, VAUX rails with individual thresholds",
+            "hysteresis": "50mV around thresholds to prevent chatter",
+            "response_time": "<10\u00b5s from threshold crossing to interrupt assertion",
+            "example_use_case": "Brown-out detection, over-voltage shutdown, thermal throttling"
+          }
+        },
+        "flash_converter_array": {
+          "description": "Flash converter with 127 or 255 comparator array (7-bit or 8-bit resolution)",
+          "specs": {
+            "conversion_time": "<10ns per flash encode cycle",
+            "thermometric_output": "One-hot encoding for lower glitch energy",
+            "binary_encoder": "Built-in priority encoder for address output",
+            "test_coverage": "All threshold transitions, monotonicity, missing codes"
+          }
+        },
+        "jitter_cleanup_pll": {
+          "description": "Comparator within PLL clock recovery loop with <50ps jitter contribution",
+          "specs": {
+            "loop_gain": "Optimized for <100ps RMS closed-loop jitter",
+            "propagation_delay": "<0.5ns for tight loop timing",
+            "example_use_case": "Ethernet PLL, USB transceiver, DDR PHY clock recovery"
+          }
+        }
+      },
+      "key": "high_speed_comparator",
+      "compatible": true
+    },
+    {
+      "name": "I2C Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "i2c_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "scl",
+        "sda",
+        "int_n"
+      ],
+      "aliases": [
+        "i2c",
+        "iic"
+      ],
+      "description": "I2C master/slave interface for sensor and peripheral communication.",
+      "role": "Provides inter-chip communication for multi-device sensor platforms.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "i2c_controller",
+      "compatible": true
+    },
+    {
+      "name": "I2S Audio Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "i2s_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "i2s_sclk",
+        "i2s_lrck",
+        "i2s_dout",
+        "i2s_din"
+      ],
+      "aliases": [
+        "i2s",
+        "pcm_interface",
+        "audio_interface"
+      ],
+      "description": "I2S/PCM digital audio interface for audio codecs and digital audio processing.",
+      "role": "Handles I2S protocol timing and data synchronization for audio streaming.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "i2s_audio_controller",
+      "compatible": true
+    },
+    {
+      "name": "I3C (Improved I2C) Controller",
+      "domain": "digital",
+      "category": "control",
+      "generator": "i3c_ctrl",
+      "ports": [
+        "clk",
+        "rst_n",
+        "i3c_scl",
+        "i3c_sda",
+        "i3c_sdr_mode",
+        "i3c_ddr_mode",
+        "int_n"
+      ],
+      "aliases": [
+        "i3c",
+        "mipi_i3c"
+      ],
+      "description": "MIPI I3C interface controller supporting both legacy I2C and high-speed DDR modes (up to 12.5 Mbps).",
+      "role": "Provides backward-compatible sensor interface with higher bandwidth and lower latency for IoT sensor hubs.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "i3c_controller",
+      "compatible": true
+    },
+    {
+      "name": "Inertial Measurement Unit Interface",
+      "domain": "mixed",
+      "category": "sense",
+      "generator": "imu_if",
+      "ports": [
+        "VDD",
+        "GND",
+        "I2C_SCL",
+        "I2C_SDA",
+        "IRQ",
+        "INT_SELECT",
+        "REG_ACCESS"
+      ],
+      "aliases": [
+        "imu",
+        "accelerometer_gyro"
+      ],
+      "description": "I2C interface controller for 3-axis accelerometer/gyroscope sensing with integrated interrupt processing.",
+      "role": "Integrates MEMS inertial sensors for motion detection, gesture recognition, and kinematic monitoring in mobile and IoT.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "imu_interface",
+      "compatible": true
+    },
+    {
+      "name": "Interrupt Controller",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "interrupt_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "int_req",
+        "int_mask",
+        "int_stat",
+        "int_prio"
+      ],
+      "aliases": [
+        "intc",
+        "irq_controller"
+      ],
+      "description": "Prioritized interrupt dispatcher for multi-source event handling.",
+      "role": "Arbitrates and prioritizes multiple interrupt sources to CPU.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "interrupt_controller",
+      "compatible": true
+    },
+    {
+      "name": "Isolated Gate Driver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "iso_gate_drv",
+      "ports": [
+        "VDD",
+        "VDD_ISO",
+        "GND",
+        "GND_ISO",
+        "IN",
+        "OUT",
+        "OUT_N"
+      ],
+      "aliases": [
+        "gate_driver",
+        "isolated_driver"
+      ],
+      "description": "Galvanically isolated MOSFET/IGBT gate driver for three-phase power conversion and switching.",
+      "role": "Provides high-side drive for power electronics while maintaining galvanic isolation to prevent ground loops.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "validation_coverage": [
+        "isolation voltage rating (600V, 1200V, 1500V per technology)",
+        "propagation delay matching <10ns skew (high vs low-side)",
+        "dead-time insertion 50ns-500ns with \u00b15ns resolution",
+        "short-circuit protection and current limiting",
+        "CMTI immunity >50V/ns",
+        "thermal performance under sustained switching"
+      ],
+      "generator_params": {
+        "gate_drive_current": "1-10A peak",
+        "dead_time_programmable": "50ns-500ns",
+        "isolation_barrier": "characterization"
+      },
+      "example_config": {
+        "output_current": "1A to 10A peak drive capability",
+        "dead_time": "50ns to 500ns programmable",
+        "isolation_type": "Capacitive or magnetic coupling"
+      },
+      "integration_example": {
+        "three_phase_inverter": "Three-phase inverter control with synchronized gate driving",
+        "sync_buck": "Synchronous buck converter with dead-time insertion and current limiting",
+        "isolated_boost": "Isolated boost conversion stages with isolation barrier"
+      },
+      "key": "isolated_gate_driver",
+      "compatible": true
+    },
+    {
+      "name": "Analog LDO",
+      "domain": "analog",
+      "category": "power",
+      "generator": "ldo_analog",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "ldo_ana"
+      ],
+      "description": "Regulated analog rail generator for sensor, reference, and interface domains.",
+      "role": "Creates a quiet analog rail from a higher-voltage source.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ldo_analog",
+      "compatible": true
+    },
+    {
+      "name": "Digital LDO",
+      "domain": "analog",
+      "category": "power",
+      "generator": "ldo_digital",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "ldo_dig"
+      ],
+      "description": "Low-noise regulator for digital core and control logic domains.",
+      "role": "Generates the digital core supply from the parent analog rail.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ldo_digital",
+      "compatible": true
+    },
+    {
+      "name": "LIN Rail LDO",
+      "domain": "analog",
+      "category": "power",
+      "generator": "ldo_lin",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "ldo_lin_driver"
+      ],
+      "description": "Automotive-facing regulator for LIN bus driver domains.",
+      "role": "Creates the LIN transceiver supply from VBAT or another HV source.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ldo_lin",
+      "compatible": true
+    },
+    {
+      "name": "LIN Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "lin_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "tx_req",
+        "rx_valid",
+        "baud_div"
+      ],
+      "aliases": [
+        "lin_protocol"
+      ],
+      "description": "Protocol state machine for LIN framing, timing, and control.",
+      "role": "Owns the LIN protocol engine and timing behavior.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lin_controller",
+      "compatible": true
+    },
+    {
+      "name": "LIN Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "lin_transceiver",
+      "ports": [
+        "VBAT",
+        "VDD5",
+        "VDDIO",
+        "GND",
+        "TXD",
+        "RXD",
+        "LIN",
+        "EN"
+      ],
+      "aliases": [
+        "lin_tx_rx",
+        "lin_txrx"
+      ],
+      "description": "Mixed-signal LIN physical interface with driver and receiver paths.",
+      "role": "Bridges digital control signals to the automotive LIN bus and back.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lin_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "Low-Pass Filter",
+      "domain": "analog",
+      "category": "filter",
+      "generator": "lpf_rc",
+      "ports": [
+        "VIN",
+        "VOUT",
+        "GND"
+      ],
+      "aliases": [
+        "lpf",
+        "rc_filter"
+      ],
+      "description": "RC low-pass filter for noise rejection and anti-aliasing.",
+      "role": "Attenuates high-frequency noise before ADC input or sensitive analog nodes.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "low_pass_filter",
+      "compatible": true
+    },
+    {
+      "name": "LVDS Driver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "lvds_driver",
+      "ports": [
+        "VDD",
+        "VDD_IO",
+        "GND",
+        "LVDS_P",
+        "LVDS_N",
+        "SIGNAL_IN"
+      ],
+      "aliases": [
+        "lvds",
+        "differential_driver"
+      ],
+      "description": "Low-voltage differential signaling driver for noise-immune high-speed interfaces.",
+      "role": "Drives differential signals for low-noise communication across chip boundaries.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lvds_driver",
+      "compatible": true
+    },
+    {
+      "name": "LVDS Receiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "lvds_receiver",
+      "ports": [
+        "VDD",
+        "VDD_IO",
+        "GND",
+        "LVDS_P",
+        "LVDS_N",
+        "SIGNAL_OUT"
+      ],
+      "aliases": [
+        "lvds_rx",
+        "differential_receiver"
+      ],
+      "description": "Low-voltage differential signaling receiver for noise-immune high-speed interfaces.",
+      "role": "Receives and recovers differential signals for low-noise communication across chip boundaries and backplanes.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "validation_coverage": [
+        "threshold margin sweep: minimum 100mV differential detection, typical 200mV, maximum 400mV threshold",
+        "eye diagram analysis: 1MHz to 3.2Gbps data rates with eye opening >30%, 1M-sample minimum acquisitions",
+        "input impedance matching: 100\u03a9 nominal differential with \u00b110% tolerance and frequency-dependent analysis",
+        "CMTI (common-mode transient immunity): >50V/ns with false trigger detection across -10 to +10V/ns",
+        "jitter transfer: <0.3 transfer function at data rate frequency, <50ps accumulation in cascaded chains",
+        "propagation delay: 0.5-2ns typical across PVT corners with <100ps skew between P and N channels",
+        "common-mode input range: -0.5V to +3.5V without loss of sensitivity or false triggering",
+        "differential input range: 100mV (minimum) to 1V (maximum) with no cross-talk between channels",
+        "AC coupling performance: high-pass cutoff >1MHz with coupling capacitor variations",
+        "termination impedance: 100\u03a9 characteristic (series termination) or 100\u03a9 parallel (AC-coupled endpoint)",
+        "simultaneous switching noise (SSN): <10mV peak noise injection with 100ps pulse, no logic errors",
+        "electrostatic discharge (ESD): >2kV HBM with integrated clamping on differential pair",
+        "temperature-dependent behavior: propagation delay variation <100ps from -40 to +125\u00b0C",
+        "multi-lane phase alignment: <50ps maximum skew for N-channel receiver arrays in parallel applications"
+      ],
+      "generator_params": {
+        "data_rate_support": [
+          "155Mbps",
+          "250Mbps",
+          "500Mbps",
+          "1Gbps",
+          "2.5Gbps",
+          "3.125Gbps",
+          "3.2Gbps"
+        ],
+        "receiver_architecture": [
+          "latch-based",
+          "voltage-comparator-based",
+          "dynamic-latch"
+        ],
+        "threshold_setting": "Fixed 100mV or programmable 50-400mV with DAC trim",
+        "jitter_tolerance": "<200ps RMS at rated data rate",
+        "propagation_delay": "<2ns maximum with <100ps skew matched pair",
+        "common_mode_range": "-0.5V to +3.5V without threshold shift",
+        "differential_input_impedance": "100\u03a9 nominal with \u00b110% variation acceptance",
+        "output_swing": "Rail-to-rail (0V to VDD) full logic swing",
+        "multi_channel_support": "1 to 8 parallel receivers with shared bias and matched delay",
+        "input_coupling": [
+          "AC-coupled-highpass",
+          "DC-coupled",
+          "back-termination"
+        ],
+        "output_buffer_drive": "High-speed CMOS inverter with 50-200\u00b5A current capability",
+        "mixed_signal_robust_features": {
+          "process_corner_tuning": "Threshold trim across fast/slow corners with \u00b150mV offset correction and DAC-based programming",
+          "temperature_compensation": "Receiver propagation delay compensated -40\u00b0C to +125\u00b0C with <100ps variation using on-die temperature sensor feedback",
+          "supply_voltage_correction": "VDD sensitivity <0.5ps per 1% rail variation, adaptive bias current for threshold centering",
+          "crosstalk_mitigation": "Differential pair routing with Kelvin sense and per-lane capacitive coupling cancellation up to 10% parasitic",
+          "jitter_optimization": "Output buffer slew rate tuning (100ps-1ns transition time) to minimize accumulated jitter in cascaded arrays"
+        }
+      },
+      "example_config": {
+        "gigabit_ethernet_receiver": {
+          "data_rate": "1Gbps",
+          "differential_input": "100mV to 400mV threshold sweep",
+          "propagation_delay": "<1.5ns",
+          "jitter_tolerance": "<150ps RMS",
+          "common_mode_range": "0V to 3.3V",
+          "impedance_matching": "100\u03a9 differential with series termination",
+          "applications": "Gigabit Ethernet PHY, backplane interfaces"
+        },
+        "pci_express_gen1_receiver": {
+          "data_rate": "2.5Gbps per lane",
+          "threshold_programmable": "50mV to 200mV step tuning",
+          "jitter_tolerance": "<200ps RMS",
+          "multi_channel": "4-16 parallel lanes with <50ps skew",
+          "eye_diagram_margin": ">30% horizontal, >25% vertical",
+          "applications": "PCIe Gen1 transceiver, high-speed backplane"
+        },
+        "fiber_optic_receiver_front_end": {
+          "data_rate": "155Mbps to 1Gbps per channel",
+          "ac_coupled_input": "1MHz high-pass filter with coupling capacitor",
+          "common_mode_bias": "Biased to mid-supply with AC coupling",
+          "propagation_delay": "<2ns for phase alignment",
+          "applications": "Optical transceiver frontend, fiber-optic links"
+        },
+        "lvds_clock_recovery": {
+          "data_rate": "500Mbps to 3.2Gbps",
+          "low_jitter_priority": "Optimized for <50ps jitter contribution",
+          "phase_alignment": "Within 10ps across 8-lane array",
+          "programmable_threshold": "DAC-controlled 100-300mV range",
+          "applications": "Clock recovery, CDR (Clock Data Recovery) frontend"
+        }
+      },
+      "integration_example": {
+        "high_speed_backplane_interface": {
+          "description": "Multi-lane LVDS receiver array for backplane differential signaling",
+          "specs": {
+            "channel_count": "4 to 16 parallel LVDS receivers",
+            "data_rate": "1-3.2Gbps per channel",
+            "propagation_delay_matching": "<50ps maximum skew across all lanes",
+            "common_clock_interface": "Shared clock generation with per-lane phase adjustment",
+            "example_use_case": "Mid-plane backplane, high-end networking, military avionics"
+          }
+        },
+        "gigabit_ethernet_phy": {
+          "description": "LVDS receiver as core component of Gigabit Ethernet PHY for MDI interface",
+          "specs": {
+            "IEEE_standard": "IEEE 802.3 1000Base-T compliant",
+            "data_rate": "125Mbps symbol rate (1Gbps effective with 8B/10B)",
+            "eye_diagram_standard": "IEEE 802.3 Template compliance with >30% margin",
+            "threshold_adaptation": "Programmable threshold for eye-opening optimization",
+            "example_use_case": "Gigabit Ethernet switch, router, industrial gateway"
+          }
+        },
+        "clock_data_recovery_loop": {
+          "description": "LVDS receiver within CDR feedback loop for jitter cleanup",
+          "specs": {
+            "closed_loop_jitter": "<50ps RMS with <100ps peak deviation",
+            "data_rate": "500Mbps to 2.5Gbps",
+            "loop_bandwidth": "1-10MHz for jitter transfer optimization",
+            "phase_lock_time": "<100ns acquisition time",
+            "example_use_case": "Fiber optic receiver, high-speed serial links, DDR PHY"
+          }
+        },
+        "pcie_lane_receiver": {
+          "description": "Multi-lane LVDS receiver for PCIe physical layer interface",
+          "specs": {
+            "pcie_generation": "Gen1 (2.5Gbps), Gen2 (5Gbps) capable",
+            "lane_width": "4 to 16 parallel receivers",
+            "eye_diagram_margin": ">30% H-margin, >25% V-margin per PCIe spec",
+            "phase_alignment": "Within 10ps skew for symbol timing",
+            "example_use_case": "PCIe Gen1 endpoint, root complex, switch fabric"
+          }
+        },
+        "differential_front_panel_interface": {
+          "description": "AC-coupled LVDS receiver for externally connectorized differential signals",
+          "specs": {
+            "ac_coupling": "High-pass 1MHz cutoff for DC-blocking",
+            "common_mode_bias": "On-die bias network for AC-coupled inputs",
+            "termination": "Optional integrated parallel 100\u03a9 termination on input",
+            "overcurrent_protection": "Series source impedance limiting",
+            "example_use_case": "Instrument interfaces, industrial sensors, automotive diagnostics"
+          }
+        },
+        "test_point_analog_mux": {
+          "description": "LVDS receiver with optional analog multiplexer for multi-signal monitoring",
+          "specs": {
+            "channel_count": "4-8 multiplexed LVDS inputs",
+            "switch_time": "<100ns for channel selection and settling",
+            "threshold_programmable": "Per-channel threshold calibration",
+            "example_use_case": "Production test, debug probe, multi-signal oscilloscope input"
+          }
+        }
+      },
+      "key": "lvds_receiver",
+      "compatible": true
+    },
+    {
+      "name": "Memory Compiler",
+      "domain": "digital",
+      "category": "storage",
+      "generator": "memory_compiler",
+      "ports": [
+        "clk",
+        "rst_n",
+        "addr",
+        "din",
+        "dout",
+        "wr_en",
+        "rd_en"
+      ],
+      "aliases": [
+        "sram",
+        "memory"
+      ],
+      "description": "Embedded SRAM macro for configuration and data storage.",
+      "role": "Provides local storage for register settings, calibration, and runtime state.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "memory_compiler",
+      "compatible": true
+    },
+    {
+      "name": "NFC/RFID Controller",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "nfc_ctrl",
+      "ports": [
+        "VDD",
+        "GND",
+        "ANT_P",
+        "ANT_N",
+        "UART_TX",
+        "UART_RX",
+        "IRQ"
+      ],
+      "aliases": [
+        "nfc",
+        "rfid"
+      ],
+      "description": "NFC Type 2/3 and ISO14443-A compliant RFID/NFC controller for proximity and short-range communication.",
+      "role": "Enables wireless identification, authentication, and contactless data exchange for payment, access control, and asset tracking.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "nfc_controller",
+      "compatible": true
+    },
+    {
+      "name": "Operational Amplifier",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "opamp",
+      "ports": [
+        "VDD",
+        "VSS",
+        "VIN_P",
+        "VIN_N",
+        "VOUT",
+        "VBIAS"
+      ],
+      "aliases": [
+        "opamp",
+        "op_amp"
+      ],
+      "description": "Reusable operational amplifier macro for instrumentation and filtering.",
+      "role": "Provides high-gain analog signal processing for sensor conditioning.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "operational_amplifier",
+      "compatible": true
+    },
+    {
+      "name": "Phase-Locked Loop",
+      "domain": "mixed",
+      "category": "sequencing",
+      "generator": "pll",
+      "ports": [
+        "VDD",
+        "GND",
+        "REF_CLK",
+        "FEEDBACK_CLK",
+        "CLK_OUT",
+        "LOCK_DETECT",
+        "DIV_RATIO"
+      ],
+      "aliases": [
+        "pll_macro"
+      ],
+      "description": "Phase-locked loop for clock multiplication and jitter reduction.",
+      "role": "Multiplies reference clock to higher frequencies with reduced jitter.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "pll",
+      "compatible": true
+    },
+    {
+      "name": "Precision Voltage Reference",
+      "domain": "analog",
+      "category": "reference",
+      "generator": "precision_vref",
+      "ports": [
+        "VDD",
+        "GND",
+        "VREF",
+        "EN"
+      ],
+      "aliases": [
+        "vref",
+        "precision_ref"
+      ],
+      "description": "High-accuracy voltage reference for data converters and comparators.",
+      "role": "Provides calibrated reference voltage for precision analog circuits.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "precision_voltage_reference",
+      "compatible": true
+    },
+    {
+      "name": "PROFIBUS Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "profibus_txrx",
+      "ports": [
+        "VDD",
+        "GND",
+        "TXD",
+        "RXD",
+        "PROFIBUS_P",
+        "PROFIBUS_N",
+        "EN",
+        "DE"
+      ],
+      "aliases": [
+        "profibus",
+        "profibus_phy"
+      ],
+      "description": "PROFIBUS PA/DP physical layer transceiver for industrial fieldbus communication.",
+      "role": "Bridges digital PROFIBUS protocol signals to industrial PROFIBUS fieldbus for distributed process control.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "validation_coverage": [
+        "baud rate accuracy 9.6kbps to 12Mbps (\u00b15% tolerance)",
+        "differential signal swing \u00b1900mV to \u00b11200mV",
+        "driver slew rate limiting (10-30V/\u00b5s for EMI control)",
+        "receiver hysteresis and threshold margins",
+        "CRC validation (CCITT-16 polynomial)",
+        "electromagnetic immunity verification"
+      ],
+      "generator_params": {
+        "baud_rates": "9.6k to 12M bps",
+        "failsafe_biasing": [
+          "390\u03a9",
+          "680\u03a9"
+        ],
+        "slew_rate_tuning": "10-30V/\u00b5s"
+      },
+      "example_config": {
+        "baud_rate": "9.6k, 19.2k, 93.75k, 187.5k, 500k, 1.5M, 3M, 6M, 12M bps",
+        "termination": "Integrated 390\u03a9/680\u03a9 failsafe resistors",
+        "slew_rate": "10 V/\u00b5s to 30 V/\u00b5s programmable"
+      },
+      "integration_example": {
+        "profibus_slave": "PROFIBUS DP/PA slave nodes with token passing and messaging",
+        "distributed_control": "Distributed control systems with multi-master arbitration",
+        "automation_networks": "Industrial automation networks with failsafe biasing and EMC immunity"
+      },
+      "key": "profibus_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "Programmable Gain Amplifier",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "pga",
+      "ports": [
+        "VDD",
+        "GND",
+        "VIN_P",
+        "VIN_N",
+        "VOUT",
+        "GAIN_SEL",
+        "VBIAS"
+      ],
+      "aliases": [
+        "pga",
+        "variable_gain_amp"
+      ],
+      "description": "Instrumentation amplifier with programmable gain for flexible sensor signal conditioning.",
+      "role": "Amplifies small sensor signals with software-selectable gain and high CMRR.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "programmable_gain_amplifier",
+      "compatible": true
+    },
+    {
+      "name": "PWM Generator Controller",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "pwm_gen",
+      "ports": [
+        "clk",
+        "rst_n",
+        "duty_code",
+        "freq_sel",
+        "pwm_out",
+        "pwm_n_out"
+      ],
+      "aliases": [
+        "pwm",
+        "pulse_width_mod"
+      ],
+      "description": "Programmable PWM generator with complementary output support for motor and converter drive.",
+      "role": "Generates synchronized PWM signals for power electronics control with adjustable frequency and dead-time.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "pwm_controller",
+      "compatible": true
+    },
+    {
+      "name": "Qi Wireless Power Receiver",
+      "domain": "mixed",
+      "category": "power",
+      "generator": "qi_rx",
+      "ports": [
+        "VDD_RECT",
+        "VDD_DIGITAL",
+        "GND",
+        "COIL_P",
+        "COIL_N",
+        "COMM",
+        "STATUS"
+      ],
+      "aliases": [
+        "qi_receiver",
+        "wireless_charging"
+      ],
+      "description": "Wireless power receiver controller for Qi standard charging (5W-15W) with foreign object detection.",
+      "role": "Enables wireless charging capability for portable IoT devices with automated power negotiation and safety.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "qi_wireless_rx",
+      "compatible": true
+    },
+    {
+      "name": "Register File",
+      "domain": "digital",
+      "category": "control",
+      "generator": "register_file",
+      "ports": [
+        "clk",
+        "rst_n",
+        "wr_en",
+        "addr",
+        "wdata",
+        "rdata"
+      ],
+      "aliases": [
+        "registers",
+        "reg_file"
+      ],
+      "description": "Central register bank for configuration, status, and trim control.",
+      "role": "Holds chip configuration state and status visibility.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "register_file",
+      "compatible": true
+    },
+    {
+      "name": "Reset Generator",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "reset_gen",
+      "ports": [
+        "VDD",
+        "GND",
+        "EXT_RST_N",
+        "RST_N_OUT",
+        "POR_N"
+      ],
+      "aliases": [
+        "reset_logic",
+        "por_generator"
+      ],
+      "description": "Power-on reset and watchdog reset sequencer with debouncing.",
+      "role": "Generates robust reset signals synchronized to power-up and watchdog events.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "reset_generator",
+      "compatible": true
+    },
+    {
+      "name": "RF Front-End Module",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "rf_frontend",
+      "ports": [
+        "VDD",
+        "VDD_RF",
+        "GND",
+        "RF_IN",
+        "RF_OUT",
+        "LNA_EN",
+        "PA_EN",
+        "TX_RX_SEL"
+      ],
+      "aliases": [
+        "rf_fe",
+        "lna_pa"
+      ],
+      "description": "Integrated low-noise amplifier (LNA) and power amplifier (PA) front-end for multi-band RF systems.",
+      "role": "Provides high-gain, low-noise reception and high-power transmission for cellular, WLAN, and satellite IoT.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "rf_front_end",
+      "compatible": true
+    },
+    {
+      "name": "Ring Oscillator",
+      "domain": "analog",
+      "category": "sequencing",
+      "generator": "ring_oscillator",
+      "ports": [
+        "VDD",
+        "GND",
+        "EN",
+        "CLK_OUT",
+        "FREQ_TRIM"
+      ],
+      "aliases": [
+        "osc",
+        "ring_osc"
+      ],
+      "description": "On-chip ring oscillator for internal clock generation.",
+      "role": "Generates primary system clock using delay chain oscillation for standalone operation.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "ring_oscillator",
+      "compatible": true
+    },
+    {
+      "name": "RS-485 Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "rs485_txrx",
+      "ports": [
+        "VDD",
+        "GND",
+        "TXD",
+        "RXD",
+        "A",
+        "B",
+        "DE",
+        "RE_N"
+      ],
+      "aliases": [
+        "rs485",
+        "half_duplex_phy"
+      ],
+      "description": "Isolated or non-isolated RS-485 bus transceiver for long-distance serial communication.",
+      "role": "Bridges digital UART signals to industrial RS-485 bus with integrated line termination options.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "rs485_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "Sample and Hold Frontend",
+      "domain": "analog",
+      "category": "converter",
+      "source": "examples/adc/sample_hold_cmos.spice",
+      "ports": [],
+      "aliases": [
+        "sample_hold"
+      ],
+      "description": "Reusable sample-and-hold front-end stage for ADC assembly.",
+      "role": "Captures the analog input and holds it stable for conversion.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sample_hold_frontend",
+      "compatible": true
+    },
+    {
+      "name": "SAR ADC Top",
+      "domain": "mixed",
+      "category": "converter",
+      "source": "examples/standard_circuits/sar_adc.spice",
+      "ports": [],
+      "aliases": [
+        "sar_adc"
+      ],
+      "description": "Top-level successive-approximation ADC reference implementation.",
+      "role": "Provides a reusable sampled-data converter macro for sensor or monitor chips.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "verification": {
+        "case_id": "TOP-SAR-ADC",
+        "category": "Top",
+        "standard": "Internal ADC architecture spec",
+        "description": "Top-level transient snapshot for the imported SAR ADC reference design.",
+        "analysis": "transient",
+        "settings": {
+          "tstop": 0.0001,
+          "tstep": 1e-07
+        },
+        "checks": [
+          {
+            "type": "has_key",
+            "key": "V(analog_in)",
+            "description": "Analog input waveform captured"
+          },
+          {
+            "type": "has_any_key",
+            "keys": [
+              "V(dac_out)",
+              "V(sh_out)",
+              "V(comp_out)"
+            ],
+            "description": "Internal SAR conversion nodes are present"
+          },
+          {
+            "type": "min_length",
+            "key": "time",
+            "min": 100,
+            "description": "Transient simulation produced enough samples"
+          }
+        ]
+      },
+      "key": "sar_adc_top",
+      "compatible": true
+    },
+    {
+      "name": "SHA Hash Accelerator",
+      "domain": "digital",
+      "category": "security",
+      "generator": "sha_accel",
+      "ports": [
+        "clk",
+        "rst_n",
+        "din",
+        "dout",
+        "hash_sel",
+        "mode_sel",
+        "valid_in",
+        "valid_out",
+        "ready"
+      ],
+      "aliases": [
+        "sha",
+        "hash_accel"
+      ],
+      "description": "Hardware SHA-256/512 hash computation accelerator for integrity verification and authentication.",
+      "role": "Accelerates cryptographic hashing for secure boot, firmware verification, and authentication protocols.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "sha_accelerator",
+      "compatible": true
+    },
+    {
+      "name": "Sigma-Delta ADC Top",
+      "domain": "mixed",
+      "category": "converter",
+      "source": "examples/standard_circuits/sigma_delta_adc.spice",
+      "ports": [],
+      "aliases": [
+        "sigma_delta_adc"
+      ],
+      "description": "Top-level sigma-delta ADC reference implementation.",
+      "role": "Provides an oversampled converter macro for sensing and monitoring chips.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "verification": {
+        "case_id": "TOP-SIGMA-DELTA-ADC",
+        "category": "Top",
+        "standard": "Internal ADC architecture spec",
+        "description": "Top-level transient snapshot for the imported Sigma-Delta ADC reference design.",
+        "analysis": "transient",
+        "settings": {
+          "tstop": 0.002,
+          "tstep": 1e-07
+        },
+        "checks": [
+          {
+            "type": "has_key",
+            "key": "V(analog_in)",
+            "description": "Analog input waveform captured"
+          },
+          {
+            "type": "has_key",
+            "key": "V(bitstream)",
+            "description": "Modulator bitstream is present"
+          },
+          {
+            "type": "has_any_key",
+            "keys": [
+              "V(dec_filt)",
+              "V(fb_dac)",
+              "V(int_out)"
+            ],
+            "description": "Internal sigma-delta nodes are present"
+          },
+          {
+            "type": "min_length",
+            "key": "time",
+            "min": 1000,
+            "description": "Transient simulation produced enough samples"
+          }
+        ]
+      },
+      "key": "sigma_delta_adc_top",
+      "compatible": true
+    },
+    {
+      "name": "Slew-Rate Limited Output Buffer",
+      "domain": "analog",
+      "category": "interface",
+      "generator": "slew_limiter",
+      "ports": [
+        "VDD",
+        "GND",
+        "IN",
+        "OUT",
+        "SLEW_CTRL"
+      ],
+      "aliases": [
+        "slew_buf",
+        "soft_start_buf"
+      ],
+      "description": "Output buffer with programmable slew-rate limiting for EMI reduction.",
+      "role": "Limits dI/dt and dV/dt on outputs to reduce radiated and conducted emissions.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "slew_rate_limiter",
+      "compatible": true
+    },
+    {
+      "name": "SPI Controller",
+      "domain": "digital",
+      "category": "control",
+      "generator": "spi_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "sclk",
+        "mosi",
+        "miso",
+        "cs_n"
+      ],
+      "aliases": [
+        "spi"
+      ],
+      "description": "Register access path for software-programmable mixed-signal chips.",
+      "role": "Provides serial register access into the chip control plane.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "spi_controller",
+      "compatible": true
+    },
+    {
+      "name": "Temperature Sensor",
+      "domain": "analog",
+      "category": "sense",
+      "generator": "temperature_sensor",
+      "ports": [
+        "VDD",
+        "GND",
+        "TEMP_OUT",
+        "EN"
+      ],
+      "aliases": [
+        "temp_sensor",
+        "temp_mon"
+      ],
+      "description": "On-die temperature sensor for thermal monitoring and protection.",
+      "role": "Provides die temperature feedback for power sequencing and thermal shutdown.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "temperature_sensor",
+      "compatible": true
+    },
+    {
+      "name": "Trim Circuit",
+      "domain": "analog",
+      "category": "bias",
+      "generator": "trim_circuit",
+      "ports": [
+        "VDD",
+        "GND",
+        "TRIM_CODE",
+        "VREF_TUNED"
+      ],
+      "aliases": [
+        "trim",
+        "tuning_circuit"
+      ],
+      "description": "Programmable resistor ladder for analog parameter tuning.",
+      "role": "Provides post-silicon trimming capability for reference, bias, and threshold tuning.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "trim_circuit",
+      "compatible": true
+    },
+    {
+      "name": "True Random Number Generator",
+      "domain": "analog",
+      "category": "security",
+      "generator": "trng",
+      "ports": [
+        "VDD",
+        "GND",
+        "RND_OUT",
+        "RND_VALID",
+        "EN",
+        "TEST_MODE"
+      ],
+      "aliases": [
+        "trng",
+        "rng"
+      ],
+      "description": "Entropy-based true random number generator for cryptographic key generation and nonce production.",
+      "role": "Provides non-predictable random numbers for cryptographic operations, ensuring security of random key generation.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "true_random_number_generator",
+      "compatible": true
+    },
+    {
+      "name": "UART Controller",
+      "domain": "digital",
+      "category": "protocol",
+      "generator": "uart_controller",
+      "ports": [
+        "clk",
+        "rst_n",
+        "tx",
+        "rx",
+        "cts_n",
+        "rts_n"
+      ],
+      "aliases": [
+        "uart",
+        "serial"
+      ],
+      "description": "UART/serial interface for host communication.",
+      "role": "Provides serial debug and data port to external host or console.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "uart_controller",
+      "compatible": true
+    },
+    {
+      "name": "Ultra-Wideband Transceiver",
+      "domain": "mixed",
+      "category": "interface",
+      "generator": "uwb_txrx",
+      "ports": [
+        "VDD",
+        "VDD_IO",
+        "GND",
+        "RF_P",
+        "RF_N",
+        "SPI_CLK",
+        "SPI_MOSI",
+        "SPI_MISO",
+        "SPI_CS",
+        "IRQ"
+      ],
+      "aliases": [
+        "uwb",
+        "ultra_wideband"
+      ],
+      "description": "Ultra-wideband RF transceiver for high-precision ranging and localization (IEEE 802.15.4z).",
+      "role": "Enables indoor positioning, asset localization, and secure communication for industrial IoT and consumer devices.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "uwb_transceiver",
+      "compatible": true
+    },
+    {
+      "name": "Voltage Ladder DAC",
+      "domain": "analog",
+      "category": "converter",
+      "source": "examples/adc/dac_string.spice",
+      "ports": [],
+      "aliases": [
+        "string_dac",
+        "resistor_ladder"
+      ],
+      "description": "String DAC for programmable reference and bias generation.",
+      "role": "Converts digital codes into precision analog voltage levels via resistor divider.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "voltage_ladder_dac",
+      "compatible": true
+    },
+    {
+      "name": "Watchdog Timer",
+      "domain": "digital",
+      "category": "sequencing",
+      "generator": "watchdog_timer",
+      "ports": [
+        "clk",
+        "rst_n",
+        "wd_en",
+        "wd_kick",
+        "wd_rst_n"
+      ],
+      "aliases": [
+        "watchdog",
+        "wdt"
+      ],
+      "description": "System watchdog for fault detection and recovery.",
+      "role": "Monitors system health and forces reset on timeout for robustness.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "watchdog_timer",
+      "compatible": true
+    }
+  ],
+  "verification_ips": [
+    {
+      "name": "ADC Linearity VIP",
+      "protocol": "Converter linearity",
+      "checks": [
+        "INL/DNL analysis",
+        "code histogram",
+        "missing codes",
+        "monotonicity"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates ADC linearity through INL/DNL computation and code transition analysis.",
+      "key": "adc_linearity_vip"
+    },
+    {
+      "name": "ADC Transient VIP",
+      "protocol": "Converter transient",
+      "checks": [
+        "input stimulus",
+        "internal decision nodes",
+        "bitstream or DAC activity"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates converter activity over a sampled-data transient window.",
+      "key": "adc_transient_vip"
+    },
+    {
+      "name": "Analog Snapshot VIP",
+      "protocol": "Analog snapshot",
+      "checks": [
+        "waveform presence",
+        "minimum sample count",
+        "tracked node visibility"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Turns a block verification spec into a normalized regression artifact.",
+      "key": "analog_snapshot_vip"
+    },
+    {
+      "name": "Bluetooth Low Energy VIP",
+      "protocol": "BLE 5.0",
+      "checks": [
+        "advertising sequence",
+        "connection establishment",
+        "attribute exchange",
+        "security handshake"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates BLE radio operation, advertising, connection, and security procedures.",
+      "key": "ble_vip"
+    },
+    {
+      "name": "Battery Management System VIP",
+      "protocol": "Battery monitoring",
+      "checks": [
+        "cell voltage monitoring",
+        "temperature thresholds",
+        "charge balancing",
+        "fault detection"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates battery management including cell monitoring, protection thresholds, and fault handling.",
+      "key": "bms_vip"
+    },
+    {
+      "name": "CAN Verification IP",
+      "protocol": "CAN",
+      "checks": [
+        "arbitration",
+        "frame format",
+        "bit stuffing",
+        "CRC validation",
+        "acknowledgment"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates CAN 2.0 protocol compliance, messaging, and bus arbitration.",
+      "key": "can_vip"
+    },
+    {
+      "name": "CANopen VIP",
+      "protocol": "CANopen",
+      "checks": [
+        "CAN frame structure (CAN 2.0A/2.0B)",
+        "SDO transfer sequence (download/upload, expedited/segmented)",
+        "PDO mapping and triggering",
+        "NMT state machine (BOOT -> OPERATIONAL -> STOPPED)",
+        "heartbeat producer/consumer timing",
+        "emergency (EMCY) message generation",
+        "synchronization (SYNC) frame handling",
+        "arbitration field collision resolution",
+        "transceiver differential signaling integrity",
+        "error frame detection and transmission"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates CANopen protocol stack including object dictionary access, state management, signal integrity, and automotive-grade timing compliance.",
+      "design_scenarios": [
+        "SDO download with segmented transfer (16-byte chunks) and abort sequence",
+        "PDO event-triggered transmission with 1ms time window",
+        "NMT master commanding all nodes to START with 10ms guard time",
+        "Heartbeat timeout simulation with node recovery",
+        "EMCY message priority transmission over normal PDO traffic",
+        "SYNC frame with synchronized PDO response within 10\u00b5s window",
+        "Arbitration with 11-bit identifier collision and priority resolution",
+        "Bus-off error state recovery after 128 error frames",
+        "Multi-node heartbeat network with 8 nodes at 100ms intervals"
+      ],
+      "enhanced_scenarios": [
+        "SDO download transfer: 4-byte expedited mode, 16-byte segmented chunks with block acknowledge",
+        "SDO upload sequence: toggle bit alternation, 7-byte data per segment with CRC validation",
+        "PDO event-triggered transmission: 1ms synchronization window with jitter <100\u00b5s across 10 PDO cycles",
+        "PDO mapping: 8 different object entries mapped to single PDO with consistent transmission timing",
+        "NMT state transitions: BOOT->PRE_OPERATIONAL->OPERATIONAL->STOPPED with guard time enforcement",
+        "NMT reset: cold-start (80) and warm-start (81) with heartbeat producer recovery <100ms",
+        "heartbeat timeout simulation: producer misses beat with consumer detection <200ms beyond timeout",
+        "heartbeat network: 8-node multi-master with independent 100ms intervals and collision arbitration",
+        "EMCY message generation: CAN priority 0x80+node_id with emergency code and manufacturer fields",
+        "SYNC frame transmission: periodic 1ms frame with PDO synchronization response <10\u00b5s skew",
+        "SYNC producer multi-consumer: single SYNC frame triggers synchronized PDO from 8 nodes",
+        "Arbitration collision: 11-bit CAN ID collision with lower-ID node winning transmission (CAN protocol)",
+        "Error frame detection: reception of error frame stops current transmission and triggers bus recovery",
+        "Bus-off recovery: after 128 error frames, node enters bus-off state with 128 message cycle reset",
+        "Cyclic messaging: 100 consecutive CAN frames at 1Mbps with no frame loss or bit errors"
+      ],
+      "mixed_signal_regressions": [
+        "transceiver differential signaling: 100-400mV threshold sweep with 10% margin measurement",
+        "CAN bit timing: \u00b15% tolerance verification across -40\u00b0C to +85\u00b0C operating range",
+        "recessive to dominant transition: <1\u00b5s rise time with no overshoot >10% VDOM",
+        "common-mode transient immunity: 50V/\u00b5s injection with protocol recovery <1 bit period",
+        "electromagnetic immunity: 1-400MHz RF field injection per ISO 7637 automotive standard",
+        "supply voltage sensitivity: \u00b110% VBAT variation with bit timing and threshold margin effects",
+        "ground coupling: simultaneous TX/RX with crosstalk and jitter measurement",
+        "temperature drift: bit timing error accumulation from -40\u00b0C to +125\u00b0C ramp",
+        "frequency accuracy: crystal oscillator \u00b1500ppm drift over calendar month simulation",
+        "simultaneous 8-node arbitration: collision-free arbitration with lowest ID winning at 1Mbps"
+      ],
+      "protocol_scenarios": [
+        "sdo_expedited_download: 4-byte data transfer in single SDO DOWNLOAD INITIATE, toggle bit toggle on next transfer",
+        "sdo_segmented_upload: multi-segment file read with 7-byte chunks, toggle bit alternation, CRC validation per segment",
+        "pdo_event_triggered: event-flag set triggers immediate PDO transmission, jitter <100\u00b5s over 10 consecutive events",
+        "pdo_time_triggered: fixed 10ms SYNC interval with PDO response synchronized within \u00b110\u00b5s window",
+        "nmt_state_transitions: BOOT->PRE_OP->OPERATIONAL->STOPPED with proper command codes (0x01, 0x80, 0x81)",
+        "heartbeat_timeout_recovery: producer misses heartbeat, consumer detects within 200ms and signals error",
+        "emcy_priority_transmission: EMERGENCY message interrupts normal PDO traffic, transmitted with highest CAN ID priority",
+        "arbitration_collision: 11-bit ID collision resolved by CAN arbitration (lower ID wins) within <8\u00b5s settling",
+        "error_frame_recovery: reception of ERROR FRAME stops transmission and initiates bus recovery sequence",
+        "bus_off_to_recovery: 128 consecutive error frames trigger BUS_OFF state, cycling through 11 bit times for recovery"
+      ],
+      "validation_coverage": [
+        "can_frame_structure: 11-bit standard ID or 29-bit extended ID, 0-8 bytes data, CRC, ACK, EOF per ISO 11898-1",
+        "arbitration_mechanism: lower CAN ID has higher priority, collision resolution <8\u00b5s, no frame corruption",
+        "sdo_toggle_bit_protocol: toggle bit (bit 4 of SDO header byte) alternates per segment for synchronization",
+        "pdo_timing_accuracy: SYNC-triggered PDO response within \u00b110\u00b5s, event-triggered latency <100\u00b5s from event flag",
+        "nmt_guard_time_enforcement: transmit timeout guard >2\u00d7 producer heartbeat interval for NMT recovery",
+        "bit_timing_accuracy: sample point 75-85% of bit time, \u00b15% overall tolerance across -40 to +85\u00b0C",
+        "receiver_threshold: 200-400mV differential voltage detection with >100mV hysteresis for noise immunity",
+        "error_state_machine: ERROR_ACTIVE (0 errors), ERROR_PASSIVE (>127 errors), BUS_OFF (>255 errors) state transitions",
+        "recovery_sequence: BUS_OFF recovery requires 11 consecutive bit times of dominant recessive pattern observation",
+        "network_arbitration_latency: multi-node arbitration completion <8\u00b5s for 8-node network at 1Mbps CAN speed"
+      ],
+      "key": "canopen_vip"
+    },
+    {
+      "name": "Clock Gating VIP",
+      "protocol": "Clock gating control",
+      "checks": [
+        "gating latency from enable to clock shutdown (<2ns typ)",
+        "enable signal synchronization to clock edge",
+        "glitch immunity (no spurious clock edges)",
+        "clock tree propagation delay matching",
+        "setup/hold time verification at gating point",
+        "enable signal timing margin analysis",
+        "multi-level gating cascade verification",
+        "power gating interaction with clock gating",
+        "enable signal metastability analysis",
+        "duty cycle preservation through gating"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates clock gating cells for correct enable timing, glitch-free operation, and critical path implications in low-power designs.",
+      "design_scenarios": [
+        "enable signal held high for exactly 1 clock cycle (glitch detection window)",
+        "enable to disable transition with <1ns setup margin (CDC testing)",
+        "cascaded gating stages (4-level hierarchy) with accumulated delay analysis",
+        "enable signal metastability injection at clock edge boundaries",
+        "power-gated domain with clock gating held inactive during power-down",
+        "mixed rising-edge and falling-edge enable detection robustness",
+        "cross-domain clock gating with 100ns clock skew between domains",
+        "duty cycle measurement over 1M cycles (verify no asymmetry growth)"
+      ],
+      "enhanced_scenarios": [
+        "single-cycle enable pulse: held high for exactly 1 clock cycle with glitch verification (peak at <0.5V)",
+        "enable-to-disable transition: <1ns setup margin with no glitch, <100ps propagation delay",
+        "enable setup/hold violation: metastability injection \u00b10.1ns around clock edge with stable convergence",
+        "cascaded 4-level gating hierarchy: accumulated delay <500ps max with <50ps skew between parallel stages",
+        "skew matching between multiple gated clocks: <50ps maximum difference across 8 parallel gate cells",
+        "power gating interaction: clock gates held inactive during power-off transition with no spurious edges",
+        "output clock frequency: gated output never exceeds input clock frequency (gate cannot create edges)",
+        "gated clock duty cycle: \u00b15% symmetry maintained through gating cell with <50ps skew accumulation",
+        "cross-domain clock gating: 100ns skew injection between clock inputs with proper gate switching",
+        "reset interaction: asynchronous reset de-asserts before enable signal transitions (setup time)",
+        "multiple enable sources: OR/AND of up to 4 enable signals with proper gate switching and latching",
+        "very low frequency operation: 1MHz to 1Hz input clock gating with proper settling",
+        "FIFO interaction: clock gating coordinated with FIFO empty/full flags (gray-coded CDC)",
+        "pipeline flushout: clock gating released after pipeline data drains with minimum latency"
+      ],
+      "mixed_signal_regressions": [
+        "enable signal CDC (clock domain crossing): synchronizer latency <3 clock cycles with metastability filtering",
+        "clock tree jitter: input clock jitter <100ps RMS with <50ps contribution from gating cell",
+        "process variation impact: gate delay variation \u00b120% across PVT corners with timing closure margin",
+        "temperature drift: gate delay shift <50ps per 25\u00b0C from -40 to +125\u00b0C operation",
+        "supply voltage sensitivity: gate delay <0.5ps per 1% VBAT variation with 3.3V \u00b110% range",
+        "substrate coupling: simultaneous enable and clock transitions with crosstalk-induced glitch <0.1V",
+        "leakage current variation: standby leakage <1\u00b5A per gated domain through isolated gates",
+        "enable slew rate impact: fast (<50ps) and slow (>5ns) enable transitions with different glitch behavior",
+        "output loading effect: capacitive load variation 10pF-1nF with propagation delay change <100ps",
+        "setup/hold margin with CDC: cross-domain enable with variable delay synchronizer (1-3 flip-flop stages)"
+      ],
+      "protocol_scenarios": [
+        "glitch_free_gating: enable held high for exactly 1 clock cycle with peak glitch voltage <0.5V,recovery <100ps",
+        "enable_setup_margin: enable transitions with <1ns setup margin to clock edge, no metastability observable",
+        "cascaded_gating_synchronization: 4-level gating hierarchy with <50ps inter-stage skew, accumulated delay <500ps",
+        "power_domain_shutdown_safety: clock gates held inactive during power-off transition with no spurious edges",
+        "cross_domain_enable: enable signal from different clock domain synchronized through CDC flip-flops with <3 cycle latency",
+        "fifo_integration: clock gating coordinated with FIFO empty/full gray-coded flags with no data corruption",
+        "frequency_scaling_support: dynamic frequency scaling (DVFS) coordinated with gating enable without glitches",
+        "very_low_frequency_operation: 1kHz input clock gating with proper settling and no spurious edge generation",
+        "reset_interaction: asynchronous reset de-assertion properly sequenced before enable signal transitions",
+        "multi_enable_logic: OR/AND of up to 4 enable sources from different clock domains with proper synthesis"
+      ],
+      "validation_coverage": [
+        "gating_latency: clock shutdown latency <2ns typical, <3ns worst-case across PVT corners",
+        "enable_synchronization: enable signal sampled at clock rising edge with \u00b10.5ns timing tolerance",
+        "glitch_immunity: no glitches >0.5V peak on output for any enable edge timing relative to clock",
+        "output_frequency_cap: gated clock frequency never exceeds input clock frequency (gate cannot create edges)",
+        "duty_cycle_preservation: gated clock maintains \u00b15% symmetry through gating cell across 1M cycles",
+        "skew_matching: maximum skew between parallel gated clock outputs <50ps for 8-gate array",
+        "propagation_delay: clock-to-gated-output delay <3ns typ with \u00b1500ps PVT variation bounds",
+        "clock_tree_settling: gated clock reaches steady state within 5 clock cycles after enable assertion",
+        "enable_pulse_width_detection: minimum enable pulse of 1 clock cycle properly gated with no partial cycles",
+        "temperature_coefficient: gate delay drift <50ps per 25\u00b0C across -40 to +125\u00b0C range, monotonic behavior"
+      ],
+      "key": "clock_gating_vip"
+    },
+    {
+      "name": "Clock Monitoring VIP",
+      "protocol": "Clock/Oscillator",
+      "checks": [
+        "frequency accuracy",
+        "phase continuity",
+        "jitter metrics",
+        "duty cycle"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Monitors oscillator and clock divider performance across corners.",
+      "key": "clock_monitoring_vip"
+    },
+    {
+      "name": "Cryptographic Accelerator VIP",
+      "protocol": "AES, SHA, crypto",
+      "checks": [
+        "key expansion",
+        "encryption/decryption",
+        "hash computation",
+        "side-channel timing"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates cryptographic operation correctness and timing consistency for security applications.",
+      "key": "crypto_vip"
+    },
+    {
+      "name": "Current Consumption VIP",
+      "protocol": "Power monitoring",
+      "checks": [
+        "quiescent current",
+        "dynamic current",
+        "power sequencing",
+        "inrush limiting"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Measures steady-state and transient current consumption across all rails.",
+      "key": "current_consumption_vip"
+    },
+    {
+      "name": "Digital Subsystem VIP",
+      "protocol": "Digital verification",
+      "checks": [
+        "timing compliance",
+        "reset sequencing",
+        "state machine coverage",
+        "functional correctness"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates digital logic timing, sequencing, and functional behavior.",
+      "key": "digital_subsystem_vip"
+    },
+    {
+      "name": "EMC Compliance VIP",
+      "protocol": "Electromagnetic compatibility",
+      "checks": [
+        "EMI immunity",
+        "conducted emissions",
+        "radiated immunity",
+        "ESD margin"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates electromagnetic compatibility for automotive and industrial environments.",
+      "key": "emc_compliance_vip"
+    },
+    {
+      "name": "Ethernet VIP",
+      "protocol": "Ethernet 10/100 Base-T",
+      "checks": [
+        "frame format validation (destination, source, type, data, FCS)",
+        "CRC validation for frame integrity",
+        "link detection and auto-negotiation (10/100 Mbps)",
+        "collision detection and backoff timing",
+        "MDI signaling (Manchester encoding)",
+        "interframe gap (IFG) compliance",
+        "jitter and timing margin analysis",
+        "transmit/receive signal integrity at PHY interface",
+        "power consumption during active transmission"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates Ethernet PHY compliance with IEEE 802.3 standards including signal integrity, protocol timing, and mixed-signal interface characterization.",
+      "design_scenarios": [
+        "back-to-back frame transmission (minimum IFG)",
+        "collision detection and exponential backoff",
+        "auto-negotiation sequence with link-up",
+        "long frame (1518-byte) transmission and FCS validation",
+        "FCS error injection at specific bit positions",
+        "MDI eye diagram analysis (1M UI samples)",
+        "receive jitter transfer characterization",
+        "Manchester decoder synchronization",
+        "CRC polynomial test vector validation",
+        "carrier sense and idle bus detection"
+      ],
+      "enhanced_scenarios": [
+        "back-to-back 64-byte minimum frame transmission at 100Mbps with <96ns IFG compliance",
+        "collision detection with jam signal transmission and binary exponential backoff (1-1023 slot times)",
+        "auto-negotiation sequence: FLP exchange, link-up detection, 10/100 speed confirmation within <2 seconds",
+        "maximum 1518-byte frame transmission with end-to-end FCS calculation and verification",
+        "bit-error injection at FCS field tail (bit 31 of CRC32) and verification of error detection",
+        "MDI signal eye diagram measurement: threshold margin >30%, 1M UI minimum samples at 100Mbps",
+        "receive jitter transfer function: <0.3 transfer at 125kHz clock frequency with phase margin >60\u00b0",
+        "Manchester decoder clock edge alignment: \u00b150ns tolerance at symbol boundaries with no bit slips",
+        "CRC-32 polynomial: test vectors 0x00000000, 0xFFFFFFFF, alternating 0x55 pattern frame content",
+        "carrier sense timeout: 5ms idle detection with proper line state (no differential signal)",
+        "simultaneous TX and RX collision scenario with hardware collision detection latency <300ns",
+        "link pulse generation (10Base-T) and detection within 16ms NLP timing window",
+        "receive waveform shaping: 50-60dB bandwidth limiting per IEEE 802.3 spec",
+        "power consumption measurement: idle state <500mW, active TX/RX <2W peak during collision window"
+      ],
+      "mixed_signal_regressions": [
+        "analog transmitter jitter: <100ps RMS injection during back-to-back frame transmission with BER verification",
+        "receiver common-mode offset: \u00b1200mV injection with threshold margin preservation >25%",
+        "differential pair cross-coupling: 5-10% capacitive coupling with timing skew analysis",
+        "MDI biasing variations: \u00b110% change on failsafe resistors with detection margin verification",
+        "thermal variations: -40\u00b0C to +125\u00b0C with propagation delay drift analysis and phase lock range",
+        "supply noise injection: 100mV peak ripple at 10MHz with phase jitter contribution measurement",
+        "substrate coupling: simultaneous TX and RX with crosstalk measurement and BER impact",
+        "magnetic interference: externally injected 50/60Hz common-mode signal with immunity verification"
+      ],
+      "protocol_scenarios": [
+        "idle_to_transmission: carrier sense detection with 5\u00b5s delay, SFD detection within \u00b1100ns, data path setup",
+        "frame_collision_handling: two simultaneous transmitters with jam signal (32-bit pattern) within 4\u00b5s, backoff countdown (0-1023 slots)",
+        "crc_validation_stress: sequential frames with intentional CRC corruption at bytes 1-6, error flag assertion within 1 frame",
+        "auto_negotiation_sequence: FLP pulse exchange (16-bit), LINK_ACQUIRED assertion within 1.5 seconds, speed resolution confirmation",
+        "manchester_encoding_verification: all 16 Manchester bit patterns (0000-FFFF) with clock recovery phase error <\u00b150ns",
+        "reception_under_noise: AWGN injection (SNR=10dB) with error rates <1e-6 for frames >100 bytes",
+        "interface_mode_switching: 10Mbps to 100Mbps transition with zero frame loss, link recovery <50ms",
+        "power_save_state_transitions: MAC enters idle after IFG completion, PHY enters low-power standby (<50mW)",
+        "multicast_frame_filtering: destination address matching for broadcast and multicast groups with proper rejection",
+        "statistics_counter_overflow: frame/byte/error counters increment for 1M frames with no saturation errors"
+      ],
+      "validation_coverage": [
+        "frame_format_compliance: 64-1518 byte range, destination (6B), source (6B), type (2B), payload, FCS (4B)",
+        "crc32_polynomial: test vectors 0x00000000, 0xFFFFFFFF, alternating 0xAAAA/0x5555 patterns with correct FCS generation",
+        "link_speed_accuracy: 10Mbps \u00b15%, 100Mbps \u00b13% with phase-locked timing reference and 1M symbol measurement",
+        "collision_detection_latency: jam signal assertion <400ns after both drivers active, backoff timing 0-1023 slots \u00b15%",
+        "manchester_threshold_margin: minimum 40% eye opening at receiver, clock phase margin >60\u00b0 at recovered clock",
+        "interframe_gap_enforcement: minimum 96 bit times (9.6\u00b5s @ 100Mbps) between frames with \u00b110ns tolerance",
+        "transmit_jitter: <100ps RMS cumulative over 10 consecutive frames, clock-to-Q variation <50ps",
+        "receiver_threshold: differential voltage detection 100-200mV with hysteresis <50mV, no false triggers >50V/ns CM transients",
+        "carrier_sense_accuracy: idle bus <5mV differential, active bus >200mV differential with detection latency <100ns",
+        "power_consumption_profile: idle <500mW, transmission <2W, reception <1.8W peak at 100Mbps frame rate",
+        "link_fault_recovery: auto-recovery after collision/carrier-loss within <100ms with CRC validation on first frame post-recovery",
+        "frame_buffering: support for back-to-back frames at max baud with FIFO depth >256 bytes, water-level interrupt support",
+        "IEEE_1588_PTP_precision: nanosecond-level timestamp injection at PHY interface, <500ns latency from MDI transition to timestamp capture"
+      ],
+      "key": "ethernet_vip"
+    },
+    {
+      "name": "Frequency Accuracy VIP",
+      "protocol": "Oscillator/Clock accuracy",
+      "checks": [
+        "frequency tolerance",
+        "temperature drift",
+        "supply sensitivity",
+        "long-term stability"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates oscillator frequency accuracy across corners and operating conditions.",
+      "key": "frequency_accuracy_vip"
+    },
+    {
+      "name": "High-Speed Signal VIP",
+      "protocol": "High-speed signaling",
+      "checks": [
+        "rise/fall time",
+        "overshoot/undershoot",
+        "jitter analysis",
+        "crosstalk immunity",
+        "impedance matching"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates high-speed signal integrity including timing margins and electromagnetic effects.",
+      "design_scenarios": [
+        "differential signal eye diagram with jitter histogram (1M UI samples)",
+        "simultaneous switching noise (SSN) injection on adjacent signal groups",
+        "impedance mismatch (10% over/under nominal) reflection analysis",
+        "long trace (10cm) with controlled dv/dt slew rate variations",
+        "frequency content analysis at Nyquist and harmonics (20 GHz sampling)",
+        "temperature and supply voltage sensitivity of propagation delay",
+        "crosstalk from aggressor signals with 2V/ns transitions",
+        "overshoot/undershoot measurement at 3x Vdd and -0.3V boundaries"
+      ],
+      "enhanced_scenarios": [
+        "differential eye diagram with jitter histogram",
+        "simultaneous switching noise (SSN) injection",
+        "impedance mismatch reflection analysis",
+        "long trace propagation (10cm) with slew variations",
+        "frequency content at Nyquist and harmonics",
+        "temperature and supply voltage sensitivity",
+        "crosstalk from high-speed aggressors",
+        "overshoot/undershoot at 3\u00d7Vdd boundaries",
+        "PWM jitter tolerance at high frequencies",
+        "combined noise source margin analysis"
+      ],
+      "protocol_scenarios": [
+        "eye_diagram_measurement: differential signal eye opening >30% at bit rate (1Gbps target), jitter histogram <50ps RMS",
+        "timing_margin_analysis: minimum eye crossing point >100mV from reference threshold with >60\u00b0 phase margin",
+        "pulse_width_distortion: PWD <5% of bit period for 50% duty cycle signals across temperature range",
+        "crosstalk_victim_response: victim signal jitter <50ps RMS with 2 active aggressors switching at 2V/ns",
+        "reflections_and_ringing: impedance mismatch (\u00b110%) causes <20% overshoot with settling <5 bit periods",
+        "equalization_optimization: receiver continuous-time linear equalizer (CTLE) or feed-forward equalizer (FFE)",
+        "clock_data_recovery: CDR PLL lock-in time <1\u00b5s from random state, jitter transfer <0.3 at data rate",
+        "output_driver_strength: configurable 50\u03a9, 75\u03a9, 100\u03a9 impedance with <5% variation across corners",
+        "common_mode_range: receiver tolerates \u00b12V common-mode offset on differential pair without data errors",
+        "frequency_dependent_response: gain flatness \u00b13dB from DC to Nyquist frequency (500MHz for 1Gbps signaling)"
+      ],
+      "mixed_signal_regressions": [
+        "jitter_accumulation: phase-locked loop jitter multiplies through cascade, cumulative <200ps RMS at receiver",
+        "thermal_effects_on_propagation: propagation delay changes <100ps per 25\u00b0C across -40 to +125\u00b0C",
+        "supply_induced_jitter: \u00b110% VDD variation produces <50ps clock-to-Q timing shift with <3% frequency error",
+        "substrate_noise_coupling: simultaneous digital switching injects <10mV transient on high-speed differential pair",
+        "electromagnetic_interference: 1-400MHz RF field injection causes <1% BER degradation with proper shielding",
+        "crosstalk_far_end_crosstalk: FEXT from parallel traces 1mm spacing produces <20% of aggressor amplitude response",
+        "dispersion_effects: frequency-dependent attenuation produces <5% eye closure over 10cm trace length",
+        "impedance_discontinuities: vias and connectors cause <10% reflection coefficient with ringing <3 cycles",
+        "temperature_gradient_effects: \u00b15\u00b0C local temperature variation produces <50ps timing skew between differential pair",
+        "aging_and_degradation: 10-year NBTI/HCI simulation produces <100ps timing degradation with <5% frequency shift"
+      ],
+      "validation_coverage": [
+        "rise_fall_time_specification: 10-90% transition time <200ps with <50ps skew between rising and falling edges",
+        "overshoot_undershoot_limits: peak voltage excursion <10% VDDIO above VDD and below GND for <50ps duration",
+        "jitter_specifications: deterministic jitter <20ps, random jitter <50ps RMS, total jitter <100ps at 1e-12 BER",
+        "differential_impedance: 100\u03a9 nominal (\u00b110% tolerance) measured over 1MHz-1GHz frequency range",
+        "return_loss_specification: >15dB return loss at data rate frequency with >5dB margin to connector discontinuities",
+        "insertion_loss_measurement: <3dB insertion loss at Nyquist frequency (500MHz for 1Gbps) for 10cm trace",
+        "group_delay_variation: <50ps group delay deviation across frequency band to minimize symbol ISI",
+        "common_mode_rejection: receiver CMRR >40dB at data rate with <1% BER impact from \u00b12V common-mode swings",
+        "power_consumption_profile: idle <100mW, active transmission <500mW per differential pair at 1Gbps",
+        "temperature_coefficient: all timing parameters drift <100ps per 25\u00b0C with monotonic temperature dependence"
+      ],
+      "key": "high_speed_signal_vip"
+    },
+    {
+      "name": "I2C Verification IP",
+      "protocol": "I2C",
+      "checks": [
+        "start and stop conditions",
+        "acknowledge handshake",
+        "data framing",
+        "clock stretching"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates I2C master/slave protocol compliance and timing.",
+      "key": "i2c_vip"
+    },
+    {
+      "name": "I2S Audio VIP",
+      "protocol": "I2S",
+      "checks": [
+        "frame synchronization",
+        "clock gating",
+        "data alignment",
+        "channel separation"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates I2S protocol timing, frame boundaries, and stereo channel integrity.",
+      "key": "i2s_audio_vip"
+    },
+    {
+      "name": "I3C Verification IP",
+      "protocol": "MIPI I3C (SDR and DDR)",
+      "checks": [
+        "i2c legacy mode",
+        "i3c sdr mode",
+        "i3c ddr mode",
+        "dynamic address assignment"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates I3C controller compliance with MIPI I3C specification including backward I2C compatibility.",
+      "key": "i3c_vip"
+    },
+    {
+      "name": "I/O Electrical Characteristics VIP",
+      "protocol": "I/O interface",
+      "checks": [
+        "output drive strength",
+        "input threshold margin",
+        "leakage current",
+        "output impedance"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Measures I/O electrical specifications including drive capability and threshold margins.",
+      "key": "io_electrical_vip"
+    },
+    {
+      "name": "LIN Verification IP",
+      "protocol": "LIN",
+      "checks": [
+        "break and sync",
+        "frame timing",
+        "TX/RX thresholding"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Covers LIN protocol and mixed-signal bus behavior.",
+      "key": "lin_vip"
+    },
+    {
+      "name": "Mixed-Signal Bridge VIP",
+      "protocol": "Mixed-signal interface",
+      "checks": [
+        "digital-to-analog drive",
+        "analog-to-digital thresholding",
+        "interface closure"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Checks top-level mixed-signal bridge behavior between digital logic and analog interfaces.",
+      "key": "mixed_signal_bridge_vip"
+    },
+    {
+      "name": "NFC Verification IP",
+      "protocol": "NFC Type 2/3, ISO14443-A",
+      "checks": [
+        "activation sequence",
+        "data framing",
+        "UID/ATQA",
+        "CRC verification"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Verifies NFC controller compliance with ISO standards and proximity communication.",
+      "key": "nfc_vip"
+    },
+    {
+      "name": "Noise Performance VIP",
+      "protocol": "Signal integrity",
+      "checks": [
+        "SNR calculation",
+        "THD analysis",
+        "SFDR measurement",
+        "noise floor"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Evaluates converter noise performance including SNR, THD, and spectral characteristics.",
+      "key": "noise_performance_vip"
+    },
+    {
+      "name": "Power Domain Isolation VIP",
+      "protocol": "Analog/Digital isolation",
+      "checks": [
+        "cross-domain leakage",
+        "isolation boundary integrity",
+        "handshake synchronization",
+        "metastability"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Ensures robust isolation between analog and digital power domains to prevent noise coupling.",
+      "key": "power_domain_isolation_vip"
+    },
+    {
+      "name": "Power Sequence VIP",
+      "protocol": "Power-up sequencing",
+      "checks": [
+        "rail order",
+        "enable staging",
+        "reset release"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Checks rail bring-up order and control-logic sequencing assumptions.",
+      "key": "power_sequence_vip"
+    },
+    {
+      "name": "Power Supply VIP",
+      "protocol": "Power supply quality",
+      "checks": [
+        "ripple and noise",
+        "PSRR, transient response",
+        "regulation accuracy",
+        "ramp rate"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Measures power supply quality metrics including ripple, PSRR, and regulation performance.",
+      "key": "power_supply_vip"
+    },
+    {
+      "name": "Precision DAC VIP",
+      "protocol": "DAC conversion",
+      "checks": [
+        "DNL/INL analysis",
+        "settling time",
+        "output impedance",
+        "linearity",
+        "code transition"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates precision DAC linearity, settling behavior, and output accuracy across codes.",
+      "design_scenarios": [
+        "full-scale sweepfrom 0x000 to 0xFFF with INL/DNL extraction",
+        "single code transition (e.g., 0x7FF to 0x800) with glitch measurement",
+        "settling time to 0.1% and 0.01% at different reference voltages",
+        "monotonicity verification under PVT corners (slow/fast silicon)",
+        "output impedance measurement and load transient response",
+        "power-supply rejection ratio (PSRR) at 1kHz line ripple injection",
+        "temperature drift characterization (-40\u00b0C to +125\u00b0C)",
+        "code-dependent noise and spectral analysis across frequency bands"
+      ],
+      "enhanced_scenarios": [
+        "full-scale code sweep (0x000 to 0xFFF)",
+        "single code transitions with glitch measurement",
+        "settling time to 0.1% and 0.01% targets",
+        "monotonicity verification (SS/FF/TT corners)",
+        "output impedance with transient response",
+        "PSRR measurement at 1kHz ripple injection",
+        "temperature drift characterization (-40 to 125C)",
+        "code-dependent noise analysis",
+        "glitch energy measurement",
+        "INL/DNL worst-case code identification"
+      ],
+      "protocol_scenarios": [
+        "ramp_sweep_linearity: sequential 0x000 to 0xFFF code sweep with linear regression analysis, R\u00b2 >0.9999",
+        "code_transition_glitch: 0x7FF to 0x800 (MSB transition) with glitch energy <100pJ and peak <50mV",
+        "settling_accuracy_window: output settles to within 0.1% of final value within 500ns (12-bit resolution)",
+        "monotonicity_across_corners: no code inversion observed in SS, TT, FF corners across 256 transitions",
+        "dac_update_latency: digital-to-analog propagation delay <100ns from DIN strobe to VOUT change",
+        "reference_voltage_sensitivity: VREF variation \u00b15% produces proportional output change \u00b10.5% (ratiometric correction)",
+        "output_impedance_stability: output impedance <50\u03a9 DC to 1MHz, <100\u03a9 at 10MHz, load-independent within \u00b120%",
+        "power_supply_ripple_immunity: 100mV peak 1kHz ripple on VDD produces <10mV ripple on VOUT (PSRR >60dB)",
+        "temperature_drift_compensation: output drift <50ppm/\u00b0C across -40 to +125\u00b0C without trimming",
+        "dynamic_range_utilization: full-scale swing 0V to VREF with no missing codes or non-monotonic jumps"
+      ],
+      "mixed_signal_regressions": [
+        "thermal_drift_impact: output value shift <100\u00b5V from -40\u00b0C to +125\u00b0C, monotonic change with temperature",
+        "supply_noise_coupling: 100mV peak 10MHz ripple on VDD causes <5mV transient on VOUT peak",
+        "reference_noise_sensitivity: bandgap reference noise <10\u00b5V RMS integrated results in <20\u00b5V RMS output noise",
+        "load_transient_response: 1k\u03a9 to 10M\u03a9 load change causes <1\u00b5s settling with <5% overshoot",
+        "code_dependent_switching: simultaneous transitions of all bits cause <50mV glitch peak with <500ps duration",
+        "process_corner_variations: DNL/INL changes <0.5LSB across SS/TT/FF corners for 12-bit resolution",
+        "clock_feedthrough: digital clock (>10MHz) feedthrough to analog output <1mV peak with no data corruption",
+        "bias_current_variation: \u00b110% bias current change produces <0.1% output scale factor change",
+        "substrate_coupling: simultaneous digital switching causes <10mV transient on DAC output with<500ps settling",
+        "aging_drift_simulation: 10-year equivalent aging produces <100ppm total output drift with <50ppm permanent shift"
+      ],
+      "validation_coverage": [
+        "dnl_inl_specification: DNL <\u00b10.5LSB (12-bit), INL <\u00b11LSB end-to-end across all codes",
+        "settling_time_precision: 0.1% accuracy in <500ns, 0.01% accuracy in <2\u00b5s (12-bit target)",
+        "monotonicity_guarantee: all 4096 codes produce unique outputs with no code inversions across PVT",
+        "glitch_energy_bound: code transition glitch impulse <100pJ typical, <50pJ for best-case transitions",
+        "linearity_metrics: code histogram R\u00b2 >0.9999 for linear regression fit across full range",
+        "output_impedance_specification: 50\u03a9 nominal DC, <100\u03a9 at 10MHz, stable to \u00b120% load variation",
+        "psrr_specification: >60dB at 1kHz, >50dB at 10MHz, measured with 100mV peak supply ripple",
+        "temperature_coefficient: <50ppm/\u00b0C output drift from -40 to +125\u00b0C with linear correlation",
+        "power_consumption_profile: <10mW static (1.8V supply, 10\u00b5A typical), <50mW dynamic per MHz switching",
+        "reference_voltage_ratiometric_accuracy: output proportional to VREF within \u00b10.1% for 2.5V to 3.3V range"
+      ],
+      "key": "precision_dac_vip"
+    },
+    {
+      "name": "PROFIBUS VIP",
+      "protocol": "PROFIBUS PA/DP",
+      "checks": [
+        "bit timing and baud rate accuracy (9.6 kbps - 12 Mbps)",
+        "frame format (start, address, data length, data, CRC, end)",
+        "slave address and collision handling",
+        "CRC validation (CCITT-16)",
+        "collision detection and resolution (CSMA/CD-like)",
+        "idle line detection and silence detection",
+        "transceiver failsafe biasing",
+        "electromagnetic immunity (conducted and radiated)",
+        "power consumption in different operational modes"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates PROFIBUS transceiver protocol compliance for industrial fieldbus networks including timing, signal integrity, EMI/EMC, and mixed-signal biasing.",
+      "design_scenarios": [
+        "token passing at high speed (12 Mbps) with low latency",
+        "simultaneous transmission collision detection and resolution",
+        "idleline timeout and watchdog expiration recovery",
+        "frame transmission with CRC error injection at various bit positions",
+        "failsafe idle state with resistor biasing (bus pulled to mid-level)",
+        "noise margin validation with 50% amplitude reduction",
+        "long message (64 bytes) transmission with fragmentation",
+        "multi-slave arbitration with priority resolution"
+      ],
+      "enhanced_scenarios": [
+        "token passing at 12Mbps with <10\u00b5s master latency and token holding time <50ms",
+        "simultaneous transmission collision detection (<1\u00b5s latency) and arbitration resolution",
+        "idleline timeout: 11-bit silent interval triggers watchdog expiration with automatic retry",
+        "frame transmission with cyclic redundancy check error injection at byte 1, 4, and 8 positions",
+        "failsafe idle state: bus pulled to mid-supply by 680\u03a9 resistor pair with <100mV hysteresis",
+        "noise margin testing: 50% amplitude reduction still maintains threshold detection (\u00b1900mV to \u00b11200mV)",
+        "long message fragmentation: 64-byte payload split into 2-3 PROFIBUS frames with reassembly verification",
+        "multi-slave arbitration: 8-node network with address conflict detection and priority token passing",
+        "baud rate accuracy across temperature: 9.6kbps to 12Mbps with \u00b15% tolerance verification -40 to +85\u00b0C",
+        "driver slew rate control: 10-30V/\u00b5s programmable to minimize EMI and cross-coupling effects",
+        "receiver threshold margin: 200mV differential minimum with hysteresis <100mV for noise immunity",
+        "failsafe biasing verification: idle bus voltage 7.5V \u00b10.5V with <100\u00b5A leakage current"
+      ],
+      "mixed_signal_regressions": [
+        "conducted immunity: 10V/\u00b5s 50/60Hz injection on PROFIBUS lines with bit error rate <1e-6",
+        "radiated immunity: 1-400MHz RF field (10V/m) with protocol recovery within 1 frame period",
+        "ground bounce: common-mode transient >50V/\u00b5s injection with slew rate limiting verification",
+        "reflections: stub termination mismatch (\u00b120%) with eye diagram margin verification",
+        "temperature drift: slew rate and threshold shifts from -40\u00b0C to +85\u00b0C operation",
+        "supply voltage sensitivity: \u00b110% VBAT variation impact on biasing and detection thresholds",
+        "parameter drift with aging: leakage current and resistance changes over 100k frame cycles",
+        "multi-driver contention: simultaneous transmission detection and driver disable latency <100ns"
+      ],
+      "protocol_scenarios": [
+        "token_passing: master token holder (TTH) timeout initiates search, token passes through 8-slave network <50ms",
+        "slave_address_collision: two nodes with same address respond with parity error, arbitration recovery in <1 frame period",
+        "frame_fragmentation: 64-byte payload split across 3 PROFIBUS frames with frame_more_follows flag, reassembly verification",
+        "crc_error_recovery: CCITT-CRC error in byte 4 triggers NAK, transmitter resends within 10ms timeout",
+        "failsafe_biasing_verification: idle bus pulled to 7.5V midpoint by 680\u03a9 resistor pair, noise margin >200mV",
+        "noise_immunity_stress: 50% amplitude reduction (250mV) still maintains threshold detection and no bit slips",
+        "multinode_arbitration: 12-node network with prioritized token passing, latency <100\u00b5s per slave",
+        "idle_line_watchdog: 11-bit silent interval triggers watchdog, automatic retry with fresh token generation",
+        "baudrate_transitions: frequency switching 9.6k->19.2k->56k with zero frame loss, resynchronization <100\u00b5s",
+        "electromagnetic_environment_compliance: conducted/radiated immunity per IEC 61326-1, recovery within 1 frame"
+      ],
+      "validation_coverage": [
+        "baud_rate_accuracy: 9.6kbps to 12Mbps with \u00b15% tolerance verification across -40 to +85\u00b0C range",
+        "frame_structure: mandatory start bit, 8 data bits, parity, 1-2 stop bits per PROFIBUS spec",
+        "crc_polynomial: CCITT-16 polynomial with test vectors for single-bit and multi-bit errors",
+        "token_passing_latency: max token holding time (THT) <100ms, token pass <1ms between adjacent nodes",
+        "slave_response_time: slave receives master query, responds within <100ms station address timeout",
+        "collision_detection: simultaneous transmission stopped within <1\u00b5s, arbitration via lower address priority",
+        "failsafe_idle_voltage: 7.5V \u00b10.5V midpoint with <100\u00b5A leakage, threshold hysteresis <100mV",
+        "noise_immunity_margin: minimum 200mV differential threshold with 50% overdrive capability",
+        "slew_rate_control: 10-30V/\u00b5s programmable to minimize EMI and inter-symbol interference",
+        "receiver_threshold_margin: 100% recognition of 200mV differential signals, no false triggers on 50V/\u00b5s CM events"
+      ],
+      "key": "profibus_vip"
+    },
+    {
+      "name": "SPI Verification IP",
+      "protocol": "SPI",
+      "checks": [
+        "transaction decode",
+        "register access",
+        "reset defaults"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Exercises the serial programming path and register map visibility.",
+      "key": "spi_vip"
+    },
+    {
+      "name": "Temperature Corner VIP",
+      "protocol": "Temperature characterization",
+      "checks": [
+        "cold corner performance",
+        "hot corner performance",
+        "gradient effects",
+        "thermal coupling"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Validates analog and digital functionality across temperature extremes.",
+      "key": "temperature_corner_vip"
+    },
+    {
+      "name": "Thermal Monitoring VIP",
+      "protocol": "Temperature monitoring",
+      "checks": [
+        "temp sensor accuracy",
+        "shutdown threshold",
+        "hysteresis",
+        "rise time"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates temperature sensor linearity and thermal shutdown protection.",
+      "key": "thermal_monitoring_vip"
+    },
+    {
+      "name": "UART Verification IP",
+      "protocol": "UART",
+      "checks": [
+        "frame formation",
+        "baud rate accuracy",
+        "parity checking",
+        "flow control"
+      ],
+      "command": "python designs/framework/scripts/run_regression.py --design {design}",
+      "description": "Exercises serial communication framing, timing, and error handling.",
+      "key": "uart_vip"
+    },
+    {
+      "name": "Voltage Regulation VIP",
+      "protocol": "Power supply regulation",
+      "checks": [
+        "DC regulation accuracy",
+        "load transient response",
+        "line regulation",
+        "soft-start behavior"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Characterizes regulator steady-state accuracy and dynamic response under load steps.",
+      "key": "voltage_regulation_vip"
+    },
+    {
+      "name": "Wireless Charging VIP",
+      "protocol": "Qi wireless power",
+      "checks": [
+        "coil detection",
+        "power negotiation",
+        "foreign object detection",
+        "alignment"
+      ],
+      "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
+      "description": "Validates wireless charging receiver operation and safety mechanisms.",
+      "key": "wireless_charging_vip"
+    }
+  ],
+  "digital_subsystems": [
+    {
+      "name": "Analog Conditioning Plane",
+      "blocks": [
+        "programmable_gain_amplifier",
+        "low_pass_filter",
+        "comparator_array",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Multi-channel analog signal conditioning with programmable gain, filtering, and thresholding.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "analog_conditioning_plane",
+      "compatible": true
+    },
+    {
+      "name": "Battery Management Subsystem",
+      "blocks": [
+        "battery_cell_monitor",
+        "bms_controller",
+        "temperature_sensor",
+        "register_file",
+        "control_logic",
+        "interrupt_controller"
+      ],
+      "description": "Complete battery pack monitoring and management with multi-cell balancing and safety enforcement.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "battery_management_plane",
+      "compatible": true
+    },
+    {
+      "name": "CAN Node Control Plane",
+      "blocks": [
+        "can_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Automotive CAN node with messaging, configuration, and interrupt handling.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "can_node_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "Clock Distribution Plane",
+      "blocks": [
+        "pll",
+        "clock_divider",
+        "control_logic"
+      ],
+      "description": "Advanced clock generation, distribution, and gating for power-efficient multi-domain designs.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "clock_distribution_plane",
+      "compatible": true
+    },
+    {
+      "name": "Clock Gating Plane",
+      "blocks": [
+        "control_logic",
+        "register_file",
+        "clock_divider",
+        "interrupt_controller"
+      ],
+      "description": "Integrated clock gating and domain control for multi-frequency clock generation, distribution, and energy-efficient gating. Includes glitch-free enable logic, setup/hold verification, and multi-level gating cascade support. Integration rules: clock gates must preserve duty cycle, enable signals require CDC (clock domain crossing) synchronization, output clock must not exceed input frequency.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "integration_rules": [
+        "enable signals synchronized to clock rising edge (<1ns setup margin)",
+        "clock gate outputs capped at input frequency",
+        "multi-level cascade delay balancing (<500ps skew)",
+        "CDC synchronizers for cross-domain enable signals",
+        "duty cycle \u00b15% preservation through gating",
+        "gated clock <50ps skew to non-gated reference",
+        "reset signal gate disable sequencing",
+        "power-down gate disable enforcement",
+        "glitch-free latch-based implementation",
+        "setup/hold margin accounting for metastability",
+        "CDC pipeline (2-3 flip-flops minimum)",
+        "per-domain isolated gating logic for multi-frequency"
+      ],
+      "validation_scenarios": [
+        "Simultaneous enabling of 4 gating stages with timing closure verification",
+        "Enable signal metastability injection at CDC boundaries",
+        "Clock tree analysis with gate insertion delay impact",
+        "Duty cycle preservation over 10M clock cycles",
+        "Single-cycle enable pulse glitch detection (peak <0.5V)",
+        "4-level cascaded gate delay analysis with <50ps skew accumulation",
+        "Clock domain crossing with 100ns skew injection and proper gate switching",
+        "Power gating interaction: clock gates held inactive during power-off with no spurious edges",
+        "Reset deassertion timing: clean gate disable before enable signal transitions",
+        "Very low frequency operation: 1kHz-1MHz gating with proper settling",
+        "FIFO empty/full signal interaction with clock gating control"
+      ],
+      "design_patterns": [
+        "single-domain gating: enable tied to register bit with synchronous reset",
+        "multi-domain gating: OR/AND of up to 4 enables from different clock domains",
+        "hierarchical gating: 2-4 level cascades with accumulated delay tracking",
+        "power-aware gating: coordination with power gating control signals",
+        "frequency scaling: gating coordinated with DVFS voltage/frequency changes"
+      ],
+      "key": "clock_gating_plane",
+      "compatible": true
+    },
+    {
+      "name": "Converter Control Plane",
+      "blocks": [
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Digital control subsystem for sampling cadence, trim, and observability.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "converter_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "Ethernet Control Plane",
+      "blocks": [
+        "ethernet_phy",
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Complete Ethernet PHY control and management interface subsystem for networked applications. Features real-time frame processing, link status monitoring, MDI transceiver control, and multi-protocol configuration through UART/SPI. Integration rules: Ethernet PHY must provide differential signaling (LVDS), RX/TX data path must meet 10/100 Mbps timing, CRC validation must be hardware-accelerated.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22"
+      ],
+      "integration_rules": [
+        "IEEE 802.3 timing margins (30% eye opening minimum)",
+        "differential pair length matching (\u00b1200ps)",
+        "link detection responsiveness (<100ms)",
+        "hardware CRC validation (1 frame time reporting)",
+        "RMII/MII setup/hold compliance (<2ns margin)",
+        "collision detection strobing (<100ns)",
+        "auto-negotiation completion (<2 seconds)",
+        "register access without blocking reception",
+        "Manchester encoding \u00b15% bit timing",
+        "FCS polynomial verification",
+        "MDI transceiver synchronous control",
+        "link quality indicator (4-level granularity minimum)"
+      ],
+      "validation_scenarios": [
+        "Back-to-back frame reception at 100 Mbps with CRC validation",
+        "Auto-negotiation with link-up confirmation in <2 seconds",
+        "Register access via UART/SPI during active frame transmission",
+        "Collision scenario with exponential backoff timing verification",
+        "Long frame transmission (1518-byte payload) with inter-frame gap timing",
+        "FCS error injection and CRC error handling",
+        "MDI eye diagram measurement at TX/RX pins with >30% eye opening",
+        "Manchester decoder alignment with bit slip injection and recovery",
+        "Link loss detection and re-acquisition with <100ms settling",
+        "Multi-frame simultaneous reception with queuing and DMA transfer",
+        "Control plane register updates during mid-frame RX with no data corruption",
+        "Collision jam signal generation with proper bit timing verification"
+      ],
+      "design_patterns": [
+        "single-PHY integration: simple point-to-point MAC-to-PHY interface",
+        "multi-PHY stacking: multiple Ethernet segments aggregated with forwarding rules",
+        "link-fail-safe: automatic fallback to alternative PHY or reduced-speed mode",
+        "auto-MDI polarity correction: RX pair swapping on link negotiation failure",
+        "real-time priority: control plane register access with QoS arbitration"
+      ],
+      "design_assembly_rules": [
+        "Differential pair routing: 100\u03a9 characteristic impedance \u00b110% with <5mm length matching between TX+/-, RX+/- pairs",
+        "Guard trace shielding: Return path guards around differential pairs, connected to ground every <1\u03bb_eff per frequency",
+        "MDI transceiver bias: Failsafe 50k\u03a9 pull-down resistors on unused differential lines to center idle state at mid-supply",
+        "CRC validation timing: Hardware CRC computed in <1 frame period with parallel polynomial engine to minimize PHY latency",
+        "Link quality indicator: 4-level RSSI mapping (LED: off/red/yellow/green) with hysteresis >5% to prevent flicker",
+        "Auto-negotiation sequencing: FLP pulse exchange (16-bit pattern) complete within 1.5s, speed negotiation within 500ms",
+        "Manchester clock recovery: Sampling clock locked to midpoint of Manchester bit with \u00b150ns tolerance per symbol",
+        "Register access serialization: SPI/UART access to registers during RX without blocking (register reads sampled synchronously)",
+        "Collision jam signal: 32-bit jam pattern (0x55555555 Manchester) transmitted within <4\u00b5s of collision detection",
+        "Reset assertion: Watchdog-triggered PHY reset held for >100ns with clean power-up sequencing"
+      ],
+      "key": "ethernet_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "Frequency Monitoring Plane",
+      "blocks": [
+        "frequency_detector",
+        "control_logic",
+        "register_file",
+        "interrupt_controller"
+      ],
+      "description": "Dedicated frequency monitoring and fault detection subsystem for oscillator health.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "frequency_monitoring_plane",
+      "compatible": true
+    },
+    {
+      "name": "I2C Sensor Interface",
+      "blocks": [
+        "i2c_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "I2C master/slave subsystem for multi-sensor coordination and data aggregation.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "i2c_sensor_interface",
+      "compatible": true
+    },
+    {
+      "name": "Infotainment Control Plane",
+      "blocks": [
+        "i2s_audio_controller",
+        "i2c_controller",
+        "uart_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Multimedia and human-machine interface subsystem with I2S audio, I2C, and UART support for in-vehicle infotainment systems. Handles stereo audio streaming, multi-node I2C sensor aggregation, and serial console access. Integration rules: I2S timing must align frame sync with data, I2C bus requires open-drain arbitration (not push-pull), UART baud rate generator must support automotive standard rates (9.6k, 115.2k, 1M baud).",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "integration_rules": [
+        "I2S frame sync timing (\u00b110ns to data bit 0)",
+        "I2S bit clock BCLK synchronization (within 1 period)",
+        "I2C open-drain drivers (no active high push-pull)",
+        "I2C SDA release timing (<5\u00b5s after SCL low)",
+        "clock stretching support (up to 100ms hold)",
+        "UART FIFO minimum 16-byte depth (1M baud)",
+        "UART baud rate accuracy (\u00b13% @9.6k, \u00b12% @115.2k)",
+        "audio frame synchronous boundary handling",
+        "stereo channel separation (>-3dB @ 20Hz-20kHz)",
+        "UART FIFO water levels for DMA scheduling",
+        "multi-master I2C arbitration (<100ns propagation)",
+        "audio sample rate support (48/96/192kHz)"
+      ],
+      "validation_scenarios": [
+        "Stereo I2S audio streaming with sample rate changes (48kHz to 192kHz)",
+        "Multi-slave I2C bus arbitration and clock stretching timeout",
+        "UART at 1M baud with back-to-back character transmission",
+        "I2S LRCLK timing with \u00b110ns margin to SDATA transitions",
+        "I2S to I2C simultaneous operation: audio DMA and sensor polling without glitch",
+        "I2C multi-master arbitration with collision on both SDA and SCL within same clock",
+        "UART baud rate generator accuracy across 5 standard rates (9.6k, 38.4k, 115.2k, 460.8k, 1M)",
+        "I2S left/right channel alignment after sample rate change with <1 sample skew",
+        "I2C slave clock stretching hold >100ms with timeout recovery",
+        "UART FIFO overflow handling at 1M baud with DMA backpressure",
+        "I2S frame sync pulse width verification (1-4 bit periods with edge alignment)",
+        "Multi-channel audio mixing coordination with fixed 48kHz reference clock"
+      ],
+      "design_patterns": [
+        "single-audio-output: simple I2S stereo DAC interface",
+        "multi-sensor-aggregation: I2C multi-master with up to 16 sensor nodes",
+        "console-control: dual UART for debug console and modem communication",
+        "audio-crossfade: synchronized rate change with mute/unmute coordination",
+        "i2c-clock-stretching: slave timeout with transparent clock re-sync"
+      ],
+      "design_assembly_rules": [
+        "I2S clock routing: Master clock (48-192kHz) distributed with <50ps skew to all audio subsystems, glitch-free mux for sample rate switching",
+        "I2S data path: Separate TX and RX data lines with AC coupling (>1kHz high-pass) to audio codec, impedance matching 50\u03a9 for high-speed data",
+        "I2C bus pull-ups: Open-drain 10k\u03a9 pull-ups (\u00b15% tolerance) with parasitic capacitance <50pF per node, clock stretching timeout logic on SCL",
+        "UART baud rate generator: Precision divider with <\u00b12% error at 115.2kbps achieved through PLL-generated reference clock (not integer dividers)",
+        "Audio codec interface: Right-justify or left-justify data format selectable, mono/stereo channel assignment per register field",
+        "DMA arbitration: I2S audio DMA highest priority (48kHz continuous), I2C sensor reads lower priority with preemption logic",
+        "Noise isolation: Audio ground plane separate from I2C/UART digital ground with isolated star point to main GND via ferrite bead",
+        "LRCLK alignment: Frame sync pulse width 1-4 bit periods, positive or negative polarity configurable, edge-aligned to data sampling point",
+        "Clock stretching timeout: SCL held low monitored with timeout >100ms, automatic bus release on timeout with debounce filter (>10\u00b5s)",
+        "UART FIFO threshold: Configurable water level (1-16 bytes) to coordinate DMA transfers, prevents FIFO overrun at 1M baud"
+      ],
+      "key": "infotainment_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "IoT Wireless Communication Plane",
+      "blocks": [
+        "ble_transceiver",
+        "nfc_controller",
+        "rf_front_end",
+        "i3c_controller",
+        "register_file",
+        "interrupt_controller"
+      ],
+      "description": "Integrated wireless subsystem for multi-protocol IoT connectivity (BLE, NFC, custom RF).",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "iot_wireless_plane",
+      "compatible": true
+    },
+    {
+      "name": "LIN Node Control Plane",
+      "blocks": [
+        "spi_controller",
+        "register_file",
+        "lin_controller",
+        "control_logic"
+      ],
+      "description": "Integrated digital subsystem for protocol control, configuration, and sequencing.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lin_node_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "Multi-Rail Power Control Plane",
+      "blocks": [
+        "control_logic",
+        "reset_generator",
+        "register_file",
+        "interrupt_controller",
+        "temperature_sensor"
+      ],
+      "description": "Advanced multi-rail power sequencing with rail-order enforcement and cross-domain isolation.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "multi_rail_power_control",
+      "compatible": true
+    },
+    {
+      "name": "Power Conversion Plane",
+      "blocks": [
+        "boost_converter",
+        "buck_converter",
+        "pwm_controller",
+        "frequency_detector",
+        "control_logic",
+        "register_file"
+      ],
+      "description": "Integrated power conversion control plane for multi-output PMIC and power management. Provides robust DC-DC conversion with voltage regulation, current limiting, and adaptive frequency scaling. Integration rules: PWM frequency must be synchronized across buck and boost stages for EMI control, dead-time insertion mandatory for shoot-through prevention, loop response must settle within 100\u00b5s for dynamic load steps.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "integration_rules": [
+        "buck/boost frequency phase alignment for EMI control",
+        "PWM dead-time insertion (>50ns shoot-through prevention)",
+        "frequency detector independent monitoring (\u00b15% tolerance)",
+        "soft-start ramp (<100ms with inrush minimization)",
+        "multi-output cross-regulation (\u00b15% at 50% load change)",
+        "loop bandwidth 10x separation from switching frequency",
+        "current sensing accuracy (<5%) for cycle-by-cycle limiting",
+        "output voltage ordering enforcement (core before I/O)",
+        "converter frequency synchronization (<5% skew)",
+        "load transient settling (<100\u00b5s for 50% step)",
+        "current limit protection latency (<1\u00b5s)",
+        "over-voltage shutdown latency (<100ns)"
+      ],
+      "validation_scenarios": [
+        "Multi-output transient response with simultaneous load steps on different rails",
+        "Frequency detector alarm triggering at 90% and 110% of nominal frequency",
+        "Current limiting activation at 120% nominal load with current sense margin",
+        "Soft-start ramp with controlled dV/dt <1V/ms",
+        "Buck converter steady-state ripple <2% at full load with \u00b15V input variation",
+        "Boost converter 10V to 30V conversion with efficiency >90% at 80% load",
+        "Cross-regulation between core (1.2V) and I/O (3.3V) with shared inductor",
+        "Over-voltage protection shutdown with <100ns latency followed by soft-restart",
+        "Frequency sweep from 50% to 150% nominal with loop stability verification",
+        "Load step response: 0% to 100% in <1ms with <5% overshoot",
+        "Phase-locked frequency synchronization with external clock within \u00b12%",
+        "Thermal throttling: frequency reduction from 1MHz to 500kHz at junction >110C"
+      ],
+      "design_patterns": [
+        "single-buck: basic 5V to 3.3V conversion for simple applications",
+        "buck-boost combo: dual-output with independent feedback control",
+        "isolated-gate-drive: bootstrap capacitor charging for high-side switches",
+        "synchronous-rectification: MOSFET switching on output diode for efficiency",
+        "adaptive-frequency: dynamic frequency scaling for EMI/efficiency tradeoff"
+      ],
+      "design_assembly_rules": [
+        "buck converter PCB layout: inductor <10mm from IC, bulk capacitors at IC pins, feedback divider shielded from switching nodes",
+        "boost converter bootstrap: bootstrap capacitor >10\u00b5F with diode to power source, 100nF ceramic for high-frequency decoupling",
+        "multi-output sequencing: core rail must rise before I/O rail by >100ms to prevent I/O-to-core current backflow",
+        "PWM frequency synchronization: all converters locked to common reference clock with \u00b15% tolerance for harmonic alignment",
+        "feedback network filtering: low-pass cutoff <500kHz to attenuate switching frequency ripple before ADC input",
+        "current sensing resistor placement: sense resistor <1mm from comparator inputs, Kelvin connection for low offset drift",
+        "compensation network design: PI compensator with crossover frequency 10\u00d7 lower than PWM frequency for stability",
+        "thermal design: IC junction temperature margin >20\u00b0C at maximum load with heat sink for >10W dissipation",
+        "input filtering: LC filter with L>1\u00b5H, C>10\u00b5F before switching stage to minimize EMI on supply rails",
+        "output decoupling: multilayer capacitor array (bulk + ceramic) with ESR <50m\u03a9 for transient response <10% ripple"
+      ],
+      "key": "power_conversion_plane",
+      "compatible": true
+    },
+    {
+      "name": "Power Sequencer",
+      "blocks": [
+        "control_logic",
+        "reset_generator",
+        "interrupt_controller",
+        "register_file"
+      ],
+      "description": "Multi-rail power sequencing with enable staging and monitoring.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "power_sequencer",
+      "compatible": true
+    },
+    {
+      "name": "PWM Motor Control Plane",
+      "blocks": [
+        "pwm_controller",
+        "register_file",
+        "control_logic",
+        "interrupt_controller"
+      ],
+      "description": "Coordinated PWM generation with dead-time insertion and fault protection for motor drive.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "pwm_motor_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "RS-485 Interface Plane",
+      "blocks": [
+        "rs485_transceiver",
+        "uart_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Integrated RS-485 bus interface with UART-based protocol and fault detection.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "rs485_interface_plane",
+      "compatible": true
+    },
+    {
+      "name": "Safety Monitor Plane",
+      "blocks": [
+        "watchdog_timer",
+        "temperature_sensor",
+        "interrupt_controller",
+        "control_logic",
+        "reset_generator"
+      ],
+      "description": "Safety-critical monitoring subsystem with watchdog, temperature, and system reset coordination for functional safety (ISO 26262) compliance. Provides periodic health checks, autonomous reset generation on fault, and interrupt-based alert mechanisms. Integration rules: watchdog timeout must be verified independent of system clock, temperature thresholds require hysteresis to prevent chatter, reset assertion must be asynchronous and synchronized with safety domains.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "integration_rules": [
+        "watchdog independent oscillator verification (\u00b110%)",
+        "watchdog kick monitoring (2 consecutive miss triggers reset)",
+        "temperature hysteresis (\u00b15\u00b0C) for chatter prevention",
+        "temperature sensor hot-spot location (<5\u00b0C gradient)",
+        "asynchronous reset assertion (>100ns duration)",
+        "safety interrupt latency (<1\u00b5s)",
+        "shutdown persistence during main logic hang",
+        "safety signal replication/voting for SIL-2 compliance",
+        "over-temperature assertion time (<10ms)",
+        "reset timing per power-on reset requirements",
+        "independent watchdog clock failure detection",
+        "shutdown latch-up until power cycle or firmware reset"
+      ],
+      "validation_scenarios": [
+        "Watchdog timeout with clock glitch injection (verify independent timing verification)",
+        "Temperature threshold crossing with \u00b110\u00b0C overshoot and hysteresis response",
+        "Simultaneous watchdog timeout and over-temperature event prioritization",
+        "Reset signal persistence during main clock stoppage",
+        "Two consecutive watchdog misses with reset assertion confirmation",
+        "Temperature sensor accuracy across process corners (\u00b13\u00b0C worst-case)",
+        "Watchdog oscillator frequency stability over temperature (-40C to 125C)",
+        "Reset de-assertion timing with power supply ramp-up from 0V to nominal",
+        "Interrupt latency measurement with realistic interrupt handler execution",
+        "Over-temperature shutdown cascade: interrupt assertion, reset generation, latch-up hold",
+        "Dual watchdog independent verification at both rising and falling edges",
+        "Safety signal voting with 2-of-3 fault masking and SIL-2 certification"
+      ],
+      "design_patterns": [
+        "single-watchdog: simple timeout with direct reset generation",
+        "dual-watchdog redundancy: independent oscillators with majority voting",
+        "temperature-triggered shutdown: threshold crossing with interrupt-first fallback",
+        "reset sequencing: watchdog, thermal, and power-on reset priority ordering",
+        "safety certification: health monitor with continuous self-test and fault injection"
+      ],
+      "design_assembly_rules": [
+        "Watchdog oscillator isolation: Independent RC circuit (>1M\u03a9, <1nF) on separate power domain with <\u00b110% frequency tolerance over temperature",
+        "Temperature sensor placement: Located in hottest thermal zone (near power converter) with >5mm clearance from edge sensor to prevent edge artifacts",
+        "Reset signal routing: Asynchronous reset routed separately from data signals, buffered with low-slew output (>100ns rise time) to prevent timing issues",
+        "Safety interrupt priority: NMI (non-maskable) level routing directly to CPU core with <1\u00b5s latency guarantee independent of system clock",
+        "Multi-rail shutdown sequencing: Watchdog disables boost/buck switchers in priority order (high-current rails first) with staggered 10ms delays",
+        "Hysteresis implementation: Separate rising/falling thresholds (+5\u00b0C/-5\u00b0C) with Schmitt-trigger comparator to prevent chatter in threshold region",
+        "Signal replication for SIL-2: Dual independent comparators (one primary, one monitor) with voted output to fault-injection logic",
+        "Over-temperature latch: Once asserted, remains latched until power cycle or explicit firmware reset via dedicated register bit",
+        "Watchdog kick verification: Software write to UART/SPI register with random challenge-response token to prevent stuck-software false negatives",
+        "Reset de-assertion timing: Synchronized de-assertion with 2-stage flip-flops on safety domain, release only after all power supplies stable"
+      ],
+      "key": "safety_monitor_plane",
+      "compatible": true
+    },
+    {
+      "name": "Security and Cryptography Plane",
+      "blocks": [
+        "aes_accelerator",
+        "sha_accelerator",
+        "true_random_number_generator",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Integrated cryptographic acceleration and random number generation for secure communications.",
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "security_crypto_plane",
+      "compatible": true
+    },
+    {
+      "name": "Sensor Aggregation Plane",
+      "blocks": [
+        "i2c_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Multi-protocol sensor interface plane for coordinating I2C and SPI peripherals.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sensor_aggregation_plane",
+      "compatible": true
+    },
+    {
+      "name": "Sensor Hub Control Plane",
+      "blocks": [
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Shared digital control and telemetry plane for mixed-signal sensor chips.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sensor_hub_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "Test and Debug Control Plane",
+      "blocks": [
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic",
+        "interrupt_controller"
+      ],
+      "description": "JTAG, test-point aggregation, and debug signal routing for production test.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "test_control_plane",
+      "compatible": true
+    },
+    {
+      "name": "Thermal Management Plane",
+      "blocks": [
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "description": "Temperature monitoring and thermal shutdown sequencing with interrupt integration.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "thermal_management_plane",
+      "compatible": true
+    },
+    {
+      "name": "Trim Engine Subsystem",
+      "blocks": [
+        "trim_circuit",
+        "voltage_ladder_dac",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Programmable analog parameter tuning with NVM storage for post-silicon calibration.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "trim_engine",
+      "compatible": true
+    },
+    {
+      "name": "UART Debug Interface",
+      "blocks": [
+        "uart_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "description": "Serial debug and telemetry port for system diagnostics and characterization.",
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "uart_debug_interface",
+      "compatible": true
+    }
+  ],
+  "chip_profiles": [
+    {
+      "name": "Analog Signal Conditioner",
+      "summary": "Mixed-signal front-end combining precision references, filters, multiplexers, and ADCs.",
+      "headline": "Reusable analog front-end macro for precision measurement and signal conditioning.",
+      "narrative": "This profile assembles precision analog infrastructure\u2014references, op-amps, filters, multiplexers, and ADCs\u2014for sensor signal conditioning in measurement and industrial applications.",
+      "standard": "Internal analog front-end architecture reference",
+      "tags": [
+        "analog",
+        "conditioning",
+        "precision",
+        "measurement",
+        "adc"
+      ],
+      "blocks": [
+        "bandgap",
+        "precision_voltage_reference",
+        "operational_amplifier",
+        "low_pass_filter",
+        "analog_multiplexer",
+        "sar_adc_top",
+        "current_mirror"
+      ],
+      "vips": [
+        "adc_transient_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "converter_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "analog_signal_conditioner",
+      "compatible": true
+    },
+    {
+      "name": "Audio Codec ASIC",
+      "summary": "Digital audio interface chip combining stereo ADC/DAC, I2S, and signal conditioning.",
+      "headline": "Integrated audio codec platform with I2S interface and precision analog front-end.",
+      "narrative": "This profile assembles a complete audio-in/audio-out codec chip from precision analog infrastructure (references, op-amps, filters, ADC/DAC) and digital I2S interface for consumer and automotive audio applications.",
+      "standard": "I2S 3.0, internal audio codec architecture",
+      "tags": [
+        "audio",
+        "codec",
+        "i2s",
+        "dac",
+        "adc",
+        "mixed-signal"
+      ],
+      "blocks": [
+        "bandgap",
+        "precision_voltage_reference",
+        "operational_amplifier",
+        "low_pass_filter",
+        "dac_r2r_4bit",
+        "sar_adc_top",
+        "i2s_audio_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "i2s_audio_vip",
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "spi_vip"
+      ],
+      "digital_subsystems": [
+        "sensor_aggregation_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "audio_codec_asic",
+      "compatible": true
+    },
+    {
+      "name": "Automotive HV/DC PMIC",
+      "summary": "Automotive multi-output PMIC with boost converter, buck converter, and integrated protection.",
+      "headline": "High-integration automotive power management IC for battery-powered systems with multiple rail generation.",
+      "narrative": "This profile combines boost, buck, and LDO converters with multi-rail sequencing, frequency monitoring, and thermal protection for demanding automotive power-distribution applications.",
+      "standard": "ISO 26262 ASIL-B, ISO 7637 transient immunity, AEC-Q200",
+      "tags": [
+        "automotive",
+        "power",
+        "boost",
+        "buck",
+        "multi-rail",
+        "hvdc"
+      ],
+      "blocks": [
+        "bandgap",
+        "boost_converter",
+        "buck_converter",
+        "ldo_analog",
+        "ldo_digital",
+        "frequency_detector",
+        "charge_pump",
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "frequency_accuracy_vip",
+        "voltage_regulation_vip"
+      ],
+      "digital_subsystems": [
+        "multi_rail_power_control",
+        "frequency_monitoring_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "automotive_hvdc_pmic",
+      "compatible": true
+    },
+    {
+      "name": "Automotive Infotainment SoC",
+      "summary": "Advanced in-vehicle infotainment system with multi-protocol connectivity, audio interface, and safety monitoring.",
+      "headline": "Integrated automotive SoC for multimedia and telematics with safety-critical features.",
+      "narrative": "This profile creates a complete automotive infotainment chip combining I2S audio interfaces, multi-protocol connectivity (CAN, Ethernet), safety monitoring, and robust power management for in-vehicle entertainment and navigation systems. Reference design includes full schematic, layout floorplan with power distribution, thermal simulation model, and AUTOSAR software scaffolding.",
+      "standard": "ISO 26262 ASIL-B, AUTOSAR 4.x compatible",
+      "tags": [
+        "automotive",
+        "infotainment",
+        "multimedia",
+        "safety",
+        "soc",
+        "connectivity"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "i2s_audio_controller",
+        "can_transceiver",
+        "can_controller",
+        "ethernet_phy",
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "spi_controller",
+        "uart_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "i2s_audio_vip",
+        "can_vip",
+        "ethernet_vip",
+        "thermal_monitoring_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "infotainment_control_plane",
+        "safety_monitor_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "design_collateral": [
+        "full schematic with power distribution network (4-layer PCB)",
+        "layout floorplan (500mm\u00b2) with thermal analysis and hotspot identification",
+        "thermal simulation model with steady-state and transient analysis",
+        "AUTOSAR 4.4 software scaffolding with RTE integration",
+        "functional safety evidence package (FMEA, safety case, SOTIF analysis)",
+        "integration test plan (CAN/Ethernet protocol coverage >95%)",
+        "I2S audio streaming support (48kHz/16-bit stereo with DMA, front-loaded buffering)",
+        "CAN message filtering with arbitration logic (11-bit and 29-bit ID support)",
+        "Ethernet frame buffering with IEEE 802.1Q VLAN support and priority queuing",
+        "multimodal input handling (touch, buttons, knobs) with debounce logic",
+        "OTA firmware update mechanism with signed image validation",
+        "diagnostic connector interface (UDS/CAN-TP implementation)"
+      ],
+      "automation_coverage": [
+        "mixed-signal regression with I2S (1M samples/sec) + CAN (100 msg/sec) + Ethernet frames",
+        "multi-rail sequencing with transient load steps (0-100% in <1ms) on audio, core, I/O",
+        "conducted/radiated emissions from PWM, I2S clocking, and Ethernet PHY",
+        "temperature-dependent behavior across continuous audio bursts and idle modes",
+        "audio quality metrics: THD+N @ 1kHz <0.5%, SNR @ 20Hz-20kHz >90dB, crosstalk <-80dB",
+        "CAN message timing with realistic traffic patterns and collision scenarios",
+        "Ethernet link negotiation and MDI auto-correction with eye diagram verification",
+        "1000-hour burn-in at 125\u00b0C with biased power cycling and stress patterns",
+        "safety watchdog verification with independent oscillator drift (<\u00b110%)",
+        "ASIL-B partitioning with fault containment zones"
+      ],
+      "design_assembly_rules": [
+        "Power domain isolation: Separate analog/audio rail (3.3V) from core (1.8V) with LC filtering and >60dB cross-talk attenuation",
+        "Clock tree: Master oscillator \u2192 watchdog independent clock + PLL-generated audio clocks with <50ps jitter contribution",
+        "Interface routing: CAN/Ethernet on opposite board sides, 100\u03a9 differential impedance control with guard traces",
+        "Thermal placement: Audio amplifier and switch-mode PSU positioned at board corners with >20mm clearance from temperature sensor",
+        "Reset sequencing: Watchdog \u2192 core domains \u2192 I/O domains with 1ms staggered hold-time to prevent metastability",
+        "Memory hierarchy: Register file in core domain, I2S buffer in dedicated audio domain with CDC synchronizers at boundaries"
+      ],
+      "automation_steps": [
+        "Step 1: Power-up validation - verify bandgap stability <1ms, analog/digital LDO soft-start ramps",
+        "Step 2: Clock tree initialization - enable master oscillator and PLL for audio/I2S clock generation, verify <50ps jitter",
+        "Step 3: Safety subsystem boot - watchdog armed, memory ECC scrub, safety_sram initialized",
+        "Step 4: I2S audio interface startup - DMA engine enabled, audio buffer pre-loaded with silence pattern",
+        "Step 5: CAN and Ethernet transceiver initialization - protocol handshakes, link negotiation, carrier detection",
+        "Step 6: Thermal monitoring calibration - on-die sensor characterization across corners, derate thresholds configured",
+        "Step 7: Mixed-signal regression suite - I2S+CAN+Ethernet simultaneous streams, 1M samples audio + 100 CAN msg/sec + Ethernet frames",
+        "Step 8: ASIL-B functional safety verification - watchdog timeout coverage >99%, fault injection detection >99%",
+        "Step 9: Burn-in stress test - 1000 hours @ 125\u00b0C with biased power cycling, monitor for ESD/latch-up recovery",
+        "Step 10: Design collateral verification - schematic review, layout floorplan hotspot validation, AUTOSAR RTE integration, safety case evidence package"
+      ],
+      "top_level_integration_patterns": [
+        {
+          "pattern": "infotainment_boot_sequence",
+          "description": "Controlled startup of audio, network, and safety subsystems with staged voltage ramps",
+          "steps": [
+            "power_on \u2192 bandgap_stable (1ms) \u2192 analog_ldo_ready (2ms) \u2192 core_ldo_ready (1ms) \u2192 watchdog_armed (0.5ms) \u2192 safety_init (1ms) \u2192 i2s_clock_enable (0.5ms) \u2192 can_transceiver_enable \u2192 ethernet_phy_negotiation"
+          ],
+          "timeout_per_stage": "500ms total boot window",
+          "rollback_trigger": "Any stage exceeds timeout or watchdog fault detected"
+        },
+        {
+          "pattern": "audio_to_network_switching",
+          "description": "Priority arbitration when simultaneous high-bandwidth demands occur (e.g., audio burst + network packet)",
+          "rules": [
+            "Audio DMA gets highest priority (48kHz continuous); CAN 100ms window; Ethernet 10ms bursts; CPU lowest priority",
+            "I2S buffer maintains >4ms buffering to tolerate network interrupt latency",
+            "Bandwidth throttling: audio 2Mbps reserved, network peaks 100Mbps with backpressure to I2C/SPI"
+          ]
+        },
+        {
+          "pattern": "thermal_derate_strategy",
+          "description": "Automatic power reduction as temperature rises above thresholds",
+          "temp_zones": [
+            "0-85\u00b0C: full performance (no throttling)",
+            "85-105\u00b0C: audio DSP 80%, I/O 90%, core 100%",
+            "105-125\u00b0C: audio DSP 50%, I/O 80%, core 90%",
+            ">125\u00b0C: shutdown with watchdog recovery"
+          ],
+          "monitoring_rate": "10ms update cycle via on-die sensor"
+        },
+        {
+          "pattern": "safety_partition_enforcement",
+          "description": "ASIL-B safety isolation with independent watchdog and memory scrubbing",
+          "isolated_domains": [
+            "safety_monitor_plane (independent 1.2V rail) executes watchdog tasks and fault detection logic",
+            "watchdog_oscillator operates from internal RC with <\u00b110% drift for 10s timeout margin",
+            "safety_sram (512B dedicated) holds fault log with ECC protection"
+          ],
+          "cross_domain_handshakes": "Synchronized with 2-stage flip-flops and parity checkers on critical signals"
+        }
+      ],
+      "key": "automotive_infotainment_soc",
+      "compatible": true
+    },
+    {
+      "name": "CAN Automotive Node",
+      "summary": "CAN-enabled automotive controller with transceiver, messaging, and thermal protection.",
+      "headline": "Integrated CAN node assembly with automotive-grade reliability and multi-protocol support.",
+      "narrative": "This profile combines CAN transceiver and controller with thermal monitoring, watchdog, and multi-channel analog monitoring for robust automotive embedded applications.",
+      "standard": "ISO 11898-1 CAN 2.0, ISO 26262 ASIL-B capable",
+      "tags": [
+        "automotive",
+        "can",
+        "mixed-signal",
+        "reliability",
+        "thermal-safe"
+      ],
+      "blocks": [
+        "can_transceiver",
+        "can_controller",
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "can_vip",
+        "thermal_monitoring_vip",
+        "spi_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "can_node_control_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "can_automotive_node",
+      "compatible": true
+    },
+    {
+      "name": "Debug Console Interface",
+      "summary": "UART-based debug and telemetry interface with register access and event logging.",
+      "headline": "Reusable debug interface combining UART, SPI, and control plane for system diagnostics.",
+      "narrative": "This profile provides a minimal but functional debug and telemetry framework combining serial and parallel register-access methods for lab characterization and field diagnostics.",
+      "standard": "UART 16550 compatible, SPI protocol",
+      "tags": [
+        "debug",
+        "uart",
+        "spi",
+        "telemetry",
+        "control-plane"
+      ],
+      "blocks": [
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "uart_vip",
+        "spi_vip",
+        "digital_subsystem_vip"
+      ],
+      "digital_subsystems": [
+        "uart_debug_interface"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "debug_console_interface",
+      "compatible": true
+    },
+    {
+      "name": "Ethernet Sensor Hub",
+      "summary": "Networked sensor aggregation node with Ethernet PHY, multi-channel I2C/SPI, and precision analog.",
+      "headline": "Industrial sensor hub with Ethernet connectivity for distributed measurement systems.",
+      "narrative": "This profile assembles a complete sensor aggregation and networking device combining Ethernet connectivity, multi-protocol sensor interfaces (I2C, SPI), precision analog front-ends, and data buffering for industrial process monitoring and control. Reference implementation includes calibration framework, timestamp synchronization with IEEE 1588 PTP, and deterministic packet scheduling for time-critical measurements.",
+      "standard": "IEEE 802.3, Ethernet TSN-capable, IEC 61588 (PTP) compatible",
+      "tags": [
+        "sensor",
+        "hub",
+        "ethernet",
+        "precision",
+        "measurement",
+        "industrial"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "ethernet_phy",
+        "i2c_controller",
+        "spi_controller",
+        "precision_voltage_reference",
+        "operational_amplifier",
+        "sar_adc_top",
+        "low_pass_filter",
+        "comparator_array",
+        "uart_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "ethernet_vip",
+        "i2c_vip",
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "ethernet_control_plane",
+        "sensor_aggregation_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "design_collateral": [
+        "sensor hub reference platform with 16-channel analog input capability",
+        "IEEE 1588 PTP implementation for nanosecond-level time synchronization",
+        "multi-channel sensor input conditioning with AC coupling and protection",
+        "deterministic Ethernet packet scheduling with TSN priority queueing",
+        "calibration framework with EEPROM storage and parameter backup",
+        "integration examples for common industrial sensors (RTD, thermistor, 4-20mA, pressure)",
+        "timestamp injection into Ethernet frames at transmit PHY interface",
+        "multi-channel ADC synchronized sampling with cross-channel skew <100ns",
+        "anti-aliasing filter design (Sallen-Key topology, 5kHz cutoff for 10kHz sampling)",
+        "sensor excitation voltage generation (0-10V programmable for ratiometric sensing)",
+        "digital noise injection monitoring and suppression techniques",
+        "packet buffering with automatic resynchronization on link loss"
+      ],
+      "automation_coverage": [
+        "PTP synchronization accuracy <1\u00b5s across 8-node network with grandmaster clock",
+        "multi-channel ADC linearity (INL <\u00b11LSB, DNL <\u00b10.5LSB) and settling (<500\u00b5s)",
+        "TSN scheduling compliance with <100\u00b5s worst-case latency and deterministic jitter",
+        "multi-slave I2C arbitration at 400kHz with clock stretching support",
+        "power efficiency: standby <1mW (Ethernet PHY disabled), active <500mW (all channels sampled)",
+        "sensor calibration repeatability \u00b10.1% over 6 months with aging compensation",
+        "temperature drift characterization across -40C to +85C for all sensor channels",
+        "Ethernet CRC validation and frame error detection with automatic re-request",
+        "ADC-to-Ethernet latency <10ms with buffering for burst transfers",
+        "cross-channel isolation verification (crosstalk <-80dB between adjacent channels)"
+      ],
+      "design_assembly_rules": [
+        "Sensor input conditioning: Each channel isolated AC-coupled (1\u00b5F, 1MHz corner) with \u00b110V protection clamps and 100k\u03a9 series impedance",
+        "ADC sampling synchronization: Master trigger distributed to all 16 channels with <100ns skew matched routing (equal-length traces)",
+        "Ethernet and sensor clock domains: Separate clocks with <0.1% frequency offset, PLL-based frequency synchronization to PTP grandmaster",
+        "I2C/SPI buses: Isolated from Ethernet digital noise with separate ground planes; I2C pull-ups powered from analog rail",
+        "Calibration storage: Dedicated I2C EEPROM with CRC protection for per-channel gains and offsets, updated every power-down",
+        "Precision reference network: Bandgap reference distributed to all analog blocks with <1% voltage matching via matched resistor strings"
+      ],
+      "automation_steps": [
+        "Step 1: IEEE 1588 PTP synchronization - grandmaster discovery, sync frame exchange, <1\u00b5s offset verification on 8-node network",
+        "Step 2: Multi-channel ADC characterization - linearity testing (INL <\u00b11LSB, DNL <\u00b10.5LSB), settling time <500\u00b5s per channel",
+        "Step 3: Synchronized sampling validation - 16-channel simultaneous ADC trigger with <100ns cross-channel skew measurement",
+        "Step 4: Sensor calibration framework - per-channel gain/offset calibration with EEPROM storage, power-on auto-load verification",
+        "Step 5: TSN scheduling compliance - deterministic packet priority queueing, <100\u00b5s worst-case latency, jitter characterization",
+        "Step 6: Multi-channel isolation verification - crosstalk measurement between adjacent channels <-80dB, no cross-interference detected",
+        "Step 7: Sensor integration testing - common sensor examples (RTD, thermistor, 4-20mA, pressure) with end-to-end calibration",
+        "Step 8: Temperature drift compensation - -40\u00b0C to +85\u00b0C characterization across all sensor channels, aging compensation enabled",
+        "Step 9: ADC-to-Ethernet latency - <10ms latency from sensor acquisition to network packet transmission with buffering",
+        "Step 10: Anti-aliasing filter validation - 5kHz cutoff at 10kHz sampling, signal integrity verification with noise injections"
+      ],
+      "top_level_integration_patterns": [
+        {
+          "pattern": "sensor_data_acquisition",
+          "description": "Synchronized multi-channel sampling with automatic calibration and outlier rejection",
+          "sampling_flow": [
+            "Master ADC trigger every 100\u00b5s (10kHz) \u2192 all 16 channels sample simultaneously",
+            "Each channel: anti-alias filter settling (5\u00b5s) + ADC conversion (10\u00b5s) + local calibration (offset/gain applied in digital)",
+            "Data buffered in SRAM, timestamp inserted via PTP interface, Ethernet transmission on fixed schedule"
+          ],
+          "outlier_handling": "3-sigma deviation triggers re-sampling; persistent errors logged to watchdog counter"
+        },
+        {
+          "pattern": "ptp_time_sync",
+          "description": "IEEE 1588 precision time protocol for nanosecond-accurate network time",
+          "sync_mechanism": [
+            "Grandmaster node broadcasts PTP Announce every 1s",
+            "Ethernet MAC timestamps all Sync/DelayReq frames at PHY interface (TX/RX)",
+            "This node calculates path delay and offset, updates local oscillator trim DAC every 100ms"
+          ],
+          "accuracy_target": "<1\u00b5s offset from grandmaster on a 8-node network"
+        },
+        {
+          "pattern": "sensor_calibration_engine",
+          "description": "Automatic offset/gain calibration with EEPROM storage and power-on auto-load",
+          "calibration_procedure": [
+            "Known reference applied to each channel (or all grounded for offset cal)",
+            "10 measurements averaged per channel",
+            "Gain/offset DAC trimmed to center reading, stored to EEPROM with CRC",
+            "Power-down triggers EEPROM backup of current trim values"
+          ],
+          "recalibration_interval": "On-demand via SPI command or automatic if ADC linearity exceeds threshold"
+        },
+        {
+          "pattern": "deterministic_packet_scheduling",
+          "description": "TSN-based priority queuing for time-critical sensor packets",
+          "priority_queues": [
+            "Queue-0 (highest): PTP frames and safety-critical sensor data",
+            "Queue-1: Real-time sensor aggregation packets (<100\u00b5s latency guarantee)",
+            "Queue-2: Best-effort diagnostic and calibration data"
+          ],
+          "scheduling_guarantee": "Queue-0 packets dequeued within 100\u00b5s regardless of other traffic"
+        }
+      ],
+      "key": "ethernet_sensor_hub",
+      "compatible": true
+    },
+    {
+      "name": "High-Voltage Power Supply",
+      "summary": "Automotive high-voltage supply combining buck converter, LDO, charge pump, and protection.",
+      "headline": "Reusable high-voltage PMIC assembly for automotive battery-powered systems.",
+      "narrative": "This profile starts a high-voltage PMIC from buck, charge pump, and multi-rail LDO infrastructure for automotive battery-connected applications with integrated power sequencing.",
+      "standard": "ISO 7637 transient immunity, internal PMIC spec",
+      "tags": [
+        "pmic",
+        "hv",
+        "power",
+        "automotive",
+        "protection"
+      ],
+      "blocks": [
+        "bandgap",
+        "buck_converter",
+        "charge_pump",
+        "ldo_analog",
+        "ldo_digital",
+        "watchdog_timer",
+        "temperature_sensor",
+        "control_logic",
+        "register_file"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "high_voltage_power_supply",
+      "compatible": true
+    },
+    {
+      "name": "Industrial IoT Gateway",
+      "summary": "Multi-protocol industrial gateway with PROFIBUS, CANopen, Ethernet, and security acceleration.",
+      "headline": "Comprehensive industrial edge node for protocol translation and secure data aggregation.",
+      "narrative": "This profile assembles a complete industrial IoT gateway from multiple protocol interfaces (PROFIBUS, CANopen, Ethernet), cryptographic security acceleration, and robust power management for distributed industrial control and data collection. Includes reference integration with protocol stacks, DMA-based packet handling, and ECC error correction for memory-critical data paths.",
+      "standard": "IEC 61131-3, PROFIBUS PA/DP, CANopen, EtherCAT-capable",
+      "tags": [
+        "industrial",
+        "iot",
+        "gateway",
+        "fieldbus",
+        "security",
+        "edge"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "profibus_transceiver",
+        "canopen_controller",
+        "ethernet_phy",
+        "aes_accelerator",
+        "sha_accelerator",
+        "true_random_number_generator",
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "profibus_vip",
+        "canopen_vip",
+        "ethernet_vip",
+        "crypto_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "ethernet_control_plane",
+        "security_crypto_plane",
+        "power_sequencer"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "design_collateral": [
+        "gateway architecture with multi-protocol routing and priority scheduling",
+        "multi-protocol packet router with DMA support for >100Mbps throughput",
+        "security accelerator integration examples for AES-256-GCM and SHA-512",
+        "industrial protocol stacks (PROFIBUS PA/DP, CANopen DS301/DS402, EtherCAT)",
+        "DMA controller design for multi-stream concurrent packet handling",
+        "field calibration procedures with EEPROMstorage for protocol parameters",
+        "redundant Ethernet failover logic with <50ms switchover time",
+        "CRC polynomial validation for all protocols (PROFIBUS, CANopen, Ethernet FCS)",
+        "packet buffer sizing calculator for 100Mbps sustained with <1% packet loss",
+        "end-to-end packet tracing framework with timestamp injection",
+        "IEC 61131-3 compatibility layer with standard function blocks"
+      ],
+      "automation_coverage": [
+        "simultaneous protocol traffic (PROFIBUS@12Mbps, CAN@1Mbps, Eth@100Mbps) with realistic payloads",
+        "AES-256-GCM and SHA-512 workload simulation with variable key/data sizes",
+        "multi-protocol collision detection and arbitration with DMA interleaving",
+        "long-duration stress tests (168 hours) with injected 0.1-1% packet loss on each interface",
+        "end-to-end packet latency <10ms verification across all protocol combinations",
+        "protocol switching with <100ms reconfiguration time and zero packet drop",
+        "cryptographic acceleration speedup verification (AES >100 Mbps, SHA >200 Mbps)",
+        "DMA coherency and memory ordering with ECC protection on critical buffers"
+      ],
+      "design_assembly_rules": [
+        "Protocol isolation: PROFIBUS on dedicated low-noise analog rail, CAN on separate I/O domain, Ethernet on high-speed digital domain",
+        "DMA channels assignment: 3 independent DMA units with round-robin arbiter (PROFIBUS\u2192SRAM, CAN\u2192SRAM, ETH\u2192SRAM with no stalling)",
+        "Crypto accelerator placement: Dedicated high-speed clock domain for AES/SHA engines, isolated from protocol clocks to avoid side-channel timing variation",
+        "Memory protection: Multi-rail ECC on packet buffers (SRAM protected), separate parity on register file, watchdog monitor on free-running counter",
+        "Clock tree: Multi-oscillator with independent clocks for each protocol domain, phase-locked PLL for Ethernet MAC, independent dividers for PROFIBUS",
+        "CDC (Clock Domain Crossing): Synchronized with Gray code counters and 2-stage FF for all multi-domain handshakes"
+      ],
+      "automation_steps": [
+        "Step 1: Multi-protocol interface initialization - PROFIBUS, CAN, and Ethernet PHY startup with link validation",
+        "Step 2: DMA controller setup - 3 independent channels with round-robin arbiter, buffer pointer initialization",
+        "Step 3: Crypto accelerator provisioning - AES and SHA engines enabled, test key loaded, performance benchmarked",
+        "Step 4: Gateway packet forwarding verification - PROFIBUS\u2192CAN\u2192Ethernet routing with <5ms per-packet latency",
+        "Step 5: Security pipeline validation - AES-256-GCM encryption/decryption at line-rate 100Mbps, SHA-512 verification",
+        "Step 6: Multi-protocol collision handling - simultaneous PROFIBUS@12Mbps + CAN@1Mbps + Ethernet@100Mbps stress test",
+        "Step 7: Protocol failover testing - primary interface faults injected, automatic switchover to redundant bus <50ms",
+        "Step 8: Long-duration stress test - 168 hours with injected 0.1-1% packet loss, packet buffering, zero-loss verification",
+        "Step 9: Thermal power management - crypto workload reduction as temperature climbs (85-105-125\u00b0C thresholds)",
+        "Step 10: End-to-end packet tracing - frame timestamp injection, latency verification, protocol compliance checks"
+      ],
+      "top_level_integration_patterns": [
+        {
+          "pattern": "gateway_packet_forwarding",
+          "description": "Intelligent multi-protocol packet routing with priority and rate-limiting",
+          "forwarding_rules": [
+            "PROFIBUS (token-pass) \u2192  CAN priority queue (urgent messages first)",
+            "CAN (11-bit/29-bit) \u2192 Ethernet with VLAN tagging per source",
+            "Ethernet \u2192 protocol-selector based on frame type (PROFIBUS or CAN destination)"
+          ],
+          "latency_budget": "Per-packet <5ms end-to-end, DMA minimize context-switch overhead"
+        },
+        {
+          "pattern": "security_pipeline",
+          "description": "Crypto acceleration for sensitive fields in gateway messages",
+          "pipeline": [
+            "incoming packet \u2192 CRC check \u2192 AES-256-GCM decrypt (if encrypted) \u2192 SHA-512 verify \u2192 forward or queue",
+            "acceleration speedup: line-rate 100Mbps Ethernet with encrypted payload, <10% CPU load"
+          ],
+          "key_storage": "Encrypted key storage in OTP with secure SPI interface"
+        },
+        {
+          "pattern": "protocol_failover",
+          "description": "Automatic switchover if primary interface fails",
+          "monitoring": [
+            "PROFIBUS: token pass timeout (>100ms) \u2192 raise fault",
+            "CAN: error frame count >1000/sec or arbitration failures \u2192 switch to redundant bus",
+            "Ethernet: link down or excessive retransmissions \u2192 fallback to CAN-only mode"
+          ],
+          "recovery_time": "<50ms switchover with packet buffering to prevent loss"
+        },
+        {
+          "pattern": "thermal_power_management",
+          "description": "Crypto workload reduction as temperature climbs",
+          "strategies": [
+            "85-105\u00b0C: enable fast-path forwarding (skip AES on non-critical frames)",
+            "105-125\u00b0C: AES encryption disabled, HMAC-only for protocol handshakes",
+            ">125\u00b0C: gateway enters monitoring-only mode, no forwarding"
+          ]
+        }
+      ],
+      "key": "industrial_iot_gateway",
+      "compatible": true
+    },
+    {
+      "name": "IoT Edge Hub",
+      "summary": "Multi-protocol IoT edge node combining BLE, NFC, security, and sensor aggregation.",
+      "headline": "Advanced IoT gateway with wireless connectivity, cryptographic security, and sensor hub integration.",
+      "narrative": "This profile assembles a complete IoT edge hub from wireless transceivers (BLE, NFC, RF front-end), cryptographic accelerators, sensor interfaces, and battery management for battery-powered edge AI and data collection.",
+      "standard": "BLE 5.0, MIPI I3C, ISO 26262 ASIL-B capable, Qi-enabled",
+      "tags": [
+        "iot",
+        "edge",
+        "wireless",
+        "security",
+        "multi-protocol",
+        "battery-powered"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "ble_transceiver",
+        "nfc_controller",
+        "rf_front_end",
+        "aes_accelerator",
+        "sha_accelerator",
+        "true_random_number_generator",
+        "i3c_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "ble_vip",
+        "nfc_vip",
+        "i3c_vip",
+        "crypto_vip",
+        "power_sequence_vip",
+        "thermal_monitoring_vip"
+      ],
+      "digital_subsystems": [
+        "iot_wireless_plane",
+        "security_crypto_plane",
+        "sensor_aggregation_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "iot_edge_hub",
+      "compatible": true
+    },
+    {
+      "name": "Isolated Power Supply Controller",
+      "summary": "Isolated PMIC with multiple isolated rails, boost/buck converters, and high-side gate drivers.",
+      "headline": "Industrial-grade multi-isolated power management IC for modular and resilient systems.",
+      "narrative": "This profile creates a comprehensive isolated power controller combining multiple LDO rails with galvanic isolation, boost/buck conversion, high-side gate drivers, and power sequencing for industrial equipment requiring multiple isolated supplies. Design collateral includes fault protection logic, isolated measurement circuits, and automated burn-in test patterns.",
+      "standard": "IEC 61010-1, ISO 13849-1 SIL-rated capable",
+      "tags": [
+        "isolated",
+        "power",
+        "pmic",
+        "industrial",
+        "multi-rail",
+        "safety"
+      ],
+      "blocks": [
+        "bandgap",
+        "boost_converter",
+        "buck_converter",
+        "ldo_analog",
+        "ldo_digital",
+        "isolated_gate_driver",
+        "charge_pump",
+        "temperature_sensor",
+        "frequency_detector",
+        "watchdog_timer",
+        "reset_generator",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "voltage_regulation_vip",
+        "frequency_accuracy_vip"
+      ],
+      "digital_subsystems": [
+        "multi_rail_power_control",
+        "thermal_management_plane",
+        "power_conversion_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "design_collateral": [
+        "isolation barrier schematic with creepage/clearance rules per IEC 60664",
+        "multi-isolated rail power tree with load sequencing (primary\u2192secondary\u2192tertiary)",
+        "galvanic isolation measurement circuits with <1pA leakage specifications",
+        "automated burn-in test patterns (thermal cycling, power cycling, frequency sweep)",
+        "safety FMEA with isolation failure modes and single-point failure analysis",
+        "layout guidelines for isolated domains with EMI isolation trenches and shielding",
+        "isolation barrier self-test with periodic leakage monitoring and fault reporting",
+        "cross-domain handshake synchronization logic with CDC verification",
+        "multi-frequency synchronization across isolated domains (<5% skew)",
+        "fault tree analysis for high-reliability applications (MTTF >100k hours)",
+        "regulatory compliance documentation (IEC 61010, ISO 13849-1, EN 61000 series)"
+      ],
+      "automation_coverage": [
+        "hi-pot isolation testing (2kV DC, 60 seconds) with breakdown detection threshold",
+        "multi-isolated rail bring-up with cross-domain timing verification and sequencing",
+        "isolation fault injection and detection (>99% coverage) with recovery mechanisms",
+        "temperature coupling between isolated domains with thermal stress cycling",
+        "10,000 power cycle reliability testing with load variation (0-100%)",
+        "EMC immunity per IEC 61010-1 (conducted, radiated, burst, surge)",
+        "current limiting accuracy across isolated domains (<5% variation)",
+        "efficiency characterization at 10%, 50%, 100% load for each output rail"
+      ],
+      "design_assembly_rules": [
+        "Isolation barrier placement: Creepage/clearance >5mm (IEC 60664) between primary and secondary windings, optocoupler photocoupler isolation",
+        "Primary-secondary clock domains: Independent oscillators on each domain with <5% frequency tolerance; CDC synchronizers with dual-rank flip-flops for all domain crossings",
+        "Power sequencing: Primary domain \u2192 secondary domains with staggered ramp-up (primary first, 100ms delay before secondary startup)",
+        "Current limiting: Per-output foldback current limit with <50mA overshoot, settable via SPI with 8-bit DAC granularity",
+        "Isolation barrier self-test: Periodic injection of test patterns through optocoupler, failure triggers watchdog reset",
+        "Feedback isolation: Isolated voltage divider on each output with galvanic isolation via independent feedback paths"
+      ],
+      "automation_steps": [
+        "Step 1: Hi-pot isolation testing - 2kV DC isolation voltage applied for 60 seconds with breakdown detection threshold",
+        "Step 2: Multi-isolated rail bring-up - primary domain initialization \u2192 secondary isolated supplies enable with foldback current limiting",
+        "Step 3: Clock domain synchronization - independent oscillators on primary and secondary, CDC synchronizers validated for all domain crossings",
+        "Step 4: Isolation barrier self-test - periodic test pattern injection through optocouplers every 1s, 3-strike fault detection",
+        "Step 5: Cross-domain handshake validation - primary\u2192secondary request/response signaling with 10\u00b5s timeout monitoring",
+        "Step 6: Thermal coupling stress - temperature oscillation between isolated domains with load variation, monitoring for cross-domain interference",
+        "Step 7: Multi-rail power cycling - 10,000 cycles from 0-100% load with isolated domain cross-checking, MTTF >100k hours verification",
+        "Step 8: EMC immunity testing - IEC 61010-1 compliance (conducted, radiated, burst, surge) with galvanic isolation integrity monitoring",
+        "Step 9: Current limiting accuracy - per-output foldback characterization across all rails, overshoot <50mA, variation <5%",
+        "Step 10: Efficiency characterization - 10%, 50%, 100% load testing for each isolated output rail with power accounting"
+      ],
+      "top_level_integration_patterns": [
+        {
+          "pattern": "multi_rail_sequencing",
+          "description": "Coordinated bring-up of isolated power rails to prevent inrush and ensure fault-free startup",
+          "sequence": [
+            "VBAT input \u2192 primary LDO (5V, 200ms ramp) \u2192 hi-pot test pass \u2192 secondary isolated supplies enable",
+            "Each secondary: ramp 0V\u2192Vout over 100ms with foldback current limit (50mA max)",
+            "Watchdog armed after all rails stable for 200ms"
+          ],
+          "abort_conditions": "Hi-pot fault, secondary current exceeds 100mA, voltage overshoot >10%"
+        },
+        {
+          "pattern": "isolation_barrier_monitoring",
+          "description": "Continuous health check of isolation barriers with automatic recovery",
+          "monitoring": [
+            "Periodic injection of test signal through optocoupler (every 1s)",
+            "Measure response in secondary domain, flag as fault if signal not received within 1ms",
+            "3-strike fault detection: 3 consecutive test failures \u2192 trigger watchdog reset"
+          ],
+          "self_healing": "After watchdog reset, reinitialize optocouplers and retry"
+        },
+        {
+          "pattern": "cross_domain_handshake",
+          "description": "Safe signaling between isolated domains with robust synchronization",
+          "handshake_protocol": [
+            "Primary \u2192 secondary: send request \u2192 secondary samples 2 clock cycles \u2192 response back",
+            "Synchronization: dual-stage DFF with setup-hold checking",
+            "Timeout: if no response in 10\u00b5s, abort and log error"
+          ],
+          "example_use_case": "Enable signal for secondary rails, fault report from secondary to primary"
+        },
+        {
+          "pattern": "thermal_derating_isolated",
+          "description": "Temperature monitoring with per-domain derate strategies",
+          "strategy": [
+            "Shared thermal sensor on primary, isolated measurement on secondary via optocoupler feedback",
+            "85\u00b0C: reduce secondary output current by 20%",
+            "105\u00b0C: reduce by 50%, disable non-critical secondary rails",
+            ">125\u00b0C: shut down all secondary rails, keep primary alive for safety"
+          ]
+        }
+      ],
+      "key": "isolated_power_supply_controller",
+      "compatible": true
+    },
+    {
+      "name": "Isolated RS-485 Gateway",
+      "summary": "Galvanically isolated RS-485 interface combining transceiver, isolation, and protocol handling.",
+      "headline": "Isolated industrial communication gateway for multi-node networks and power-isolated systems.",
+      "narrative": "This profile combines RS-485 transceiver with integrated isolation barrier and protocol handling for robust industrial communication networks with ground potential differences.",
+      "standard": "IEC 61800-5, RS-485, ISO 7637 automotive immunity",
+      "tags": [
+        "industrial",
+        "rs485",
+        "isolation",
+        "gateway",
+        "communication"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "rs485_transceiver",
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "uart_vip",
+        "spi_vip",
+        "emc_compliance_vip",
+        "power_domain_isolation_vip"
+      ],
+      "digital_subsystems": [
+        "rs485_interface_plane",
+        "test_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "isolated_rs485_gateway",
+      "compatible": true
+    },
+    {
+      "name": "LIN Node ASIC",
+      "summary": "Automotive LIN node with integrated analog rails, transceiver, and digital control plane.",
+      "headline": "Integrated LIN chip assembly from reusable power, interface, and digital IP.",
+      "narrative": "This profile combines the reusable bandgap, regulator, LIN interface, and control-plane IP blocks into an automotive-oriented mixed-signal chip scaffold.",
+      "standard": "ISO 17987 / LIN 2.2A",
+      "tags": [
+        "automotive",
+        "lin",
+        "mixed-signal",
+        "ip library",
+        "vip"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "ldo_lin",
+        "lin_transceiver",
+        "spi_controller",
+        "register_file",
+        "lin_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "spi_vip",
+        "lin_vip",
+        "power_sequence_vip",
+        "mixed_signal_bridge_vip"
+      ],
+      "digital_subsystems": [
+        "lin_node_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "lin_node_asic",
+      "compatible": true
+    },
+    {
+      "name": "Mixed-Signal Sensor Hub",
+      "summary": "Sensor/control chip scaffold combining references, rails, multiple converter macros, and shared digital control.",
+      "headline": "Sensor-hub chip assembly from reusable analog, converter, and digital subsystem IP.",
+      "narrative": "This profile combines power/reference infrastructure with multiple converter macros and a shared digital control plane so new monitor or sensor chips start from integrated building blocks instead of a blank architecture.",
+      "standard": "Internal sensor and monitor architecture reference",
+      "tags": [
+        "sensor hub",
+        "mixed-signal",
+        "adc",
+        "control plane",
+        "vip"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "sar_adc_top",
+        "sigma_delta_adc_top",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "spi_vip",
+        "power_sequence_vip",
+        "adc_transient_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "sensor_hub_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "mixed_signal_sensor_hub",
+      "compatible": true
+    },
+    {
+      "name": "Multi-Sensor Hub",
+      "summary": "I2C-based sensor aggregation platform with dual data converters and temperature monitoring.",
+      "headline": "Reusable multi-sensor platform combining I2C interface, analog monitoring, and temperature protection.",
+      "narrative": "This profile builds a sensor aggregation chip from reusable I2C controller, dual ADC macros, thermal monitoring, and analog signal conditioning IPs.",
+      "standard": "I2C 3.0, internal sensor-hub architecture reference",
+      "tags": [
+        "sensor-hub",
+        "i2c",
+        "multi-channel",
+        "thermal",
+        "mixed-signal"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "i2c_controller",
+        "temperature_sensor",
+        "sar_adc_top",
+        "sigma_delta_adc_top",
+        "register_file",
+        "interrupt_controller",
+        "control_logic",
+        "low_pass_filter",
+        "analog_multiplexer"
+      ],
+      "vips": [
+        "i2c_vip",
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "thermal_monitoring_vip",
+        "spi_vip"
+      ],
+      "digital_subsystems": [
+        "i2c_sensor_interface",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "multi_sensor_hub",
+      "compatible": true
+    },
+    {
+      "name": "Power Management Unit",
+      "summary": "PMU-oriented chip scaffold combining references, regulators, switching conversion, and control-plane logic.",
+      "headline": "Reusable PMU chip assembly with analog power IP and digital control integration.",
+      "narrative": "This profile starts a power-management chip from reusable bandgap, regulator, switching, and digital-control assets already in the repository.",
+      "standard": "Internal PMU architecture reference",
+      "tags": [
+        "pmu",
+        "power",
+        "ldo",
+        "buck",
+        "vip"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "buck_converter",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "spi_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "sensor_hub_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "power_management_unit",
+      "compatible": true
+    },
+    {
+      "name": "Precision Analog Front-End",
+      "summary": "Lab instrumentation front-end with programmable gain, multi-threshold detection, and precision references.",
+      "headline": "Reusable precision analog interface for measurement equipment and laboratory instrumentation.",
+      "narrative": "This profile builds a precision analog front-end from programmable gain amplifiers, multi-threshold comparator arrays, and precision reference generators for multi-channel instrumentation.",
+      "standard": "Precision measurement architecture reference",
+      "tags": [
+        "precision",
+        "measurement",
+        "instrumentation",
+        "analog",
+        "multi-channel"
+      ],
+      "blocks": [
+        "bandgap",
+        "precision_voltage_reference",
+        "current_reference",
+        "programmable_gain_amplifier",
+        "comparator_array",
+        "low_pass_filter",
+        "sar_adc_top",
+        "trim_circuit",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "io_electrical_vip",
+        "frequency_accuracy_vip"
+      ],
+      "digital_subsystems": [
+        "analog_conditioning_plane",
+        "converter_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "precision_analog_frontend",
+      "compatible": true
+    },
+    {
+      "name": "Real-Time Motor Controller",
+      "summary": "Three-phase motor control ASIC with PWM generation, current sensing, and thermal protection.",
+      "headline": "Integrated motor control platform for robotics, industrial drives, and automotive applications.",
+      "narrative": "This profile assembles a complete motor controller from PWM generation, programmable gain amplifiers for current sensing, thermal monitoring, and digital control plane for commutation sequencing.",
+      "standard": "IEC 61800-5 suitability, internal motor-control architecture reference",
+      "tags": [
+        "motor",
+        "pwm",
+        "three-phase",
+        "real-time",
+        "industrial",
+        "automotive"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "pwm_controller",
+        "programmable_gain_amplifier",
+        "comparator_array",
+        "temperature_sensor",
+        "watchdog_timer",
+        "interrupt_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "frequency_accuracy_vip"
+      ],
+      "digital_subsystems": [
+        "pwm_motor_control_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "real_time_motor_controller",
+      "compatible": true
+    },
+    {
+      "name": "Safe Motor Drive Controller",
+      "summary": "Functional safety-compliant three-phase motor drive with integrated diagnostics and SIL monitoring.",
+      "headline": "ISO 13849 SIL-2 capable motor drive ASIC for safety-critical industrial applications.",
+      "narrative": "This profile creates a safety-critical motor control IC combining three-phase PWM generation, current sensing, thermal protection, watchdog monitoring, and built-in safety diagnostics for industrial robots, conveyors, and machinery requiring certified safety performance.",
+      "standard": "ISO 13849-1 SIL-2, IEC 61508 SIL-2, IEC 60204-1",
+      "tags": [
+        "motor",
+        "drive",
+        "safety",
+        "sil",
+        "industrial",
+        "diagnostics"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "pwm_controller",
+        "programmable_gain_amplifier",
+        "high_speed_comparator",
+        "temperature_sensor",
+        "watchdog_timer",
+        "reset_generator",
+        "interrupt_controller",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "power_sequence_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "high_speed_signal_vip",
+        "clock_gating_vip"
+      ],
+      "digital_subsystems": [
+        "pwm_motor_control_plane",
+        "safety_monitor_plane",
+        "thermal_management_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "design_collateral": [
+        "three-phase PWM commutation logic with dead-time insertion (50-200ns programmable)",
+        "SIL-2 functional safety FMEA with failure mode mapping and residual risk analysis",
+        "diagnostic coverage analysis (DCA) report with >90% target and failure mode ranking",
+        "motor current sense signal conditioning circuits with offset/gain trimming",
+        "thermal management strategy with temperature-dependent derating (soft-stop at >110C)",
+        "safety-critical firmware scaffolding with dual-monitor inputs and voting logic",
+        "watchdog and reset sequencing for safe shutdown with multi-level fault escalation",
+        "isolated diagnostics interface for safety system integration (safe state output)",
+        "six-step and sinusoidal commutation pattern generators with selectable modulation",
+        "over-current and under-current detection thresholds with programmable hysteresis",
+        "phase-current reconstruction algorithms for sensorless operation capability",
+        "hall sensor input conditioning with glitch filtering and invalid state detection"
+      ],
+      "automation_coverage": [
+        "six-step and sinusoidal PWM commutation patterns with dead-time verification (<100ns jitter)",
+        "fault detection latency <10\u00b5s for under/over-current conditions with high reliability",
+        "over-temperature detection with hysteresis and safe shutdown (interrupt + watchdog trigger)",
+        "diagnostic coverage >90% with safe failure modes verified (no dangerous failures)",
+        "PWM cycle timing with <100ns jitter for multi-axis motor synchronization",
+        "watchdog timeout confidence testing with >99% coverage and independent oscillator drift",
+        "reset sequence validation across all power states (standby, active, shutdown)",
+        "SIL-2 certification documentation and traceability matrix for all design decisions",
+        "three-phase current measurement accuracy <5% across 10:1 load range",
+        "motor speed estimation error <2% with hall sensor input and sensorless fallback modes",
+        "thermal time constant characterization with junction-to-case transient response",
+        "EMC immunity per IEC 60204-1 (burst, surge, conducted/radiated emissions)"
+      ],
+      "design_assembly_rules": [
+        "PWM gate drivers: Three high-side drivers + three low-side drivers with integrated 50-200ns dead-time, shoot-through protection via AND-gated enable",
+        "Current sensing: Shunt resistors (10m\u03a9 typical) with amplifier (50V/V) sampled at 3x PWM frequency for cycle-by-cycle current limiting",
+        "Phase voltage measurement: 3 channels ADC-interfaced with RC filtering (100kHz cutoff) for BEMF reconstruction and sensorless control",
+        "Watchdog independent oscillator: On-die RC oscillator with <\u00b110% drift, guaranteed operating from 0.8V supply for safe shutdown",
+        "Reset sequencing: Internal reset signal delayed 1ms after watchdog timeout, driving all latches to safe state (all gate drivers off)",
+        "Safety output isolation: Independent NAND gate with forced logic '1' until watchdog armed, guarantees safe state until confirmed ready"
+      ],
+      "automation_steps": [
+        "Step 1: PWM commutation pattern generation - six-step and sinusoidal modes verified with dead-time insertion (50-200ns)",
+        "Step 2: Fault detection latency verification - overcurrent detection <10\u00b5s, under-temperature shutdown <100\u00b5s",
+        "Step 3: Three-phase current measurement calibration - shunt resistor verification, amplifier offset trimming, <5% accuracy across 10:1 load range",
+        "Step 4: Dead-time verification - PWM cycle timing analyzed for shoot-through prevention, <100ns jitter measured across all phase transitions",
+        "Step 5: Watchdog independent oscillator validation - RC oscillator drift <\u00b110% over temperature/PVT, safe timeout guaranteed <10s window",
+        "Step 6: Safety state transition testing - all gate drivers OFF within <500ns of fault, fault interrupt assertion, safe output verification",
+        "Step 7: Thermal monitoring and derating - on-die sensor characterization, derate DAC response across 85-125\u00b0C range, soft-stop sequence validation",
+        "Step 8: Diagnostic coverage analysis - >90% DCA target verified, safe failure modes identified, no dangerous failures detected",
+        "Step 9: Hall sensor input conditioning - glitch filtering validation, invalid state detection, sensorless commutation fallback triggered on sensor loss >50ms",
+        "Step 10: Six-phase back-EMF reconstruction - BEMF zero-crossing detection <10\u00b5s, rotor position estimation <2% error, sensorless synchronization with hall sensor modes"
+      ],
+      "top_level_integration_patterns": [
+        {
+          "pattern": "commutation_logic",
+          "description": "Six-step and sinusoidal PWM with smooth transitions and dead-time insertion",
+          "commutation_modes": [
+            "six_step: 120\u00b0 commutation with hall sensor inputs, 2 transistors ON per phase",
+            "sinusoidal: three independent 16-bit PWM with space-vector modulation for low ripple",
+            "transition: when switching modes, ramp PWM duty from 0% over 100\u00b5s to avoid current transient"
+          ],
+          "dead_time": "Configurable 50-200ns via SPI to prevent shoot-through, automatically inserted on all phase transitions"
+        },
+        {
+          "pattern": "current_limiting",
+          "description": "Cycle-by-cycle and latching overcurrent protection with safe shutdown",
+          "thresholds": [
+            "cycle_limit: if Iphase > Ilimit during any PWM cycle, disable that phase at next zero-crossing",
+            "latching_fault: if 3 consecutive cycles exceed limit, disable all drivers and trigger watchdog interrupt",
+            "hysteresis: 50mA below limit required to re-enable after latch fault"
+          ],
+          "safe_state": "All gate drivers OFF within <500ns of overcurrent detection"
+        },
+        {
+          "pattern": "thermal_derating",
+          "description": "Temperature-based motor output current reduction with fixed hold-off time",
+          "thresholds": [
+            "85-100\u00b0C: reduce PWM duty by 20% by lowering Ilimit ceiling",
+            "100-110\u00b0C: reduce by 50%, initiate soft-stop sequence (ramp speed reference to zero over 100ms)",
+            ">110\u00b0C: force all gate drivers OFF, trigger watchdog with fault logged"
+          ],
+          "thermal_sensor": "On-die sensor sampled every 100ms, updated to derate DAC immediately"
+        },
+        {
+          "pattern": "watchdog_timeout_escalation",
+          "description": "Multi-level fault escalation with safe shutdown guarantee",
+          "escalation": [
+            "Level-1 (timeout pending): ~100ms before timeout \u2192 software has chance to reset watchdog",
+            "Level-2 (timeout occur): gate drivers forced OFF, fault interrupt asserted, reset signal held 1ms",
+            "Level-3 (post-reset): safe output asserted, requires explicit software command to re-enable drive",
+            "independent oscillator ensures timeout occurs even if main clock fails"
+          ],
+          "recovery": "Software must verify motor stopped, manually clear fault bit via SPI before re-enabling"
+        },
+        {
+          "pattern": "sensorless_commutation_fallback",
+          "description": "Back-EMF estimation for motor speed when hall sensors fail",
+          "estimation": [
+            "Sample all three phase voltages and reconstruct back-EMF via 3-axis transformation",
+            "Estimate rotor position every 10\u00b5s via zero-crossing detection on BEMF",
+            "Commutation timing adjusted dynamically based on estimated speed"
+          ],
+          "fallback_trigger": "If hall sensor data invalid for >50ms, switch to sensorless mode automatically"
+        }
+      ],
+      "key": "safe_motor_drive_controller",
+      "compatible": true
+    },
+    {
+      "name": "SAR ADC Macro",
+      "summary": "Converter-oriented chip scaffold centered on a reusable SAR ADC macro and digital control hooks.",
+      "headline": "Reusable SAR ADC chip assembly with verification hooks baked in.",
+      "narrative": "This profile packages the available SAR ADC macro and supporting control/VIP pieces into a reusable converter design scaffold.",
+      "standard": "Internal ADC architecture reference",
+      "tags": [
+        "adc",
+        "sar",
+        "data converter",
+        "ip library",
+        "vip"
+      ],
+      "blocks": [
+        "sar_adc_top",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "spi_vip"
+      ],
+      "digital_subsystems": [
+        "converter_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sar_adc_macro",
+      "compatible": true
+    },
+    {
+      "name": "Secure IoT Gateway",
+      "summary": "Enterprise-grade IoT gateway with integrated crypto, multi-protocol wireless, and secure boot.",
+      "headline": "Production-ready secure IoT gateway for connected industrial and enterprise systems.",
+      "narrative": "This profile combines multi-protocol wireless connectivity, strong cryptographic protection, secure boot infrastructure, and robust power management for enterprise IoT deployments requiring FIPS 140-2 level compliance.",
+      "standard": "BLE 5.0, MIPI I3C, AES-256, SHA-512, FIPS 140-2 Level 2",
+      "tags": [
+        "gateway",
+        "secure",
+        "enterprise",
+        "iot",
+        "crypto",
+        "multi-protocol"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "boost_converter",
+        "ble_transceiver",
+        "nfc_controller",
+        "uwb_transceiver",
+        "rf_front_end",
+        "aes_accelerator",
+        "sha_accelerator",
+        "true_random_number_generator",
+        "i3c_controller",
+        "uart_controller",
+        "spi_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic",
+        "watchdog_timer"
+      ],
+      "vips": [
+        "ble_vip",
+        "nfc_vip",
+        "i3c_vip",
+        "crypto_vip",
+        "emc_compliance_vip",
+        "power_sequence_vip",
+        "frequency_accuracy_vip"
+      ],
+      "digital_subsystems": [
+        "iot_wireless_plane",
+        "security_crypto_plane",
+        "multi_rail_power_control"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "secure_iot_gateway",
+      "compatible": true
+    },
+    {
+      "name": "Sigma-Delta ADC Macro",
+      "summary": "Oversampled converter scaffold centered on a reusable sigma-delta ADC macro and its control plane.",
+      "headline": "Reusable sigma-delta converter chip assembly with integrated validation flow.",
+      "narrative": "This profile packages the available sigma-delta ADC macro and the reusable digital control path for monitoring and sensing designs.",
+      "standard": "Internal ADC architecture reference",
+      "tags": [
+        "adc",
+        "sigma-delta",
+        "data converter",
+        "ip library",
+        "vip"
+      ],
+      "blocks": [
+        "sigma_delta_adc_top",
+        "spi_controller",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "adc_transient_vip",
+        "analog_snapshot_vip",
+        "spi_vip"
+      ],
+      "digital_subsystems": [
+        "converter_control_plane"
+      ],
+      "technology_support": [
+        "generic180",
+        "generic130",
+        "generic65",
+        "bcd180"
+      ],
+      "key": "sigma_delta_macro",
+      "compatible": true
+    },
+    {
+      "name": "Smart Battery Pack Controller",
+      "summary": "Multi-cell battery management system with wireless telemetry and active balancing.",
+      "headline": "Intelligent battery pack controller for electric vehicles and portable power systems.",
+      "narrative": "This profile assembles a complete battery management system from multi-cell voltage/current monitoring, active balancing, thermal management, wireless telemetry, and pack-level protection for automotive and industrial energy storage.",
+      "standard": "IEC 61851-1 (charging), ISO 9001 (quality), GB/T 24347 (BMS standard)",
+      "tags": [
+        "battery",
+        "bms",
+        "ev",
+        "power",
+        "energy-storage",
+        "multi-cell"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "battery_cell_monitor",
+        "bms_controller",
+        "temperature_sensor",
+        "watchdog_timer",
+        "current_reference",
+        "trim_circuit",
+        "ble_transceiver",
+        "i3c_controller",
+        "uart_controller",
+        "register_file",
+        "interrupt_controller",
+        "control_logic"
+      ],
+      "vips": [
+        "bms_vip",
+        "ble_vip",
+        "i3c_vip",
+        "thermal_monitoring_vip",
+        "current_consumption_vip",
+        "power_sequence_vip"
+      ],
+      "digital_subsystems": [
+        "battery_management_plane",
+        "multi_rail_power_control"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "smart_battery_pack",
+      "compatible": true
+    },
+    {
+      "name": "Wireless-Powered Sensor Node",
+      "summary": "Battery-free or battery-assisted sensor node with Qi wireless charging and energy harvesting.",
+      "headline": "Sustainable IoT sensor node with wireless power and storage management.",
+      "narrative": "This profile creates a low-power or battery-free sensor node combining wireless power receivers (Qi standard), energy harvesting, battery management, sensor interfaces, and wireless transmission for maintenance-free IoT deployments.",
+      "standard": "Qi Wireless Charging, ISO/IEC 63000 (consumer electronics environmental profiles)",
+      "tags": [
+        "sensor",
+        "wireless",
+        "power",
+        "qi",
+        "battery-free",
+        "sustainable"
+      ],
+      "blocks": [
+        "bandgap",
+        "ldo_analog",
+        "ldo_digital",
+        "qi_wireless_rx",
+        "battery_cell_monitor",
+        "bms_controller",
+        "imu_interface",
+        "ble_transceiver",
+        "i3c_controller",
+        "temperature_sensor",
+        "register_file",
+        "control_logic"
+      ],
+      "vips": [
+        "wireless_charging_vip",
+        "bms_vip",
+        "ble_vip",
+        "i3c_vip",
+        "analog_snapshot_vip"
+      ],
+      "digital_subsystems": [
+        "battery_management_plane",
+        "iot_wireless_plane"
+      ],
+      "technology_support": [
+        "generic130",
+        "generic65",
+        "bcd180",
+        "generic22",
+        "generic14"
+      ],
+      "key": "wireless_powered_sensor",
+      "compatible": true
+    }
+  ]
+}

@@ -1,11 +1,14 @@
 {
-  "generated_at": "2026-05-02T20:53:38.716610",
-  "session_id": "312b80cf-cf22-4590-ab8f-2b2778a0d3a4",
+  "generated_at": "2026-05-03T00:01:21.015633",
+  "session_id": "39794e1c-e64c-47c8-9b75-7ae79536fae0",
   "repo_root": "C:\\Users\\vinay\\My Simulator",
   "branch": "master",
-  "commit": "4c5af78087382fe12055e7a0bd6b12a2eacc780c",
+  "commit": "250bd50f9f511c1bba69da370d88e290f26c89f3",
   "git_status": [
-    "## master...origin/master [ahead 35]",
+    "## master...origin/master [ahead 38]",
+    " M designs/lin_asic/blocks/bandgap/testbench.spice",
+    " M designs/lin_asic/blocks/ldo_lin/ldo_lin.spice",
+    " M designs/lin_asic/blocks/ldo_lin/testbench.spice",
     " M designs/sar_adc/blocks/sar_adc_top/REPORT.md",
     " M designs/sigma_delta_adc/blocks/sigma_delta_adc_top/REPORT.md",
     " M reports/agent_controller_state.json",
@@ -37,8 +40,12 @@
     " M reports/sigma_delta_adc_regression_latest.json",
     " M reports/sigma_delta_adc_regression_latest.md",
     " M reports/sigma_delta_adc_sigma_delta_adc_top_transient_latest_raw.json",
-    " M simulator/gui/main_window.py",
-    " M simulator/gui/schematic_editor.py"
+    "?? reports/cycle_0084_enhancements_summary.md",
+    "?? reports/cycle_84_to_85_handoff.md",
+    "?? simulator/catalog/integration_orchestrator.py",
+    "?? simulator/catalog/profile_reference_designs.py",
+    "?? simulator/catalog/vip_regression_scenarios.py",
+    "?? tests/test_integration_enhancements.py"
   ],
   "host": "Manasvi",
   "platform": "Windows-11-10.0.26100-SP0",

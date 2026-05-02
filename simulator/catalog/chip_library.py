@@ -2737,6 +2737,18 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "Reset sequencing: Watchdog → core domains → I/O domains with 1ms staggered hold-time to prevent metastability",
             "Memory hierarchy: Register file in core domain, I2S buffer in dedicated audio domain with CDC synchronizers at boundaries"
         ],
+        "automation_steps": [
+            "Step 1: Power-up validation - verify bandgap stability <1ms, analog/digital LDO soft-start ramps",
+            "Step 2: Clock tree initialization - enable master oscillator and PLL for audio/I2S clock generation, verify <50ps jitter",
+            "Step 3: Safety subsystem boot - watchdog armed, memory ECC scrub, safety_sram initialized",
+            "Step 4: I2S audio interface startup - DMA engine enabled, audio buffer pre-loaded with silence pattern",
+            "Step 5: CAN and Ethernet transceiver initialization - protocol handshakes, link negotiation, carrier detection",
+            "Step 6: Thermal monitoring calibration - on-die sensor characterization across corners, derate thresholds configured",
+            "Step 7: Mixed-signal regression suite - I2S+CAN+Ethernet simultaneous streams, 1M samples audio + 100 CAN msg/sec + Ethernet frames",
+            "Step 8: ASIL-B functional safety verification - watchdog timeout coverage >99%, fault injection detection >99%",
+            "Step 9: Burn-in stress test - 1000 hours @ 125°C with biased power cycling, monitor for ESD/latch-up recovery",
+            "Step 10: Design collateral verification - schematic review, layout floorplan hotspot validation, AUTOSAR RTE integration, safety case evidence package"
+        ],
         "top_level_integration_patterns": [
             {
                 "pattern": "infotainment_boot_sequence",
@@ -2809,6 +2821,18 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "Memory protection: Multi-rail ECC on packet buffers (SRAM protected), separate parity on register file, watchdog monitor on free-running counter",
             "Clock tree: Multi-oscillator with independent clocks for each protocol domain, phase-locked PLL for Ethernet MAC, independent dividers for PROFIBUS",
             "CDC (Clock Domain Crossing): Synchronized with Gray code counters and 2-stage FF for all multi-domain handshakes"
+        ],
+        "automation_steps": [
+            "Step 1: Multi-protocol interface initialization - PROFIBUS, CAN, and Ethernet PHY startup with link validation",
+            "Step 2: DMA controller setup - 3 independent channels with round-robin arbiter, buffer pointer initialization",
+            "Step 3: Crypto accelerator provisioning - AES and SHA engines enabled, test key loaded, performance benchmarked",
+            "Step 4: Gateway packet forwarding verification - PROFIBUS→CAN→Ethernet routing with <5ms per-packet latency",
+            "Step 5: Security pipeline validation - AES-256-GCM encryption/decryption at line-rate 100Mbps, SHA-512 verification",
+            "Step 6: Multi-protocol collision handling - simultaneous PROFIBUS@12Mbps + CAN@1Mbps + Ethernet@100Mbps stress test",
+            "Step 7: Protocol failover testing - primary interface faults injected, automatic switchover to redundant bus <50ms",
+            "Step 8: Long-duration stress test - 168 hours with injected 0.1-1% packet loss, packet buffering, zero-loss verification",
+            "Step 9: Thermal power management - crypto workload reduction as temperature climbs (85-105-125°C thresholds)",
+            "Step 10: End-to-end packet tracing - frame timestamp injection, latency verification, protocol compliance checks"
         ],
         "top_level_integration_patterns": [
             {
@@ -2884,6 +2908,18 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "Current limiting: Per-output foldback current limit with <50mA overshoot, settable via SPI with 8-bit DAC granularity",
             "Isolation barrier self-test: Periodic injection of test patterns through optocoupler, failure triggers watchdog reset",
             "Feedback isolation: Isolated voltage divider on each output with galvanic isolation via independent feedback paths"
+        ],
+        "automation_steps": [
+            "Step 1: Hi-pot isolation testing - 2kV DC isolation voltage applied for 60 seconds with breakdown detection threshold",
+            "Step 2: Multi-isolated rail bring-up - primary domain initialization → secondary isolated supplies enable with foldback current limiting",
+            "Step 3: Clock domain synchronization - independent oscillators on primary and secondary, CDC synchronizers validated for all domain crossings",
+            "Step 4: Isolation barrier self-test - periodic test pattern injection through optocouplers every 1s, 3-strike fault detection",
+            "Step 5: Cross-domain handshake validation - primary→secondary request/response signaling with 10µs timeout monitoring",
+            "Step 6: Thermal coupling stress - temperature oscillation between isolated domains with load variation, monitoring for cross-domain interference",
+            "Step 7: Multi-rail power cycling - 10,000 cycles from 0-100% load with isolated domain cross-checking, MTTF >100k hours verification",
+            "Step 8: EMC immunity testing - IEC 61010-1 compliance (conducted, radiated, burst, surge) with galvanic isolation integrity monitoring",
+            "Step 9: Current limiting accuracy - per-output foldback characterization across all rails, overshoot <50mA, variation <5%",
+            "Step 10: Efficiency characterization - 10%, 50%, 100% load testing for each isolated output rail with power accounting"
         ],
         "top_level_integration_patterns": [
             {
@@ -2964,6 +3000,18 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "I2C/SPI buses: Isolated from Ethernet digital noise with separate ground planes; I2C pull-ups powered from analog rail",
             "Calibration storage: Dedicated I2C EEPROM with CRC protection for per-channel gains and offsets, updated every power-down",
             "Precision reference network: Bandgap reference distributed to all analog blocks with <1% voltage matching via matched resistor strings"
+        ],
+        "automation_steps": [
+            "Step 1: IEEE 1588 PTP synchronization - grandmaster discovery, sync frame exchange, <1µs offset verification on 8-node network",
+            "Step 2: Multi-channel ADC characterization - linearity testing (INL <±1LSB, DNL <±0.5LSB), settling time <500µs per channel",
+            "Step 3: Synchronized sampling validation - 16-channel simultaneous ADC trigger with <100ns cross-channel skew measurement",
+            "Step 4: Sensor calibration framework - per-channel gain/offset calibration with EEPROM storage, power-on auto-load verification",
+            "Step 5: TSN scheduling compliance - deterministic packet priority queueing, <100µs worst-case latency, jitter characterization",
+            "Step 6: Multi-channel isolation verification - crosstalk measurement between adjacent channels <-80dB, no cross-interference detected",
+            "Step 7: Sensor integration testing - common sensor examples (RTD, thermistor, 4-20mA, pressure) with end-to-end calibration",
+            "Step 8: Temperature drift compensation - -40°C to +85°C characterization across all sensor channels, aging compensation enabled",
+            "Step 9: ADC-to-Ethernet latency - <10ms latency from sensor acquisition to network packet transmission with buffering",
+            "Step 10: Anti-aliasing filter validation - 5kHz cutoff at 10kHz sampling, signal integrity verification with noise injections"
         ],
         "top_level_integration_patterns": [
             {
@@ -3047,6 +3095,18 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
             "Watchdog independent oscillator: On-die RC oscillator with <±10% drift, guaranteed operating from 0.8V supply for safe shutdown",
             "Reset sequencing: Internal reset signal delayed 1ms after watchdog timeout, driving all latches to safe state (all gate drivers off)",
             "Safety output isolation: Independent NAND gate with forced logic '1' until watchdog armed, guarantees safe state until confirmed ready"
+        ],
+        "automation_steps": [
+            "Step 1: PWM commutation pattern generation - six-step and sinusoidal modes verified with dead-time insertion (50-200ns)",
+            "Step 2: Fault detection latency verification - overcurrent detection <10µs, under-temperature shutdown <100µs",
+            "Step 3: Three-phase current measurement calibration - shunt resistor verification, amplifier offset trimming, <5% accuracy across 10:1 load range",
+            "Step 4: Dead-time verification - PWM cycle timing analyzed for shoot-through prevention, <100ns jitter measured across all phase transitions",
+            "Step 5: Watchdog independent oscillator validation - RC oscillator drift <±10% over temperature/PVT, safe timeout guaranteed <10s window",
+            "Step 6: Safety state transition testing - all gate drivers OFF within <500ns of fault, fault interrupt assertion, safe output verification",
+            "Step 7: Thermal monitoring and derating - on-die sensor characterization, derate DAC response across 85-125°C range, soft-stop sequence validation",
+            "Step 8: Diagnostic coverage analysis - >90% DCA target verified, safe failure modes identified, no dangerous failures detected",
+            "Step 9: Hall sensor input conditioning - glitch filtering validation, invalid state detection, sensorless commutation fallback triggered on sensor loss >50ms",
+            "Step 10: Six-phase back-EMF reconstruction - BEMF zero-crossing detection <10µs, rotor position estimation <2% error, sensorless synchronization with hall sensor modes"
         ],
         "top_level_integration_patterns": [
             {

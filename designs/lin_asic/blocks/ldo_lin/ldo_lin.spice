@@ -1,35 +1,36 @@
-* Bandgap Voltage Reference - Brokaw Topology
-* Supply: 3.3V, Output: ~1.2V
-* Temperature coefficient: < 50 ppm/°C
-.SUBCKT BANDGAP_REF VDD VREF GND EN
+* LDO Regulator - LIN Transceiver Supply
+* Input: 12.0V (VBAT), Output: 5.0V
+* Designed for LIN bus driver power
+.SUBCKT LDO_LIN VIN VOUT GND VREF EN
 
-* Startup circuit
-M_START1 n_start1 EN GND GND NMOS_3P3 W=2u L=0.5u
-M_START2 n_start1 n_start1 VDD VDD PMOS_3P3 W=4u L=0.5u
-M_START3 n_bp n_start1 VDD VDD PMOS_3P3 W=4u L=0.5u
+* Error amplifier
+M_D1 n_d1 n_d1 VIN VIN PMOS_HV W=10u L=1u
+M_D2 n_d2 n_d1 VIN VIN PMOS_HV W=10u L=1u
+M_D3 n_d1 VREF n_tail GND NMOS_3P3 W=20u L=1u
+M_D4 n_d2 n_fb n_tail GND NMOS_3P3 W=20u L=1u
+M_TAIL n_tail n_bias GND GND NMOS_3P3 W=10u L=2u
 
-* PMOS current mirror (cascode for accuracy)
-M_P1 n_c1 n_bp VDD VDD PMOS_3P3 W=20u L=2u
-M_P2 n_c2 n_bp VDD VDD PMOS_3P3 W=20u L=2u
-M_P3 n_bp n_bp VDD VDD PMOS_3P3 W=20u L=2u
+* Bias
+M_BIAS n_bias n_bias GND GND NMOS_3P3 W=5u L=4u
+R_BIAS n_bias VIN 300k
 
-* BJT pair (Q2 has 8x area of Q1)
-Q1 n_c1 n_c1 n_e1 GND NPN_VERT AREA=1
-Q2 n_c2 n_c2 n_e2 GND NPN_VERT AREA=8
+* HV Pass transistor (handles VBAT range 8-18V)
+M_PASS VOUT n_d2 VIN VIN PMOS_HV W=8000u L=0.8u
 
-* Emitter resistors for delta-VBE
-R1 n_e1 n_r1 10k
-R2 n_e2 n_r1 1.25k
+* Output
+C_OUT VOUT GND 2.2u
+C_INT VOUT GND 100p
 
-* Output resistor divider for VREF = VBE + (R3/R2)*Vt*ln(8)
-R3 n_r1 GND 25k
+* Feedback: VOUT=5V, VREF=1.2V -> R1/R2 = 3.167
+R_FB1 VOUT n_fb 316.7k
+R_FB2 n_fb GND 100k
 
-* Output buffer
-M_BUF1 VREF n_c1 VDD VDD PMOS_3P3 W=40u L=1u
-R_OUT VREF GND 100k
-C_FILT VREF GND 10p
+* Compensation
+C_COMP n_d2 VOUT 4p
+R_COMP n_d2 n_rc 15k
+C_COMP2 n_rc VOUT 2p
 
-* Enable control
-M_EN n_bp EN GND GND NMOS_3P3 W=2u L=0.5u
+* Enable
+M_EN_SW n_bias EN GND GND NMOS_3P3 W=2u L=0.5u
 
-.ENDS BANDGAP_REF
+.ENDS LDO_LIN

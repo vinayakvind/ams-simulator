@@ -1,6 +1,6 @@
 {
   "chip": "LIN_ASIC",
-  "generated_at": "2026-05-02T20:57:45.705585",
+  "generated_at": "2026-05-03T00:01:31.502692",
   "standard": "ISO 17987 / LIN 2.2A",
   "summary": {
     "total": 10,
@@ -26,7 +26,7 @@
         "output_steady_std": 0.0003672564817803106,
         "settling_time_ns": 634.6346346346346
       },
-      "elapsed_ms": 44.0
+      "elapsed_ms": 72.3
     },
     {
       "case_id": "ANA-LDO-3V3",
@@ -41,7 +41,7 @@
         "output_steady_std": 5.714956128458279e-07,
         "settling_time_ns": 465.0
       },
-      "elapsed_ms": 18.1
+      "elapsed_ms": 22.6
     },
     {
       "case_id": "ANA-LDO-1V8",
@@ -56,7 +56,7 @@
         "output_steady_std": 7.507567416272978e-11,
         "settling_time_ns": 300.0
       },
-      "elapsed_ms": 21.0
+      "elapsed_ms": 20.0
     },
     {
       "case_id": "ANA-LDO-5V0",
@@ -71,7 +71,7 @@
         "output_steady_std": 9.841580766016615e-06,
         "settling_time_ns": 555.0
       },
-      "elapsed_ms": 19.5
+      "elapsed_ms": 20.0
     },
     {
       "case_id": "ANA-LIN-BUS-SWING",
@@ -85,7 +85,7 @@
         "output_steady_mean": 6.8855270703249385,
         "output_steady_std": 3.941066135232677
       },
-      "elapsed_ms": 10.3
+      "elapsed_ms": 8.5
     },
     {
       "case_id": "DIG-SPI-DECODE",

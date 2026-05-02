@@ -1,6 +1,6 @@
 # LIN ASIC Regression Report
 
-- Generated: 2026-05-02T20:57:45.705585
+- Generated: 2026-05-03T00:01:31.502692
 - Standard Target: ISO 17987 / LIN 2.2A
 - Overall: PASS
 

@@ -17,7 +17,7 @@ V_GND_REF GND_REF 0 DC 0
 V_EN EN 0 DC 3.3
 
 * DUT instantiation
-X_DUT VDD GND LDO_LIN
+X_DUT VDD VOUT GND VREF EN LDO_LIN
 
 * Analysis
 .OP
