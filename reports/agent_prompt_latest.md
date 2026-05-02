@@ -1,10 +1,10 @@
 # Autonomous Agent Prompt
 
-Cycle: 21
-Generated: 2026-05-02T19:24:44.503944
+Cycle: 23
+Generated: 2026-05-02T19:45:17.480294
 Workspace: My Simulator
 Branch: master
-Commit: 246242998810dd048974d53d0db9f3a95d8bd12c
+Commit: 34613b2dfbe56a30230cfcbd5eba97503841c107
 
 ## Controller Handshake Files
 
@@ -19,13 +19,13 @@ Run validation and reporting, then feed the next concrete improvement batch back
 
 ## Validation Commands Already Run This Cycle
 
-- PASS verify-project-status (log: reports/agent_cycles/cycle_0021_verify-project-status.log)
-- PASS generate-chip-catalog-all (log: reports/agent_cycles/cycle_0021_generate-chip-catalog-all.log)
-- PASS generate-chip-catalog-generic130 (log: reports/agent_cycles/cycle_0021_generate-chip-catalog-generic130.log)
-- PASS generate-chip-catalog-generic65 (log: reports/agent_cycles/cycle_0021_generate-chip-catalog-generic65.log)
-- PASS generate-chip-catalog-bcd180 (log: reports/agent_cycles/cycle_0021_generate-chip-catalog-bcd180.log)
-- PASS run-strict-autopilot (log: reports/agent_cycles/cycle_0021_run-strict-autopilot.log)
-- PASS repo-backup-report (log: reports/agent_cycles/cycle_0021_repo-backup-report.log)
+- PASS verify-project-status (log: reports/agent_cycles/cycle_0023_verify-project-status.log)
+- PASS generate-chip-catalog-all (log: reports/agent_cycles/cycle_0023_generate-chip-catalog-all.log)
+- PASS generate-chip-catalog-generic130 (log: reports/agent_cycles/cycle_0023_generate-chip-catalog-generic130.log)
+- PASS generate-chip-catalog-generic65 (log: reports/agent_cycles/cycle_0023_generate-chip-catalog-generic65.log)
+- PASS generate-chip-catalog-bcd180 (log: reports/agent_cycles/cycle_0023_generate-chip-catalog-bcd180.log)
+- PASS run-strict-autopilot (log: reports/agent_cycles/cycle_0023_run-strict-autopilot.log)
+- PASS repo-backup-report (log: reports/agent_cycles/cycle_0023_repo-backup-report.log)
 
 ## Priority Build Targets
 
@@ -42,7 +42,7 @@ Run validation and reporting, then feed the next concrete improvement batch back
 - Chip catalog inventory: 69 reusable IPs, 35 VIPs, 25 digital subsystems, 24 chip profiles.
 - generic130: 69/69 reusable IPs and 24/24 chip profiles are currently compatible.
 - generic65: 69/69 reusable IPs and 24/24 chip profiles are currently compatible.
-- bcd180: 68/69 reusable IPs and 24/24 chip profiles are currently compatible.
+- bcd180: 69/69 reusable IPs and 24/24 chip profiles are currently compatible.
 - Priority backlog configured for 24 targeted reusable IP, VIP, digital-subsystem, and chip-profile items.
 - Workflow focus: Use the latest strict autopilot and chip-catalog reports to decide the next implementation batch.
 - Workflow focus: Prefer improvements that expand reusable chip IP, VIP, and technology coverage.
@@ -50,7 +50,6 @@ Run validation and reporting, then feed the next concrete improvement batch back
 
 ## Next Improvements To Implement
 
-- Expand bcd180 reusable IP support for: uwb_transceiver.
 - Harden reusable IP priority targets with stronger generators, validation coverage, and example integrations: high_speed_comparator, differential_amplifier, buffered_precision_dac, lvds_receiver.
 - Deepen verification IP priority targets with richer protocol scenarios and mixed-signal regressions: ethernet_vip, profibus_vip, canopen_vip, clock_gating_vip.
 - Expand digital subsystem priority targets with reusable control planes, integration rules, and validation coverage: clock_gating_plane, ethernet_control_plane, safety_monitor_plane, infotainment_control_plane.

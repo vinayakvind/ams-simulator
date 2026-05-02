@@ -1,6 +1,6 @@
 # Agent Feedback
 
-Generated: 2026-05-02T19:24:44.503944
+Generated: 2026-05-02T19:45:17.480294
 
 ## Observations
 
@@ -9,7 +9,7 @@ Generated: 2026-05-02T19:24:44.503944
 - Chip catalog inventory: 69 reusable IPs, 35 VIPs, 25 digital subsystems, 24 chip profiles.
 - generic130: 69/69 reusable IPs and 24/24 chip profiles are currently compatible.
 - generic65: 69/69 reusable IPs and 24/24 chip profiles are currently compatible.
-- bcd180: 68/69 reusable IPs and 24/24 chip profiles are currently compatible.
+- bcd180: 69/69 reusable IPs and 24/24 chip profiles are currently compatible.
 - Priority backlog configured for 24 targeted reusable IP, VIP, digital-subsystem, and chip-profile items.
 - Workflow focus: Use the latest strict autopilot and chip-catalog reports to decide the next implementation batch.
 - Workflow focus: Prefer improvements that expand reusable chip IP, VIP, and technology coverage.
@@ -17,7 +17,6 @@ Generated: 2026-05-02T19:24:44.503944
 
 ## Improvements
 
-- Expand bcd180 reusable IP support for: uwb_transceiver.
 - Harden reusable IP priority targets with stronger generators, validation coverage, and example integrations: high_speed_comparator, differential_amplifier, buffered_precision_dac, lvds_receiver.
 - Deepen verification IP priority targets with richer protocol scenarios and mixed-signal regressions: ethernet_vip, profibus_vip, canopen_vip, clock_gating_vip.
 - Expand digital subsystem priority targets with reusable control planes, integration rules, and validation coverage: clock_gating_plane, ethernet_control_plane, safety_monitor_plane, infotainment_control_plane.
@@ -25,7 +24,6 @@ Generated: 2026-05-02T19:24:44.503944
 
 ## Next Actions
 
-- Expand bcd180 reusable IP support for: uwb_transceiver.
 - Harden reusable IP priority targets with stronger generators, validation coverage, and example integrations: high_speed_comparator, differential_amplifier, buffered_precision_dac, lvds_receiver.
 - Deepen verification IP priority targets with richer protocol scenarios and mixed-signal regressions: ethernet_vip, profibus_vip, canopen_vip, clock_gating_vip.
 - Expand digital subsystem priority targets with reusable control planes, integration rules, and validation coverage: clock_gating_plane, ethernet_control_plane, safety_monitor_plane, infotainment_control_plane.

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-02T19:32:05.569671",
+  "generated_at": "2026-05-02T19:44:49.214431",
   "technology_filter": "bcd180",
   "summary": {
     "technology_count": 4,
@@ -316,6 +316,24 @@
         "generic65",
         "bcd180"
       ],
+      "validation_coverage": [
+        "DNL/INL analysis across all codes and corners",
+        "settling time to 0.1% and 0.01% levels",
+        "output impedance <100 \u03a9",
+        "buffered output slew rate control",
+        "glitch impulse energy and characterization",
+        "monotonicity across temperature and supply"
+      ],
+      "example_config": {
+        "resolution": "8-bit to 12-bit",
+        "output_range": "0-VREF or -VREF/2 to +VREF/2",
+        "settling_target": "<1 \u00b5s to 0.1%"
+      },
+      "integration_example": {
+        "trim_dac": "Post-silicon analog parameter tuning for bandgap and bias",
+        "setpoint_generation": "Precision reference for converter control loops",
+        "programmable_threshold": "Dynamically adjustable comparator reference"
+      },
       "key": "buffered_precision_dac",
       "compatible": true
     },
@@ -402,6 +420,27 @@
         "bcd180",
         "generic22"
       ],
+      "validation_coverage": [
+        "CAN 2.0A/2.0B frame format compliance (ISO 11898-1)",
+        "SDO (Service Data Object) transfer sequences (expedited/segmented, upload/download)",
+        "PDO (Process Data Object) mapping and event-triggered transmission",
+        "NMT state machine verification (BOOT, OPERATIONAL, STOPPED, PRE-OPERATIONAL)",
+        "Heartbeat producer/consumer timing and timeout detection",
+        "SYNC frame handling and synchronization group management",
+        "Emergency (EMCY) message generation on error",
+        "Object Dictionary (OD) coverage across DS401/DS405 device classes",
+        "Arbitration and collision handling for multi-node networks"
+      ],
+      "example_config": {
+        "node_id": "0 to 127 (0 reserved for NMT)",
+        "baudrate": "10k, 20k, 50k, 125k, 250k, 500k, 800k, 1M bps",
+        "heartbeat_period": "1ms to 65.535 seconds"
+      },
+      "integration_example": {
+        "robot_joint_controller": "Real-time motor commutation with distributed PDO synchronization",
+        "machinery_gateway": "Multi-axis machine control with emergency stop coordinated via CANopen",
+        "safety_network": "SIL-2 rated safety-critical control system with heartbeat monitoring"
+      },
       "key": "canopen_controller",
       "compatible": true
     },
@@ -634,6 +673,24 @@
         "generic65",
         "bcd180"
       ],
+      "validation_coverage": [
+        "DC gain >80 dB across PVT corners",
+        "common-mode rejection ratio (CMRR) >60 dB at 1 kHz",
+        "input-referred noise <100 nV/\u221aHz",
+        "gain flatness vs. temperature and supply voltage",
+        "output impedance and loading robustness",
+        "slew rate and settling time for step inputs"
+      ],
+      "example_config": {
+        "gain_stages": "1x, 2x, 4x, 10x programmable",
+        "bandwidth": "100 kHz to 10 MHz",
+        "input_impedance": ">1 M\u03a9 differential"
+      },
+      "integration_example": {
+        "sensor_frontend": "Bridge sensor amplification with 0.1% gain accuracy",
+        "audio_preamp": "Balanced microphone input with CMRR >70 dB",
+        "current_measurement": "Shunt resistor to voltage conversion in power paths"
+      },
       "key": "differential_amplifier",
       "compatible": true
     },
@@ -692,6 +749,26 @@
         "bcd180",
         "generic22"
       ],
+      "validation_coverage": [
+        "10 Mbps and 100 Mbps data rate compliance (IEEE 802.3)",
+        "Manchester encoding/decoding with edge detection",
+        "collision detection and carrier sense functionality",
+        "link quality indicator and auto-negotiation timing",
+        "MDI signal integrity at differential transmit/receive pairs",
+        "jitter and timing margin analysis for data recovery",
+        "transmit spectral mask compliance (FCC/ETSI)",
+        "electromagnetic immunity to industrial noise (EN 61000-4-6)"
+      ],
+      "example_config": {
+        "link_speed": "10 Mbps or 100 Mbps auto-negotiated",
+        "media_type": "Cat5/Cat6 twisted pair",
+        "interface_voltage": "3.3V or 1.8V logic levels"
+      },
+      "integration_example": {
+        "industrial_gateway": "Multi-port Ethernet hub with MAC layer bridging",
+        "automotive_diagnostics": "Ethernet gateway for vehicle health monitoring",
+        "sensor_network": "Time-sensitive networking (TSN) edge node"
+      },
       "key": "ethernet_phy",
       "compatible": true
     },
@@ -807,6 +884,25 @@
         "generic65",
         "bcd180"
       ],
+      "validation_coverage": [
+        "propagation delay (tpd < 1ns typical)",
+        "offset voltage characterization across PVT",
+        "hysteresis control and input offset compensation",
+        "output rise/fall time symmetry",
+        "common-mode input range verification",
+        "power supply rejection ratio (PSRR) at 1-10 MHz"
+      ],
+      "example_config": {
+        "vbias_current": "5 uA to 50 uA",
+        "input_common_mode": "0.3 to 2.5 V (supply dependent)",
+        "hysteresis": "10 mV to 100 mV",
+        "response_mode": "single-stage or cascaded"
+      },
+      "integration_example": {
+        "adc_feedback": "Use for SAR ADC comparator with <0.5ns skew to clock",
+        "threshold_detection": "Multi-level detection with comparator arrays",
+        "rf_slicer": "High-speed data recovery in LVDS or clock paths"
+      },
       "key": "high_speed_comparator",
       "compatible": true
     },
@@ -979,6 +1075,26 @@
         "generic65",
         "bcd180"
       ],
+      "validation_coverage": [
+        "Isolation voltage rating (600V, 1200V, 1500V dependent on technology)",
+        "Propagation delay matching between high and low-side drivers (<10ns skew)",
+        "Gate driver output rise/fall times and slew rate control",
+        "Dead-time insertion to prevent shoot-through in half-bridge or full-bridge topologies",
+        "Short-circuit protection and current limiting capabilities",
+        "Isolation barrier CMTI (Common-Mode Transient Immunity) >50 V/ns",
+        "Isolation leakage current and capacitance characterization",
+        "Thermal performance under sustained switching (heat dissipation)"
+      ],
+      "example_config": {
+        "output_current": "1A to 10A peak drive capability",
+        "dead_time": "50ns to 500ns programmable",
+        "isolation_type": "Capacitive or magnetic coupling"
+      },
+      "integration_example": {
+        "three_phase_inverter": "180\u00b0 and 120\u00b0 commutation with coordinated gate drive to prevent rail shoot-through",
+        "synchronous_buck": "High-side and low-side MOSFET driving with dead-time insertion",
+        "isolated_boost": "Flyback transformer driven from isolated gate output for boost conversion"
+      },
       "key": "isolated_gate_driver",
       "compatible": true
     },
@@ -1194,6 +1310,24 @@
         "generic65",
         "bcd180"
       ],
+      "validation_coverage": [
+        "threshold margin analysis for LVDS levels (100-400mV differential)",
+        "eye diagram measurements at operating data rates",
+        "common-mode input range and CMRR",
+        "receiver input impedance matching (100 \u03a9 nominal)",
+        "propagation delay symmetry and skew",
+        "jitter transfer and output rise/fall time consistency"
+      ],
+      "example_config": {
+        "data_rate": "155 Mbps to 3.2 Gbps",
+        "input_impedance": "100 \u03a9 differential nominal",
+        "receiver_type": "CMOS or current-mode"
+      },
+      "integration_example": {
+        "backplane_link": "Long-trace differential signaling with impedance controlled routing",
+        "adc_interface": "Differential clock path with low jitter and skew requirements",
+        "multi_channel": "2-8 channel LVDS receiver array for parallel data collection"
+      },
       "key": "lvds_receiver",
       "compatible": true
     },
@@ -1364,6 +1498,26 @@
         "generic65",
         "bcd180"
       ],
+      "validation_coverage": [
+        "Baud rate accuracy from 9.6 kbps to 12 Mbps (IEC 61158-2)",
+        "differential signal swing (\u00b1900mV to \u00b11200mV)",
+        "common-mode input range and failsafe biasing",
+        "driver slew rate limiting for EMI suppression",
+        "receiver hysteresis and input threshold margins",
+        "collision detection and arbitration support",
+        "CRC polynomial (CCITT-16) and frame error detection",
+        "electromagnetic immunity to industrial environment noise"
+      ],
+      "example_config": {
+        "baud_rate": "9.6k, 19.2k, 93.75k, 187.5k, 500k, 1.5M, 3M, 6M, 12M bps",
+        "termination": "Integrated 390\u03a9/680\u03a9 failsafe resistors",
+        "slew_rate": "10 V/\u00b5s to 30 V/\u00b5s programmable"
+      },
+      "integration_example": {
+        "distributed_control": "PROFIBUS DP slave node with I/O aggregation",
+        "process_instrumentation": "PROFIBUS PA sensor node with 4-20mA interfaces",
+        "fieldbus_gateway": "Multi-node PROFIBUS master/slave with protocol translation"
+      },
       "key": "profibus_transceiver",
       "compatible": true
     },
@@ -2100,6 +2254,17 @@
       ],
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
       "description": "Validates CANopen protocol stack including object dictionary access, state management, signal integrity, and automotive-grade timing compliance.",
+      "design_scenarios": [
+        "SDO download with segmented transfer (16-byte chunks) and abort sequence",
+        "PDO event-triggered transmission with 1ms time window",
+        "NMT master commanding all nodes to START with 10ms guard time",
+        "Heartbeat timeout simulation with node recovery",
+        "EMCY message priority transmission over normal PDO traffic",
+        "SYNC frame with synchronized PDO response within 10\u00b5s window",
+        "Arbitration with 11-bit identifier collision and priority resolution",
+        "Bus-off error state recovery after 128 error frames",
+        "Multi-node heartbeat network with 8 nodes at 100ms intervals"
+      ],
       "key": "canopen_vip"
     },
     {
@@ -2119,6 +2284,16 @@
       ],
       "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
       "description": "Validates clock gating cells for correct enable timing, glitch-free operation, and critical path implications in low-power designs.",
+      "design_scenarios": [
+        "enable signal held high for exactly 1 clock cycle (glitch detection window)",
+        "enable to disable transition with <1ns setup margin (CDC testing)",
+        "cascaded gating stages (4-level hierarchy) with accumulated delay analysis",
+        "enable signal metastability injection at clock edge boundaries",
+        "power-gated domain with clock gating held inactive during power-down",
+        "mixed rising-edge and falling-edge enable detection robustness",
+        "cross-domain clock gating with 100ns clock skew between domains",
+        "duty cycle measurement over 1M cycles (verify no asymmetry growth)"
+      ],
       "key": "clock_gating_vip"
     },
     {
@@ -2202,6 +2377,15 @@
       ],
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
       "description": "Validates Ethernet PHY compliance with IEEE 802.3 standards including signal integrity, protocol timing, and mixed-signal interface characterization.",
+      "design_scenarios": [
+        "back-to-back frame transmission with minimal IFG",
+        "collision scenario with exponential backoff",
+        "auto-negotiation sequence with 100BASE-TX fallback",
+        "long frame (1518 bytes) transmission and error recovery",
+        "FCS error injection and detection verification",
+        "MDI differential signal eye diagram analysis",
+        "receive path jitter transfer at 100 Mbps clock recovery"
+      ],
       "key": "ethernet_vip"
     },
     {
@@ -2229,6 +2413,16 @@
       ],
       "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
       "description": "Validates high-speed signal integrity including timing margins and electromagnetic effects.",
+      "design_scenarios": [
+        "differential signal eye diagram with jitter histogram (1M UI samples)",
+        "simultaneous switching noise (SSN) injection on adjacent signal groups",
+        "impedance mismatch (10% over/under nominal) reflection analysis",
+        "long trace (10cm) with controlled dv/dt slew rate variations",
+        "frequency content analysis at Nyquist and harmonics (20 GHz sampling)",
+        "temperature and supply voltage sensitivity of propagation delay",
+        "crosstalk from aggressor signals with 2V/ns transitions",
+        "overshoot/undershoot measurement at 3x Vdd and -0.3V boundaries"
+      ],
       "key": "high_speed_signal_vip"
     },
     {
@@ -2383,6 +2577,16 @@
       ],
       "command": "python designs/framework/scripts/run_design_snapshot.py --design {design}",
       "description": "Validates precision DAC linearity, settling behavior, and output accuracy across codes.",
+      "design_scenarios": [
+        "full-scale sweepfrom 0x000 to 0xFFF with INL/DNL extraction",
+        "single code transition (e.g., 0x7FF to 0x800) with glitch measurement",
+        "settling time to 0.1% and 0.01% at different reference voltages",
+        "monotonicity verification under PVT corners (slow/fast silicon)",
+        "output impedance measurement and load transient response",
+        "power-supply rejection ratio (PSRR) at 1kHz line ripple injection",
+        "temperature drift characterization (-40\u00b0C to +125\u00b0C)",
+        "code-dependent noise and spectral analysis across frequency bands"
+      ],
       "key": "precision_dac_vip"
     },
     {
@@ -2401,6 +2605,16 @@
       ],
       "command": "python designs/framework/scripts/run_regression.py --design {design}",
       "description": "Validates PROFIBUS transceiver protocol compliance for industrial fieldbus networks including timing, signal integrity, EMI/EMC, and mixed-signal biasing.",
+      "design_scenarios": [
+        "token passing at high speed (12 Mbps) with low latency",
+        "simultaneous transmission collision detection and resolution",
+        "idleline timeout and watchdog expiration recovery",
+        "frame transmission with CRC error injection at various bit positions",
+        "failsafe idle state with resistor biasing (bus pulled to mid-level)",
+        "noise margin validation with 50% amplitude reduction",
+        "long message (64 bytes) transmission with fragmentation",
+        "multi-slave arbitration with priority resolution"
+      ],
       "key": "profibus_vip"
     },
     {
@@ -2573,6 +2787,22 @@
         "generic65",
         "bcd180"
       ],
+      "integration_rules": [
+        "All enable signals must be synchronized to clock rising edge with <1ns setup margin",
+        "Clock gate outputs must not exceed input frequency; verify ratio <= 1.0",
+        "Multi-level gating cascades require delay balancing to prevent clock skew >500ps",
+        "Enable signals crossing clock domains require gray-coded CDC synchronizers",
+        "Duty cycle through gating cell must remain \u00b15% of 50% nominal",
+        "Gated clocks must have <50ps skew to their non-gated clock references",
+        "Reset signals must disable all gates before domain reset assertion",
+        "Power-gated domains must hold all gates disabled during power-down"
+      ],
+      "validation_scenarios": [
+        "Simultaneous enabling of 4 gating stages with timing closure verification",
+        "Enable signal metastability injection at CDC boundaries",
+        "Clock tree analysis with gate insertion delay impact",
+        "Duty cycle preservation over 10M clock cycles"
+      ],
       "key": "clock_gating_plane",
       "compatible": true
     },
@@ -2609,6 +2839,22 @@
         "generic65",
         "bcd180",
         "generic22"
+      ],
+      "integration_rules": [
+        "Ethernet PHY RX/TX data paths must meet IEEE 802.3 timing margins (minimum eye opening 30% at 100 Mbps)",
+        "Differential signaling pairs (RXD\u00b1, TXD\u00b1) require length-matched routing within \u00b1200ps",
+        "Link up/down detection status must be readable within 100ms of link change event",
+        "Frame CRC validation must occur in hardware with error reporting within 1 frame time",
+        "RMII or MII interface timing must meet PHY-to-MAC setup/hold times (<2ns min margin)",
+        "Collision detection output must strobe within 100ns of collision event on shared medium",
+        "Auto-negotiation sequence must complete within 2 seconds per IEEE 802.3u",
+        "Control/status register access (UART/SPI) must not block frame reception pipeline"
+      ],
+      "validation_scenarios": [
+        "Back-to-back frame reception at 100 Mbps with CRC validation",
+        "Auto-negotiation with link-up confirmation in <2 seconds",
+        "Register access via UART/SPI during active frame transmission",
+        "Collision scenario with exponential backoff timing verification"
       ],
       "key": "ethernet_control_plane",
       "compatible": true
@@ -2665,6 +2911,22 @@
         "generic130",
         "generic65",
         "bcd180"
+      ],
+      "integration_rules": [
+        "I2S frame sync (LRCLK) must occur within \u00b110ns of audio data (SDATA) bit 0 timing",
+        "I2S bit clock (BCLK) must remain synchronized with frame sync within 1 BCLK period",
+        "I2C SDA/SCL lines must use open-drain drivers with pull-ups (never push-pull active high)",
+        "I2C slave must release SDA within 5\u00b5s after SCL goes low to avoid bus deadlock",
+        "I2C clock stretching must be supported: slave can hold SCL low for up to 100ms",
+        "UART transmit FIFO must have at least 16-byte depth to prevent underruns at 1M baud",
+        "UART baud rate accuracy must be \u00b13% for 9.6k bps and \u00b12% for 115.2k bps",
+        "Audio frame boundaries must be synchronous; no sample skipping or repeating on mode switches"
+      ],
+      "validation_scenarios": [
+        "Stereo I2S audio streaming with sample rate changes (48kHz to 192kHz)",
+        "Multi-slave I2C bus arbitration and clock stretching timeout",
+        "UART at 1M baud with back-to-back character transmission",
+        "I2S LRCLK timing with \u00b110ns margin to SDATA transitions"
       ],
       "key": "infotainment_control_plane",
       "compatible": true
@@ -2744,6 +3006,22 @@
         "generic65",
         "bcd180"
       ],
+      "integration_rules": [
+        "Buck and boost converter switching frequencies must be phase-aligned to reduce conducted EMI",
+        "PWM dead-time insertion between high and low-side drives must be >50ns to prevent shoot-through",
+        "Frequency detector must monitor each converter output independently with \u00b15% tolerance band",
+        "Soft-start ramp must be <100ms to minimize inrush current while ensuring stability",
+        "Multi-output cross-regulation must be within \u00b15% at any single output 50% load change",
+        "Loop bandwidth must be designed for 10x separation from switching frequency",
+        "Current-sensing feedback must have <5% accuracy for cycle-by-cycle current limiting",
+        "Enable/disable sequencing must enforce output voltage ordering (e.g., core before I/O)"
+      ],
+      "validation_scenarios": [
+        "Multi-output transient response with simultaneous load steps on different rails",
+        "Frequency detector alarm triggering at 90% and 110% of nominal frequency",
+        "Current limiting activation at 120% nominal load with current sense margin",
+        "Soft-start ramp with controlled dV/dt <1V/ms"
+      ],
       "key": "power_conversion_plane",
       "compatible": true
     },
@@ -2816,6 +3094,22 @@
         "generic130",
         "generic65",
         "bcd180"
+      ],
+      "integration_rules": [
+        "Watchdog timer window must be independently verified using oscillator with \u00b110% accuracy (not system clock)",
+        "Watchdog kick frequency must be monitored; missing 2 consecutive kick windows triggers automatic reset",
+        "Temperature thresholds must have \u00b15\u00b0C hysteresis to prevent oscillation in reset/enable signals",
+        "Temperature sensor must be located on hot-spot thermal node with <5\u00b0C local gradient",
+        "Reset assertion must be fully asynchronous (independent of any clock) with >100ns duration",
+        "Safety interrupt signals must propagate to firmware within 1\u00b5s of trigger event",
+        "Watchdog and temperature shutdown must persist even if main control logic is hung",
+        "All safety signals must be replicated/voted for SIL-2 compliance requirements"
+      ],
+      "validation_scenarios": [
+        "Watchdog timeout with clock glitch injection (verify independent timing verification)",
+        "Temperature threshold crossing with \u00b110\u00b0C overshoot and hysteresis response",
+        "Simultaneous watchdog timeout and over-temperature event prioritization",
+        "Reset signal persistence during main clock stoppage"
       ],
       "key": "safety_monitor_plane",
       "compatible": true
@@ -3130,6 +3424,20 @@
         "generic65",
         "bcd180"
       ],
+      "design_collateral": [
+        "Full schematic (automotive_infotainment_soc_schematic.ckt)",
+        "Layout floorplan with power distribution network (automotive_infotainment_soc_floorplan.py)",
+        "Thermal simulation model and hotspot analysis (automotive_infotainment_soc_thermal.sp)",
+        "AUTOSAR 4.x software scaffolding and ECU configuration",
+        "Functional safety evidence package (FMEA, safety case, SIL analysis)",
+        "Integration test plan with CAN/Ethernet protocol coverage"
+      ],
+      "automation_coverage": {
+        "simulation": "Mixed-signal regression with I2S streaming + CAN traffic injection",
+        "power_validation": "Multi-rail sequencing with transient load steps on each interface",
+        "emc_compliance": "Conducted/radiated emissions from PWM and Ethernet drivers",
+        "thermal_management": "Temperature-dependent behavior across audio and communication bursts"
+      },
       "key": "automotive_infotainment_soc",
       "compatible": true
     },
@@ -3259,6 +3567,20 @@
         "generic65",
         "bcd180"
       ],
+      "design_collateral": [
+        "Sensor hub reference platform (ethernet_sensor_hub_platform.py)",
+        "IEEE 1588 PTP implementation for time sync (ptp_time_sync.ckt)",
+        "Multi-channel sensor input conditioning (sensor_frontend_array.ckt)",
+        "Deterministic Ethernet packet scheduling (eth_qos_scheduler.py)",
+        "Calibration framework with EEPROM storage",
+        "Integration examples for common industrial sensors (temperature, pressure, flow)"
+      ],
+      "automation_coverage": {
+        "timestamp_accuracy": "PTP synchronization with <1\u00b5s accuracy across multiple nodes",
+        "sensor_conditioning": "Multi-channel ADC linearity and settling time verification",
+        "ethernet_timing": "TSN scheduling compliance with bounded latency <100\u00b5s",
+        "i2c_reliability": "Multi-slave I2C arbitration with priority handling"
+      },
       "key": "ethernet_sensor_hub",
       "compatible": true
     },
@@ -3351,6 +3673,20 @@
         "generic65",
         "bcd180"
       ],
+      "design_collateral": [
+        "Gateway reference architecture (industrial_iot_gateway_arch.py)",
+        "Multi-protocol packet router design (profibus_canopen_eth_mux.ckt)",
+        "Security accelerator integration examples (aes_sha_data_paths.py)",
+        "Industrial protocol stacks (PROFIBUS PA, CANopen, EtherCAT)",
+        "DMA controller design for packet handling",
+        "Field calibration procedures and sensor integration guide"
+      ],
+      "automation_coverage": {
+        "protocol_validation": "Simultaneous PROFIBUS, CANopen, and Ethernet traffic injection",
+        "security": "AES-256 and SHA-512 workload simulation with key derivation",
+        "interoperability": "Multi-protocol collision detection and arbitration",
+        "reliability": "Long-duration stress tests with packet loss injection"
+      },
       "key": "industrial_iot_gateway",
       "compatible": true
     },
@@ -3454,6 +3790,20 @@
         "generic65",
         "bcd180"
       ],
+      "design_collateral": [
+        "Isolation barrier schematic (isolated_pmic_barriers.ckt)",
+        "Multi-isolated rail power tree (isolated_pmic_power_tree.py)",
+        "Galvanic isolation measurement circuits (isolation_fault_detection.ckt)",
+        "Automated burn-in test patterns and sequences (isolated_pmic_burnin.py)",
+        "Safety FMEA with isolation failure modes",
+        "Layout guidelines for multiple isolated domains"
+      ],
+      "automation_coverage": {
+        "isolation": "Galvanic isolation barrier integrity testing with hi-pot simulation",
+        "sequencing": "Multi-isolated rail bring-up with cross-domain timing verification",
+        "fault_detection": "Isolation fault injection and detection confidence testing",
+        "thermal": "Temperature coupling between isolated domains during load transients"
+      },
       "key": "isolated_power_supply_controller",
       "compatible": true
     },
@@ -3806,6 +4156,20 @@
         "generic65",
         "bcd180"
       ],
+      "design_collateral": [
+        "Three-phase PWM commutation logic (three_phase_pwm_commutation.ckt)",
+        "SIL-2 functional safety FMEA and safety case",
+        "Diagnostic coverage analysis (DCA) report",
+        "Motor current sense signal conditioning (current_sense_conditioning.ckt)",
+        "Thermal management strategy with temperature-dependent derating",
+        "Safety-critical firmware scaffolding with fault injection testing"
+      ],
+      "automation_coverage": {
+        "commutation": "Six-step and sinusoidal PWM commutation patterns with dead-time verification",
+        "diagnostics": "Fault detection latency <10\u00b5s for under/over-current and over-temperature",
+        "sil_compliance": "Diagnostic coverage >90% with safe failure modes verified",
+        "real_time": "PWM cycle timing with <100ns jitter for synchronized multi-axis applications"
+      },
       "key": "safe_motor_drive_controller",
       "compatible": true
     },
