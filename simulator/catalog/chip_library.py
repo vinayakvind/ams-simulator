@@ -733,7 +733,12 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "frequency response: -3dB bandwidth >500MHz, phase margin >60° with capacitive load up to 500pF"
         ],
         "generator_params": {
-            "circuit_variants": ["single-stage", "cascode-gain", "telescopic", "folded-cascode"],
+            "circuit_variants": ["single-stage", "cascode-gain", "telescopic", "folded-cascode", "dynamic-latch-comparator", "regenerative-comparator-array"],
+            "process_corner_generators": {
+                "FF_SS_mix": {"vth_delta": -0.05, "beta_boost": 1.25, "delay_reduction": "15-20%"},
+                "SS_FF_mix": {"vth_delta": 0.08, "beta_reduction": 0.80, "delay_increase": "30-40%"},
+                "TT_nominal": {"vth_delta": 0.0, "beta_nominal": 1.0, "delay_nominal": "10ns"}
+            },
             "propagation_delay_target": "<0.8ns at TT@27C",
             "gain": "50-100 V/V configurable",
             "offset_trim": "±50mV with 10-bit DAC trim, ±1mV resolution",
@@ -866,7 +871,12 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "input-output latency: <100ns time-delay (gain independent) for control loops"
         ],
         "generator_params": {
-            "gain_configurations": ["1V/V (unity buffer)", "2V/V", "5V/V", "10V/V", "20V/V", "50V/V", "100V/V"],
+            "gain_configurations": [
+                {"gain": 1, "bw_khz": 500, "noise_nv_hz": 55, "power_uw": 80},
+                {"gain": 10, "bw_khz": 5000, "noise_nv_hz": 95, "power_uw": 250},
+                {"gain": 100, "bw_khz": 500, "noise_nv_hz": 150, "power_uw": 600}
+            ],
+            "circuit_families_expanded": ["long-tail-pair-simple", "long-tail-pair-cascoded", "telescopic-single-ended-output", "telescopic-fully-differential", "folded-cascode-high-slew", "class-ab-output-stage"],
             "gain_control_method": ["fixed-resistor", "binary-weighted-DAC", "programmable-gain-array"],
             "bandwidth_setting": ["1MHz", "5MHz", "10MHz", "50MHz", "100MHz"],
             "cmrr_optimization": "enabled with common-mode feedback network",
@@ -1008,17 +1018,25 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         ],
         "generator_params": {
             "resolution_options": ["8-bit", "10-bit", "12-bit", "14-bit", "16-bit"],
-            "resolution": "8-14 bit configurable",
-            "dac_architecture": ["R-2R-ladder", "Charge-redistribution", "Segmented-switch"],
+            "resolution": "8-14 bit configurable with enhanced linearity specs",
+            "dac_architecture": ["R-2R-ladder", "Charge-redistribution", "Segmented-switch", "Current-steering"],
             "output_impedance": "<50Ω for driving ADC inputs and low-impedance loads",
             "settling_time_0.1pct": "<500ns typical at 12-bit",
             "settling_time_0.01pct": "<2µs typical at 12-bit",
-            "buffer_topology": ["rail-to-rail-CMOS", "current-output-amplifier", "open-drain"],
-            "reference_configurations": ["internal-bandgap", "external-VREF-input", "ratiometric-biasing"],
+            "settling_time_0.001pct": "<10µs typical at 12-bit with high-precision control",
+            "buffer_topology": ["rail-to-rail-CMOS", "current-output-amplifier", "open-drain", "class-AB-output"],
+            "reference_configurations": ["internal-bandgap", "external-VREF-input", "ratiometric-biasing", "dual-reference"],
             "update_rate": "DC to 10MHz with glitch-free latch or transparent latch options",
             "power_supply_rejection": ">60dB at 100kHz with dual-supply option",
             "output_drive_capability": "±10mA to ±100mA sourcing/sinking depending on buffer sizing",
-            "power_consumption": "0.5-5mW depending on update rate and buffer drive"
+            "power_consumption": "0.5-5mW depending on update rate and buffer drive",
+            "process_corner_linearity": {
+                "FF@-40C": "DNL <±0.3LSB, INL <±0.8LSB",
+                "TT@27C": "DNL <±0.4LSB, INL <±1LSB",
+                "SS@125C": "DNL <±0.5LSB, INL <±1.2LSB"
+            },
+            "temperature_compensation": "Gain and offset tracking -40°C to +125°C with embedded sensor",
+            "monotonicity_guarantee": "Hardware-verified monotonic progression across all PVT corners"
         },
         "example_config": {
             "12bit_sar_adc_setpoint": {
@@ -1179,7 +1197,7 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         ],
         "generator_params": {
             "data_rate_support": ["155Mbps", "250Mbps", "500Mbps", "1Gbps", "2.5Gbps", "3.125Gbps", "3.2Gbps"],
-            "receiver_architecture": ["latch-based", "voltage-comparator-based", "dynamic-latch"],
+            "receiver_architecture": ["latch-based", "voltage-comparator-based", "dynamic-latch", "regenerative-latch"],
             "threshold_setting": "Fixed 100mV or programmable 50-400mV with DAC trim",
             "jitter_tolerance": "<200ps RMS at rated data rate",
             "propagation_delay": "<2ns maximum with <100ps skew matched pair",
@@ -1193,8 +1211,9 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
                 "process_corner_tuning": "Threshold trim across fast/slow corners with ±50mV offset correction and DAC-based programming",
                 "temperature_compensation": "Receiver propagation delay compensated -40°C to +125°C with <100ps variation using on-die temperature sensor feedback",
                 "supply_voltage_correction": "VDD sensitivity <0.5ps per 1% rail variation, adaptive bias current for threshold centering",
-                "crosstalk_mitigation": "Differential pair routing with Kelvin sense and per-lane capacitive coupling cancellation up to 10% parasitic",
-                "jitter_optimization": "Output buffer slew rate tuning (100ps-1ns transition time) to minimize accumulated jitter in cascaded arrays"
+                "cmti_immunity": "Common-mode transient injection up to ±50V/ns with latching prevention",
+                "emi_filtering": "Integrated RC filter on differential input for sub-1MHz EMI rejection without signal degradation",
+                "multi_lane_skew_control": "Matched delay across up to 8 receiver lanes with <50ps maximum relative skew"
             }
         },
         "example_config": {
