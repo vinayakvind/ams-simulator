@@ -1606,16 +1606,30 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "carrier sense and idle bus detection"
         ],
         "enhanced_scenarios": [
-            "back-to-back frame transmission (minimum IFG)",
-            "collision detection and exponential backoff",
-            "auto-negotiation sequence with link-up",
-            "long frame (1518-byte) transmission and FCS validation",
-            "FCS error injection at specific bit positions",
-            "MDI eye diagram analysis (1M UI samples)",
-            "receive jitter transfer characterization",
-            "Manchester decoder synchronization",
-            "CRC polynomial test vector validation",
-            "carrier sense and idle bus detection"
+            "back-to-back 64-byte minimum frame transmission at 100Mbps with <96ns IFG compliance",
+            "collision detection with jam signal transmission and binary exponential backoff (1-1023 slot times)",
+            "auto-negotiation sequence: FLP exchange, link-up detection, 10/100 speed confirmation within <2 seconds",
+            "maximum 1518-byte frame transmission with end-to-end FCS calculation and verification",
+            "bit-error injection at FCS field tail (bit 31 of CRC32) and verification of error detection",
+            "MDI signal eye diagram measurement: threshold margin >30%, 1M UI minimum samples at 100Mbps",
+            "receive jitter transfer function: <0.3 transfer at 125kHz clock frequency with phase margin >60°",
+            "Manchester decoder clock edge alignment: ±50ns tolerance at symbol boundaries with no bit slips",
+            "CRC-32 polynomial: test vectors 0x00000000, 0xFFFFFFFF, alternating 0x55 pattern frame content",
+            "carrier sense timeout: 5ms idle detection with proper line state (no differential signal)",
+            "simultaneous TX and RX collision scenario with hardware collision detection latency <300ns",
+            "link pulse generation (10Base-T) and detection within 16ms NLP timing window",
+            "receive waveform shaping: 50-60dB bandwidth limiting per IEEE 802.3 spec",
+            "power consumption measurement: idle state <500mW, active TX/RX <2W peak during collision window"
+        ],
+        "mixed_signal_regressions": [
+            "analog transmitter jitter: <100ps RMS injection during back-to-back frame transmission with BER verification",
+            "receiver common-mode offset: ±200mV injection with threshold margin preservation >25%",
+            "differential pair cross-coupling: 5-10% capacitive coupling with timing skew analysis",
+            "MDI biasing variations: ±10% change on failsafe resistors with detection margin verification",
+            "thermal variations: -40°C to +125°C with propagation delay drift analysis and phase lock range",
+            "supply noise injection: 100mV peak ripple at 10MHz with phase jitter contribution measurement",
+            "substrate coupling: simultaneous TX and RX with crosstalk measurement and BER impact",
+            "magnetic interference: externally injected 50/60Hz common-mode signal with immunity verification"
         ]
     },
     "profibus_vip": {
@@ -1645,16 +1659,28 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "multi-slave arbitration with priority resolution"
         ],
         "enhanced_scenarios": [
-            "token passing at 12Mbps with latency verification",
-            "CSMA/CD collision detection and resolution",
-            "idleline timeout and watchdog expiration",
-            "frame CRC error injection at multiple bit positions",
-            "failsafe idle state with biasing validation",
-            "noise margin testing (50% amplitude reduction)",
-            "long message fragmentation (64-byte payloads)",
-            "multi-slave arbitration (8-node network)",
-            "slew rate limiting verification",
-            "electromagnetic immunity (EN 61000-4-6)"
+            "token passing at 12Mbps with <10µs master latency and token holding time <50ms",
+            "simultaneous transmission collision detection (<1µs latency) and arbitration resolution",
+            "idleline timeout: 11-bit silent interval triggers watchdog expiration with automatic retry",
+            "frame transmission with cyclic redundancy check error injection at byte 1, 4, and 8 positions",
+            "failsafe idle state: bus pulled to mid-supply by 680Ω resistor pair with <100mV hysteresis",
+            "noise margin testing: 50% amplitude reduction still maintains threshold detection (±900mV to ±1200mV)",
+            "long message fragmentation: 64-byte payload split into 2-3 PROFIBUS frames with reassembly verification",
+            "multi-slave arbitration: 8-node network with address conflict detection and priority token passing",
+            "baud rate accuracy across temperature: 9.6kbps to 12Mbps with ±5% tolerance verification -40 to +85°C",
+            "driver slew rate control: 10-30V/µs programmable to minimize EMI and cross-coupling effects",
+            "receiver threshold margin: 200mV differential minimum with hysteresis <100mV for noise immunity",
+            "failsafe biasing verification: idle bus voltage 7.5V ±0.5V with <100µA leakage current"
+        ],
+        "mixed_signal_regressions": [
+            "conducted immunity: 10V/µs 50/60Hz injection on PROFIBUS lines with bit error rate <1e-6",
+            "radiated immunity: 1-400MHz RF field (10V/m) with protocol recovery within 1 frame period",
+            "ground bounce: common-mode transient >50V/µs injection with slew rate limiting verification",
+            "reflections: stub termination mismatch (±20%) with eye diagram margin verification",
+            "temperature drift: slew rate and threshold shifts from -40°C to +85°C operation",
+            "supply voltage sensitivity: ±10% VBAT variation impact on biasing and detection thresholds",
+            "parameter drift with aging: leakage current and resistance changes over 100k frame cycles",
+            "multi-driver contention: simultaneous transmission detection and driver disable latency <100ns"
         ]
     },
     "canopen_vip": {
@@ -1686,16 +1712,33 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "Multi-node heartbeat network with 8 nodes at 100ms intervals"
         ],
         "enhanced_scenarios": [
-            "SDO segmented transfer (16-byte chunks)",
-            "PDO event-triggered transmission (1ms windows)",
-            "NMT master commanding START sequence",
-            "heartbeat timeout with node recovery",
-            "EMCY priority transmission over PDO",
-            "SYNC frame with 10µs synchronization window",
-            "CAN arbitration with priority resolution",
-            "bus-off recovery after 128 error frames",
-            "multi-node heartbeat network (8 nodes)",
-            "object dictionary access with SDO"
+            "SDO download transfer: 4-byte expedited mode, 16-byte segmented chunks with block acknowledge",
+            "SDO upload sequence: toggle bit alternation, 7-byte data per segment with CRC validation",
+            "PDO event-triggered transmission: 1ms synchronization window with jitter <100µs across 10 PDO cycles",
+            "PDO mapping: 8 different object entries mapped to single PDO with consistent transmission timing",
+            "NMT state transitions: BOOT->PRE_OPERATIONAL->OPERATIONAL->STOPPED with guard time enforcement",
+            "NMT reset: cold-start (80) and warm-start (81) with heartbeat producer recovery <100ms",
+            "heartbeat timeout simulation: producer misses beat with consumer detection <200ms beyond timeout",
+            "heartbeat network: 8-node multi-master with independent 100ms intervals and collision arbitration",
+            "EMCY message generation: CAN priority 0x80+node_id with emergency code and manufacturer fields",
+            "SYNC frame transmission: periodic 1ms frame with PDO synchronization response <10µs skew",
+            "SYNC producer multi-consumer: single SYNC frame triggers synchronized PDO from 8 nodes",
+            "Arbitration collision: 11-bit CAN ID collision with lower-ID node winning transmission (CAN protocol)",
+            "Error frame detection: reception of error frame stops current transmission and triggers bus recovery",
+            "Bus-off recovery: after 128 error frames, node enters bus-off state with 128 message cycle reset",
+            "Cyclic messaging: 100 consecutive CAN frames at 1Mbps with no frame loss or bit errors"
+        ],
+        "mixed_signal_regressions": [
+            "transceiver differential signaling: 100-400mV threshold sweep with 10% margin measurement",
+            "CAN bit timing: ±5% tolerance verification across -40°C to +85°C operating range",
+            "recessive to dominant transition: <1µs rise time with no overshoot >10% VDOM",
+            "common-mode transient immunity: 50V/µs injection with protocol recovery <1 bit period",
+            "electromagnetic immunity: 1-400MHz RF field injection per ISO 7637 automotive standard",
+            "supply voltage sensitivity: ±10% VBAT variation with bit timing and threshold margin effects",
+            "ground coupling: simultaneous TX/RX with crosstalk and jitter measurement",
+            "temperature drift: bit timing error accumulation from -40°C to +125°C ramp",
+            "frequency accuracy: crystal oscillator ±500ppm drift over calendar month simulation",
+            "simultaneous 8-node arbitration: collision-free arbitration with lowest ID winning at 1Mbps"
         ]
     },
     "clock_gating_vip": {
@@ -1726,16 +1769,32 @@ VERIFICATION_IP_LIBRARY: dict[str, dict[str, Any]] = {
             "duty cycle measurement over 1M cycles (verify no asymmetry growth)"
         ],
         "enhanced_scenarios": [
-            "enable signal glitch detection (1-cycle hold)",
-            "CDC (clock domain crossing) timing margin verification",
-            "cascaded gating delay analysis (4-level hierarchy)",
-            "enable metastability injection at clock edges",
-            "power gating interaction verification",
-            "mixed rising/falling edge detection robustness",
-            "cross-domain skew tolerance (100ns injection)",
-            "duty cycle preservation (1M cycle measurement)",
-            "setup/hold recovery analysis",
-            "clock tree skew impact assessment"
+            "single-cycle enable pulse: held high for exactly 1 clock cycle with glitch verification (peak at <0.5V)",
+            "enable-to-disable transition: <1ns setup margin with no glitch, <100ps propagation delay",
+            "enable setup/hold violation: metastability injection ±0.1ns around clock edge with stable convergence",
+            "cascaded 4-level gating hierarchy: accumulated delay <500ps max with <50ps skew between parallel stages",
+            "skew matching between multiple gated clocks: <50ps maximum difference across 8 parallel gate cells",
+            "power gating interaction: clock gates held inactive during power-off transition with no spurious edges",
+            "output clock frequency: gated output never exceeds input clock frequency (gate cannot create edges)",
+            "gated clock duty cycle: ±5% symmetry maintained through gating cell with <50ps skew accumulation",
+            "cross-domain clock gating: 100ns skew injection between clock inputs with proper gate switching",
+            "reset interaction: asynchronous reset de-asserts before enable signal transitions (setup time)",
+            "multiple enable sources: OR/AND of up to 4 enable signals with proper gate switching and latching",
+            "very low frequency operation: 1MHz to 1Hz input clock gating with proper settling",
+            "FIFO interaction: clock gating coordinated with FIFO empty/full flags (gray-coded CDC)",
+            "pipeline flushout: clock gating released after pipeline data drains with minimum latency"
+        ],
+        "mixed_signal_regressions": [
+            "enable signal CDC (clock domain crossing): synchronizer latency <3 clock cycles with metastability filtering",
+            "clock tree jitter: input clock jitter <100ps RMS with <50ps contribution from gating cell",
+            "process variation impact: gate delay variation ±20% across PVT corners with timing closure margin",
+            "temperature drift: gate delay shift <50ps per 25°C from -40 to +125°C operation",
+            "supply voltage sensitivity: gate delay <0.5ps per 1% VBAT variation with 3.3V ±10% range",
+            "substrate coupling: simultaneous enable and clock transitions with crosstalk-induced glitch <0.1V",
+            "leakage current variation: standby leakage <1µA per gated domain through isolated gates",
+            "enable slew rate impact: fast (<50ps) and slow (>5ns) enable transitions with different glitch behavior",
+            "output loading effect: capacitive load variation 10pF-1nF with propagation delay change <100ps",
+            "setup/hold margin with CDC: cross-domain enable with variable delay synchronizer (1-3 flip-flop stages)"
         ]
     },
     "precision_dac_vip": {
