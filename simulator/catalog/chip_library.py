@@ -2428,23 +2428,30 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "digital_subsystems": ["infotainment_control_plane", "safety_monitor_plane", "thermal_management_plane"],
         "technology_support": ["generic130", "generic65", "bcd180"],
         "design_collateral": [
-            "full schematic with power distribution network",
-            "layout floorplan (500mm²) with thermal analysis",
-            "thermal simulation model and hotspot analysis",
-            "AUTOSAR 4.4 software scaffolding",
-            "functional safety evidence package (FMEA, safety case)",
-            "integration test plan (CAN/Ethernet protocol coverage)",
-            "I2S audio streaming support (48kHz/16-bit stereo with DMA)",
-            "CAN message filtering and priority arbitration logic",
-            "Ethernet frame buffering with IEEE 802.1Q VLAN support"
+            "full schematic with power distribution network (4-layer PCB)",
+            "layout floorplan (500mm²) with thermal analysis and hotspot identification",
+            "thermal simulation model with steady-state and transient analysis",
+            "AUTOSAR 4.4 software scaffolding with RTE integration",
+            "functional safety evidence package (FMEA, safety case, SOTIF analysis)",
+            "integration test plan (CAN/Ethernet protocol coverage >95%)",
+            "I2S audio streaming support (48kHz/16-bit stereo with DMA, front-loaded buffering)",
+            "CAN message filtering with arbitration logic (11-bit and 29-bit ID support)",
+            "Ethernet frame buffering with IEEE 802.1Q VLAN support and priority queuing",
+            "multimodal input handling (touch, buttons, knobs) with debounce logic",
+            "OTA firmware update mechanism with signed image validation",
+            "diagnostic connector interface (UDS/CAN-TP implementation)"
         ],
         "automation_coverage": [
-            "mixed-signal regression with I2S (1M samples) + CAN (100 msg/sec)",
-            "multi-rail sequencing with transient load steps",
-            "conducted/radiated emissions from PWM and Ethernet",
-            "temperature-dependent behavior across audio bursts",
-            "audio quality: THD+N @ 1kHz, SNR @ 20Hz-20kHz, crosstalk",
-            "1000-hour burn-in at 125°C with biased stress"
+            "mixed-signal regression with I2S (1M samples/sec) + CAN (100 msg/sec) + Ethernet frames",
+            "multi-rail sequencing with transient load steps (0-100% in <1ms) on audio, core, I/O",
+            "conducted/radiated emissions from PWM, I2S clocking, and Ethernet PHY",
+            "temperature-dependent behavior across continuous audio bursts and idle modes",
+            "audio quality metrics: THD+N @ 1kHz <0.5%, SNR @ 20Hz-20kHz >90dB, crosstalk <-80dB",
+            "CAN message timing with realistic traffic patterns and collision scenarios",
+            "Ethernet link negotiation and MDI auto-correction with eye diagram verification",
+            "1000-hour burn-in at 125°C with biased power cycling and stress patterns",
+            "safety watchdog verification with independent oscillator drift (<±10%)",
+            "ASIL-B partitioning with fault containment zones"
         ]
     },
     "industrial_iot_gateway": {
@@ -2459,22 +2466,27 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "digital_subsystems": ["ethernet_control_plane", "security_crypto_plane", "power_sequencer"],
         "technology_support": ["generic130", "generic65", "bcd180"],
         "design_collateral": [
-            "gateway architecture with protocol routing",
-            "multi-protocol packet router with DMA support",
-            "security accelerator integration examples",
-            "industrial protocol stacks (PROFIBUS, CANopen, EtherCAT)",
-            "DMA controller design for >100Mbps throughput",
-            "field calibration procedures and sensor integration guide",
-            "redundant Ethernet failover logic (<50ms switchover)",
-            "CRC polynomial validation for all protocols"
+            "gateway architecture with multi-protocol routing and priority scheduling",
+            "multi-protocol packet router with DMA support for >100Mbps throughput",
+            "security accelerator integration examples for AES-256-GCM and SHA-512",
+            "industrial protocol stacks (PROFIBUS PA/DP, CANopen DS301/DS402, EtherCAT)",
+            "DMA controller design for multi-stream concurrent packet handling",
+            "field calibration procedures with EEPROMstorage for protocol parameters",
+            "redundant Ethernet failover logic with <50ms switchover time",
+            "CRC polynomial validation for all protocols (PROFIBUS, CANopen, Ethernet FCS)",
+            "packet buffer sizing calculator for 100Mbps sustained with <1% packet loss",
+            "end-to-end packet tracing framework with timestamp injection",
+            "IEC 61131-3 compatibility layer with standard function blocks"
         ],
         "automation_coverage": [
-            "simultaneous protocol traffic (PROFIBUS@12Mbps, CAN@1Mbps, Eth@100Mbps)",
-            "AES-256 and SHA-512 workload simulation",
-            "multi-protocol collision detection and arbitration",
-            "long-duration stress tests (168 hours) with 0.1-1% packet loss",
-            "end-to-end packet latency <10ms verification",
-            "packet buffer sizing for 100Mbps sustained throughput"
+            "simultaneous protocol traffic (PROFIBUS@12Mbps, CAN@1Mbps, Eth@100Mbps) with realistic payloads",
+            "AES-256-GCM and SHA-512 workload simulation with variable key/data sizes",
+            "multi-protocol collision detection and arbitration with DMA interleaving",
+            "long-duration stress tests (168 hours) with injected 0.1-1% packet loss on each interface",
+            "end-to-end packet latency <10ms verification across all protocol combinations",
+            "protocol switching with <100ms reconfiguration time and zero packet drop",
+            "cryptographic acceleration speedup verification (AES >100 Mbps, SHA >200 Mbps)",
+            "DMA coherency and memory ordering with ECC protection on critical buffers"
         ]
     },
     "isolated_power_supply_controller": {
@@ -2489,22 +2501,27 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "digital_subsystems": ["multi_rail_power_control", "thermal_management_plane", "power_conversion_plane"],
         "technology_support": ["generic130", "generic65", "bcd180"],
         "design_collateral": [
-            "isolation barrier schematic with creepage rules",
-            "multi-isolated rail power tree with load sequencing",
-            "galvanic isolation measurement circuits",
-            "automated burn-in test patterns and sequences",
-            "safety FMEA with isolation failure modes",
-            "layout guidelines for isolated domains with EMI isolation",
-            "isolation barrier self-test with leakage monitoring",
-            "cross-domain handshake synchronization logic"
+            "isolation barrier schematic with creepage/clearance rules per IEC 60664",
+            "multi-isolated rail power tree with load sequencing (primary→secondary→tertiary)",
+            "galvanic isolation measurement circuits with <1pA leakage specifications",
+            "automated burn-in test patterns (thermal cycling, power cycling, frequency sweep)",
+            "safety FMEA with isolation failure modes and single-point failure analysis",
+            "layout guidelines for isolated domains with EMI isolation trenches and shielding",
+            "isolation barrier self-test with periodic leakage monitoring and fault reporting",
+            "cross-domain handshake synchronization logic with CDC verification",
+            "multi-frequency synchronization across isolated domains (<5% skew)",
+            "fault tree analysis for high-reliability applications (MTTF >100k hours)",
+            "regulatory compliance documentation (IEC 61010, ISO 13849-1, EN 61000 series)"
         ],
         "automation_coverage": [
-            "hi-pot isolation testing (2kV DC, 60 seconds)",
-            "multi-isolated rail bring-up with cross-domain timing",
-            "isolation fault injection and detection (>99% confidence)",
-            "temperature coupling between isolated domains",
-            "10,000 power cycle reliability testing",
-            "EMC immunity per IEC 61010-1"
+            "hi-pot isolation testing (2kV DC, 60 seconds) with breakdown detection threshold",
+            "multi-isolated rail bring-up with cross-domain timing verification and sequencing",
+            "isolation fault injection and detection (>99% coverage) with recovery mechanisms",
+            "temperature coupling between isolated domains with thermal stress cycling",
+            "10,000 power cycle reliability testing with load variation (0-100%)",
+            "EMC immunity per IEC 61010-1 (conducted, radiated, burst, surge)",
+            "current limiting accuracy across isolated domains (<5% variation)",
+            "efficiency characterization at 10%, 50%, 100% load for each output rail"
         ]
     },
     "ethernet_sensor_hub": {
@@ -2519,22 +2536,30 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "digital_subsystems": ["ethernet_control_plane", "sensor_aggregation_plane"],
         "technology_support": ["generic130", "generic65", "bcd180"],
         "design_collateral": [
-            "sensor hub reference platform with sensor array",
-            "IEEE 1588 PTP implementation for time synchronization",
-            "multi-channel sensor input conditioning",
-            "deterministic Ethernet packet scheduling",
-            "calibration framework with EEPROM storage",
-            "integration examples for common industrial sensors",
-            "timestamp injection into Ethernet frames",
-            "multi-channel ADC synchronized sampling"
+            "sensor hub reference platform with 16-channel analog input capability",
+            "IEEE 1588 PTP implementation for nanosecond-level time synchronization",
+            "multi-channel sensor input conditioning with AC coupling and protection",
+            "deterministic Ethernet packet scheduling with TSN priority queueing",
+            "calibration framework with EEPROM storage and parameter backup",
+            "integration examples for common industrial sensors (RTD, thermistor, 4-20mA, pressure)",
+            "timestamp injection into Ethernet frames at transmit PHY interface",
+            "multi-channel ADC synchronized sampling with cross-channel skew <100ns",
+            "anti-aliasing filter design (Sallen-Key topology, 5kHz cutoff for 10kHz sampling)",
+            "sensor excitation voltage generation (0-10V programmable for ratiometric sensing)",
+            "digital noise injection monitoring and suppression techniques",
+            "packet buffering with automatic resynchronization on link loss"
         ],
         "automation_coverage": [
-            "PTP synchronization accuracy <1µs across 8-node network",
-            "multi-channel ADC linearity (INL <±1LSB) and settling (<500µs)",
-            "TSN scheduling compliance with <100µs latency",
-            "multi-slave I2C arbitration at 400kHz",
-            "power efficiency: standby <1mW, active <500mW",
-            "sensor calibration repeatability ±0.1% over 6 months"
+            "PTP synchronization accuracy <1µs across 8-node network with grandmaster clock",
+            "multi-channel ADC linearity (INL <±1LSB, DNL <±0.5LSB) and settling (<500µs)",
+            "TSN scheduling compliance with <100µs worst-case latency and deterministic jitter",
+            "multi-slave I2C arbitration at 400kHz with clock stretching support",
+            "power efficiency: standby <1mW (Ethernet PHY disabled), active <500mW (all channels sampled)",
+            "sensor calibration repeatability ±0.1% over 6 months with aging compensation",
+            "temperature drift characterization across -40C to +85C for all sensor channels",
+            "Ethernet CRC validation and frame error detection with automatic re-request",
+            "ADC-to-Ethernet latency <10ms with buffering for burst transfers",
+            "cross-channel isolation verification (crosstalk <-80dB between adjacent channels)"
         ]
     },
     "safe_motor_drive_controller": {
@@ -2549,24 +2574,32 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "digital_subsystems": ["pwm_motor_control_plane", "safety_monitor_plane", "thermal_management_plane"],
         "technology_support": ["generic130", "generic65", "bcd180"],
         "design_collateral": [
-            "three-phase PWM commutation logic with dead-time insertion",
-            "SIL-2 functional safety FMEA with failure mode mapping",
-            "diagnostic coverage analysis (DCA) report with >90% target",
-            "motor current sense signal conditioning circuits",
-            "thermal management strategy with temperature-dependent derating",
-            "safety-critical firmware scaffolding with double-monitor inputs",
-            "watchdog and reset sequencing for safe shutdown",
-            "isolated diagnostics interface for safety system integration"
+            "three-phase PWM commutation logic with dead-time insertion (50-200ns programmable)",
+            "SIL-2 functional safety FMEA with failure mode mapping and residual risk analysis",
+            "diagnostic coverage analysis (DCA) report with >90% target and failure mode ranking",
+            "motor current sense signal conditioning circuits with offset/gain trimming",
+            "thermal management strategy with temperature-dependent derating (soft-stop at >110C)",
+            "safety-critical firmware scaffolding with dual-monitor inputs and voting logic",
+            "watchdog and reset sequencing for safe shutdown with multi-level fault escalation",
+            "isolated diagnostics interface for safety system integration (safe state output)",
+            "six-step and sinusoidal commutation pattern generators with selectable modulation",
+            "over-current and under-current detection thresholds with programmable hysteresis",
+            "phase-current reconstruction algorithms for sensorless operation capability",
+            "hall sensor input conditioning with glitch filtering and invalid state detection"
         ],
         "automation_coverage": [
-            "six-step and sinusoidal PWM commutation patterns with dead-time verification",
-            "fault detection latency <10µs for under/over-current conditions",
-            "over-temperature detection with hysteresis and safe shutdown",
-            "diagnostic coverage >90% with safe failure modes verified",
-            "PWM cycle timing with <100ns jitter for multi-axis synchronization",
-            "watchdog timeout confidence testing with >99% coverage",
-            "reset sequence validation across all power states",
-            "SIL-2 certification documentation and traceability"
+            "six-step and sinusoidal PWM commutation patterns with dead-time verification (<100ns jitter)",
+            "fault detection latency <10µs for under/over-current conditions with high reliability",
+            "over-temperature detection with hysteresis and safe shutdown (interrupt + watchdog trigger)",
+            "diagnostic coverage >90% with safe failure modes verified (no dangerous failures)",
+            "PWM cycle timing with <100ns jitter for multi-axis motor synchronization",
+            "watchdog timeout confidence testing with >99% coverage and independent oscillator drift",
+            "reset sequence validation across all power states (standby, active, shutdown)",
+            "SIL-2 certification documentation and traceability matrix for all design decisions",
+            "three-phase current measurement accuracy <5% across 10:1 load range",
+            "motor speed estimation error <2% with hall sensor input and sensorless fallback modes",
+            "thermal time constant characterization with junction-to-case transient response",
+            "EMC immunity per IEC 60204-1 (burst, surge, conducted/radiated emissions)"
         ]
     },
     }
