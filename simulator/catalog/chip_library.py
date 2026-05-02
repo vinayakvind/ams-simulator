@@ -720,28 +720,38 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "technology_support": ["generic180", "generic130", "generic65", "bcd180"],
         "validation_coverage": [
             "propagation delay (tpd <0.8ns) timing sweep across PVT corners (SS@125C, FF@-40C, TT@27C)",
-            "offset voltage characterization (-50mV to +50mV) across all corners",
-            "hysteresis control (0-100mV) with independent verification",
-            "PSRR measurement at 1-10 MHz (target >60dB)",
-            "temperature coefficient of offset (<10µV/°C target)"
+            "offset voltage characterization (-50mV to +50mV) across all corners with linearity analysis",
+            "hysteresis control (0-100mV) with independent verification and stability analysis",
+            "PSRR measurement at 1-10 MHz (target >60dB) with supply ripple immunity testing",
+            "temperature coefficient of offset (<10µV/°C target) with temperature ramp analysis",
+            "input-referred noise floor (<10µV RMS) across all bias currents",
+            "slew rate characterization (>50V/µs typical) for fast-edge detection",
+            "common-mode range verification (0V to VDD-0.5V typical)",
+            "output swing and loading effects (100pF load verification)",
+            "latch-up and ESD margin testing"
         ],
         "generator_params": {
             "tpd": "<0.8ns",
-            "offset_trim": "±50mV",
-            "hysteresis_trim": "0-100mV",
-            "vbias": "5-50µA"
+            "offset_trim": "±50mV programmable",
+            "hysteresis_trim": "0-100mV configurable",
+            "vbias": "5-50µA tunable",
+            "slew_rate": ">50V/µs",
+            "noise_floor": "<10µV RMS"
         },
         "example_config": {
-            "vbias_current": "5 uA to 50 uA",
+            "vbias_current": "5 uA to 50 uA configurable",
             "input_common_mode": "0.3 to 2.5 V (supply dependent)",
-            "hysteresis": "10 mV to 100 mV",
-            "response_mode": "single-stage or cascaded"
+            "hysteresis": "10 mV to 100 mV programmable",
+            "response_mode": "single-stage or cascaded configurations",
+            "output_buffer": "CMOS inverter or high-impedance stages"
         },
         "integration_example": {
-            "adc_feedback": "SAR ADC feedback path timing closure (<0.5ns skew to clock)",
-            "threshold_detection": "Multi-level threshold detection circuits with 8-16 comparators",
-            "rf_slicer": "RF slicer and signal conditioning for high-frequency paths",
-            "flash_converter": "Flash converter comparator arrays with priority encoding"
+            "adc_feedback": "SAR ADC feedback path timing closure (<0.5ns skew to clock) with skew matching across comparator array",
+            "threshold_detection": "Multi-level threshold detection circuits with 8-16 comparators and priority encoding",
+            "rf_slicer": "RF slicer and signal conditioning for high-frequency paths (>100Mbps)",
+            "flash_converter": "Flash converter comparator arrays with thermometric/binary encoding",
+            "precision_monitor": "Precision supply/temperature monitoring with hysteresis and interrupt generation",
+            "data_recovery": "High-speed data recovery with phase alignment and jitter filtering"
         }
     },
     "differential_amplifier": {
@@ -755,26 +765,38 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "role": "Provides differential gain for instrumentation, precision measurements, and audio front-end applications.",
         "technology_support": ["generic180", "generic130", "generic65", "bcd180"],
         "validation_coverage": [
-            "DC gain >80dB across PVT with gain flatness analysis",
-            "CMRR >60dB at 1kHz, >40dB at 100kHz",
-            "input-referred noise <100nV/√Hz",
-            "slew rate and settling time characterization",
-            "temperature and supply voltage sensitivity analysis"
+            "DC gain >80dB across PVT (SS@125C, FF@-40C, TT@27C) with gain flatness analysis",
+            "CMRR >60dB at 1kHz and >40dB at 100kHz across temperature corners",
+            "input-referred noise <100nV/√Hz integrated over 10Hz-1MHz bandwidth",
+            "slew rate and settling time characterization (1us to 0.1% and 0.01%)",
+            "temperature and supply voltage sensitivity analysis with compensation schemes",
+            "DC offset voltage (<10mV typical) trimming and post-trim accuracy",
+            "THD+N measurement <1% at 1kHz for audio applications",
+            "linear operating range verification (full rail swing capability)",
+            "open-loop output impedance characterization",
+            "frequency response (Bode plots) across gain settings and corners"
         ],
         "generator_params": {
-            "gain_stages": ["1x", "2x", "4x", "10x", "20x"],
-            "bandwidth": "DC to 10MHz",
-            "cmrr_tuning": "enabled"
+            "gain_stages": ["1x", "2x", "4x", "10x", "20x", "50x", "100x"],
+            "bandwidth": "DC to 100MHz optional",
+            "cmrr_tuning": "enabled with trim codes",
+            "offset_cancellation": "dynamic or static trim options",
+            "rail_swing": "near-rail to near-rail configurable"
         },
         "example_config": {
-            "gain_stages": "1x, 2x, 4x, 10x programmable",
-            "bandwidth": "100 kHz to 10 MHz",
-            "input_impedance": ">1 MΩ differential"
+            "gain_stages": "1x to 100x programmable with binary weighting",
+            "bandwidth": "100 kHz to 10 MHz selectable",
+            "input_impedance": ">1 MΩ differential nominal",
+            "output_swing": "100mV to VDD-100mV typical",
+            "slew_rate": ">1V/µs (gain dependent)"
         },
         "integration_example": {
-            "sensor_frontend": "Bridge sensor amplification with 0.1% gain accuracy and temperature compensation",
-            "audio_preamp": "Audio preamplifier with CMRR >70dB and <100nV/√Hz noise floor",
-            "current_measurement": "Precision current measurement circuits for power monitoring"
+            "sensor_frontend": "Bridge sensor amplification with 0.1% gain accuracy, temperature compensation, and ratiometric biasing",
+            "audio_preamp": "Audio preamplifier with CMRR >70dB, <100nV/√Hz noise floor, and THD <1% at 1kHz",
+            "current_measurement": "Precision current measurement circuits for power monitoring and load balancing",
+            "precision_adc_input": "ADC input buffer with calibrated gain and phase alignment",
+            "medical_instrumentation": "Bio-signal acquisition with >100dB CMRR for EMG/ECG/EEG recording",
+            "precision_dac_feedback": "DAC output buffer with high impedance and low distortion"
         }
     },
     "buffered_precision_dac": {
@@ -788,26 +810,42 @@ REUSABLE_IP_LIBRARY: dict[str, dict[str, Any]] = {
         "role": "Converts digital control words into precise, low-impedance analog voltages for accurate setpoint control.",
         "technology_support": ["generic180", "generic130", "generic65", "bcd180"],
         "validation_coverage": [
-            "DNL/INL analysis across all codes and PVT corners",
-            "settling time to 0.1% and 0.01% verification",
-            "output impedance <100Ω measurement",
-            "glitch impulse energy characterization",
-            "monotonicity verification across temperature and supply"
+            "DNL/INL analysis across all codes and PVT corners (SS@125C, FF@-40C, TT@27C)",
+            "settling time to 0.1% and 0.01% verification with glitch-free guarantee",
+            "output impedance <100Ω measurement at DC and across frequency range",
+            "glitch impulse energy characterization and pulse-width analysis",
+            "monotonicity verification across temperature and supply voltage swings",
+            "temperature drift and supply sensitivity (<50ppm/°C, <10ppm/V typical)",
+            "output noise floor and THD+N measurement across all codes",
+            "buffer output driving capability for various load impedances (1kΩ to 10MΩ)",
+            "DC gain and frequency response of output buffer stage",
+            "power supply rejection ratio (PSRR) >60dB at 100kHz typical",
+            "startup behavior and settling after power-on/enable",
+            "latency from digital input to analog output convergence"
         ],
         "generator_params": {
-            "resolution": "8-12 bit",
-            "output_impedance": "<50Ω",
-            "settling_time": "<2µs to 0.01%"
+            "resolution": "8-14 bit configurable",
+            "output_impedance": "<50Ω typical",
+            "settling_time": "<1µs to 0.01% typical",
+            "buffer_type": "rail-to-rail CMOS or current-output",
+            "reference_options": "internal or external VREF",
+            "power_supply_rejection": ">60dB @ 100kHz"
         },
         "example_config": {
-            "resolution": "8-bit to 12-bit",
-            "output_range": "0-VREF or -VREF/2 to +VREF/2",
-            "settling_target": "<1 µs to 0.1%"
+            "resolution": "8-bit to 14-bit configurable",
+            "output_range": "0-VREF or -VREF/2 to +VREF/2 symmetric",
+            "settling_target": "<1 µs to 0.1% (typical) or <500ns to 1%",
+            "load_impedance": "1k to 100k range typical",
+            "update_rate": "Up to 10MHz typical"
         },
         "integration_example": {
-            "trim_tuning": "Post-silicon trim tuning for bandgap and bias parameters with ±1% accuracy",
-            "setpoint_generation": "Setpoint generation for converter control loops with 0.1% accuracy",
-            "programmable_threshold": "Programmable threshold for comparator references with digital control"
+            "trim_tuning": "Post-silicon trim tuning for bandgap and bias parameters with ±1% accuracy and NVM storage",
+            "setpoint_generation": "Setpoint generation for converter control loops with 0.1% accuracy and fast settling",
+            "programmable_threshold": "Programmable threshold for comparator references with digital control and ratiometric operation",
+            "led_control": "LED brightness control with PWM and DAC combination",
+            "audio_dac": "Audio DAC output buffer with low noise and distortion",
+            "sensor_calibration": "Post-production calibration signal generation for sensor trimming",
+            "power_supply_control": "Feedback signal generation for regulated power supply loop compensation"
         }
     },
     "lvds_receiver": {

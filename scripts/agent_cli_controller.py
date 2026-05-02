@@ -29,6 +29,7 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 from pathlib import Path
@@ -214,6 +215,62 @@ def load_queue(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _is_local_api_url(api_url: str) -> bool:
+    parsed = urllib.parse.urlparse(api_url)
+    return parsed.scheme in {"http", "https"} and parsed.hostname in {"127.0.0.1", "localhost"}
+
+
+def _is_connection_refused_error(exc: BaseException) -> bool:
+    reason = getattr(exc, "reason", exc)
+    if isinstance(reason, ConnectionRefusedError):
+        return True
+
+    text = str(reason).lower()
+    return any(token in text for token in (
+        "connection refused",
+        "actively refused",
+        "winerror 10061",
+        "timed out",
+        "connection aborted",
+    ))
+
+
+def _run_headless_api_smoke_test() -> tuple[bool, str]:
+    try:
+        from simulator.api.server import start_api_server
+    except Exception as exc:  # pragma: no cover - defensive import failure path
+        return False, f"server import failed: {exc}"
+
+    server = None
+    try:
+        server = start_api_server(main_window=None, port=0)
+        port = int(getattr(server, "server_port", server.server_address[1]))
+        deadline = time.time() + 3.0
+        last_error: Exception | None = None
+        while time.time() < deadline:
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/status", timeout=1) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+                ok = response.status == 200 and payload.get("status") == "running"
+                return ok, f"HTTP {response.status}, status={payload.get('status')}"
+            except Exception as exc:  # pragma: no cover - retry loop
+                last_error = exc
+                time.sleep(0.1)
+
+        detail = str(last_error) if last_error is not None else "timed out waiting for headless API server"
+        return False, detail
+    finally:
+        if server is not None:
+            try:
+                server.shutdown()
+            except Exception:
+                pass
+            try:
+                server.server_close()
+            except Exception:
+                pass
+
+
 def build_handshake(repo_root: Path, api_url: str) -> dict[str, Any]:
     """Capture repository and optional live-API handshake metadata."""
     branch = _run_git(repo_root, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip() or "unknown"
@@ -231,16 +288,34 @@ def build_handshake(repo_root: Path, api_url: str) -> dict[str, Any]:
         "python_executable": sys.executable,
         "api_handshake_url": api_url,
         "api_handshake": None,
+        "api_handshake_ok": False,
+        "api_handshake_live": False,
     }
+
+    if not api_url.strip():
+        handshake["api_handshake_status"] = "disabled"
+        return handshake
 
     try:
         with urllib.request.urlopen(api_url, timeout=3) as response:
             payload = json.loads(response.read().decode("utf-8"))
         handshake["api_handshake"] = payload
         handshake["api_handshake_ok"] = True
+        handshake["api_handshake_live"] = True
+        handshake["api_handshake_status"] = "live"
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, ValueError) as exc:
-        handshake["api_handshake_ok"] = False
-        handshake["api_handshake_error"] = str(exc)
+        if _is_local_api_url(api_url) and _is_connection_refused_error(exc):
+            smoke_ok, smoke_detail = _run_headless_api_smoke_test()
+            handshake["api_smoke_test_ok"] = smoke_ok
+            handshake["api_smoke_test_detail"] = smoke_detail
+            handshake["api_handshake_status"] = "inactive" if smoke_ok else "error"
+            if smoke_ok:
+                handshake["api_handshake_note"] = "Live API session is not running; headless API smoke test passed."
+            else:
+                handshake["api_handshake_error"] = str(exc)
+        else:
+            handshake["api_handshake_status"] = "error"
+            handshake["api_handshake_error"] = str(exc)
 
     return handshake
 

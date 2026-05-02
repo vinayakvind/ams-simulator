@@ -132228,7 +132228,7 @@
   "metadata": {
     "netlist_file": "C:\\Users\\vinay\\My Simulator\\examples\\standard_circuits\\sar_adc.spice",
     "analysis_type": "transient",
-    "elapsed_time": 0.8823795318603516,
+    "elapsed_time": 0.8495211601257324,
     "backend": "ngspice"
   }
 }

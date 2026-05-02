@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 import tempfile
 from types import SimpleNamespace
+import urllib.error
 import unittest
 from unittest import mock
 
@@ -21,6 +22,69 @@ SPEC.loader.exec_module(agent_cli_controller)
 
 class AgentCliControllerTests(unittest.TestCase):
     """Verify resumable controller feedback and state generation."""
+
+    @staticmethod
+    def _mock_git_result(stdout: str) -> mock.Mock:
+        return mock.Mock(stdout=stdout)
+
+    def test_build_handshake_marks_live_api_as_live(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+
+            def fake_git(_repo_root: Path, *args: str) -> mock.Mock:
+                if args == ("rev-parse", "--abbrev-ref", "HEAD"):
+                    return self._mock_git_result("master\n")
+                if args == ("rev-parse", "HEAD"):
+                    return self._mock_git_result("abc123\n")
+                return self._mock_git_result("## master\n")
+
+            class Response:
+                status = 200
+
+                def __enter__(self) -> "Response":
+                    return self
+
+                def __exit__(self, exc_type, exc, tb) -> bool:
+                    return False
+
+                def read(self) -> bytes:
+                    return json.dumps({"session": "live"}).encode("utf-8")
+
+            with mock.patch.object(agent_cli_controller, "_run_git", side_effect=fake_git), \
+                    mock.patch.object(agent_cli_controller.urllib.request, "urlopen", return_value=Response()):
+                handshake = agent_cli_controller.build_handshake(root, "http://127.0.0.1:5102/api/session/handshake")
+
+            self.assertTrue(handshake["api_handshake_ok"])
+            self.assertTrue(handshake["api_handshake_live"])
+            self.assertEqual(handshake["api_handshake_status"], "live")
+            self.assertEqual(handshake["api_handshake"], {"session": "live"})
+            self.assertNotIn("api_smoke_test_ok", handshake)
+
+    def test_build_handshake_reports_inactive_live_api_when_smoke_test_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            refused = urllib.error.URLError(ConnectionRefusedError(10061, "actively refused"))
+
+            def fake_git(_repo_root: Path, *args: str) -> mock.Mock:
+                if args == ("rev-parse", "--abbrev-ref", "HEAD"):
+                    return self._mock_git_result("master\n")
+                if args == ("rev-parse", "HEAD"):
+                    return self._mock_git_result("abc123\n")
+                return self._mock_git_result("## master\n")
+
+            with mock.patch.object(agent_cli_controller, "_run_git", side_effect=fake_git), \
+                    mock.patch.object(agent_cli_controller.urllib.request, "urlopen", side_effect=refused), \
+                    mock.patch.object(agent_cli_controller, "_run_headless_api_smoke_test", return_value=(True, "HTTP 200, status=running")) as smoke_test:
+                handshake = agent_cli_controller.build_handshake(root, "http://127.0.0.1:5102/api/session/handshake")
+
+            self.assertFalse(handshake["api_handshake_ok"])
+            self.assertFalse(handshake["api_handshake_live"])
+            self.assertEqual(handshake["api_handshake_status"], "inactive")
+            self.assertTrue(handshake["api_smoke_test_ok"])
+            self.assertEqual(handshake["api_smoke_test_detail"], "HTTP 200, status=running")
+            self.assertIn("Live API session is not running", handshake["api_handshake_note"])
+            self.assertNotIn("api_handshake_error", handshake)
+            smoke_test.assert_called_once()
 
     def test_load_queue_adds_default_priority_targets_for_legacy_queue(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

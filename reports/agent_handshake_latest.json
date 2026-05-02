@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-02T19:44:41.328307",
-  "session_id": "4536a27d-d5ac-4c31-bf73-17d42f6ada66",
+  "generated_at": "2026-05-02T20:20:29.938470",
+  "session_id": "66da1c65-9800-4ca7-b50c-0d9af9829e39",
   "repo_root": "C:\\Users\\vinay\\My Simulator",
   "branch": "master",
-  "commit": "34613b2dfbe56a30230cfcbd5eba97503841c107",
+  "commit": "d33d405dda4bbbff8d84bf129444a0df46f9eae3",
   "git_status": [
-    "## master...origin/master [ahead 17]",
+    "## master...origin/master [ahead 25]",
     " M designs/sar_adc/blocks/sar_adc_top/REPORT.md",
     " M designs/sigma_delta_adc/blocks/sigma_delta_adc_top/REPORT.md",
     " M reports/agent_controller_state.json",
@@ -21,6 +21,7 @@
     " M reports/chip_catalog_generic65_latest.md",
     " M reports/chip_catalog_latest.json",
     " M reports/chip_catalog_latest.md",
+    " D reports/cycle_0025_completion_summary.md",
     " M reports/design_autopilot_latest.json",
     " M reports/design_autopilot_latest.md",
     " M reports/design_portfolio_overview.json",
@@ -33,10 +34,11 @@
     " M reports/sar_adc_regression_latest.json",
     " M reports/sar_adc_regression_latest.md",
     " M reports/sar_adc_sar_adc_top_transient_latest_raw.json",
-    " M reports/sigma_delta_adc_design_reference.html",
     " M reports/sigma_delta_adc_regression_latest.json",
     " M reports/sigma_delta_adc_regression_latest.md",
-    " M reports/sigma_delta_adc_sigma_delta_adc_top_transient_latest_raw.json"
+    " M reports/sigma_delta_adc_sigma_delta_adc_top_transient_latest_raw.json",
+    " M scripts/agent_cli_controller.py",
+    " M tests/test_agent_cli_controller.py"
   ],
   "host": "Manasvi",
   "platform": "Windows-11-10.0.26100-SP0",
@@ -44,5 +46,9 @@
   "api_handshake_url": "http://127.0.0.1:5102/api/session/handshake",
   "api_handshake": null,
   "api_handshake_ok": false,
-  "api_handshake_error": "<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>"
+  "api_handshake_live": false,
+  "api_smoke_test_ok": true,
+  "api_smoke_test_detail": "HTTP 200, status=running",
+  "api_handshake_status": "inactive",
+  "api_handshake_note": "Live API session is not running; headless API smoke test passed."
 }
