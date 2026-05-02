@@ -291,25 +291,29 @@ class VIPValidator:
         for ip_name in reusable_ips:
             result = self.validate_reusable_ip(ip_name)
             results.append(result)
-            print(f"  {ip_name}: {'✓ PASS' if result.passed else '✗ FAIL'}")
+            status = "PASS" if result.passed else "FAIL"
+            print(f"  {ip_name}: [{status}]")
 
         print("\nValidating Priority Verification IPs...")
         for vip_name in vips:
             result = self.validate_verification_ip(vip_name)
             results.append(result)
-            print(f"  {vip_name}: {'✓ PASS' if result.passed else '✗ FAIL'}")
+            status = "PASS" if result.passed else "FAIL"
+            print(f"  {vip_name}: [{status}]")
 
         print("\nValidating Priority Digital Subsystems...")
         for subsys_name in subsystems:
             result = self.validate_digital_subsystem(subsys_name)
             results.append(result)
-            print(f"  {subsys_name}: {'✓ PASS' if result.passed else '✗ FAIL'}")
+            status = "PASS" if result.passed else "FAIL"
+            print(f"  {subsys_name}: [{status}]")
 
         print("\nValidating Priority Chip Profiles...")
         for profile_name in profiles:
             result = self.validate_chip_profile(profile_name)
             results.append(result)
-            print(f"  {profile_name}: {'✓ PASS' if result.passed else '✗ FAIL'}")
+            status = "PASS" if result.passed else "FAIL"
+            print(f"  {profile_name}: [{status}]")
 
         self.results = results
         return results
@@ -346,13 +350,13 @@ def main():
     print("\n" + "=" * 60)
     print("VALIDATION SUMMARY")
     print("=" * 60)
-    print(f"Total: {summary['total']}")
-    print(f"Passed: {summary['passed']}")
-    print(f"Failed: {summary['failed']}")
-    print(f"Pass Rate: {summary['pass_rate']}")
+    print("Total: {}".format(summary['total']))
+    print("Passed: {}".format(summary['passed']))
+    print("Failed: {}".format(summary['failed']))
+    print("Pass Rate: {}".format(summary['pass_rate']))
     print("\nBy Category:")
     for category, counts in summary["by_category"].items():
-        print(f"  {category}: {counts['passed']} passed, {counts['failed']} failed")
+        print("  {}: {} passed, {} failed".format(category, counts['passed'], counts['failed']))
 
     return 0 if summary["failed"] == 0 else 1
 
