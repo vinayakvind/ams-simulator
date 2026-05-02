@@ -22,6 +22,19 @@ SPEC.loader.exec_module(agent_cli_controller)
 class AgentCliControllerTests(unittest.TestCase):
     """Verify resumable controller feedback and state generation."""
 
+    def test_load_queue_adds_default_priority_targets_for_legacy_queue(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            queue_path = Path(tmp_dir) / "agent_workflow.json"
+            queue_path.write_text(
+                json.dumps({"name": "legacy", "goal": "legacy goal", "focus_areas": [], "steps": []}),
+                encoding="utf-8",
+            )
+
+            queue = agent_cli_controller.load_queue(queue_path)
+
+            self.assertIn("priority_build_targets", queue)
+            self.assertIn("reusable_ips", queue["priority_build_targets"])
+
     def test_collect_feedback_reports_generic65_compatibility_gap(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -73,6 +86,91 @@ class AgentCliControllerTests(unittest.TestCase):
 
             self.assertTrue(any("generic65" in item for item in feedback["improvements"]))
             self.assertTrue(any("ldo_analog" in item for item in feedback["improvements"]))
+
+    def test_collect_feedback_uses_priority_targets_when_reports_are_green(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            reports = root / "reports"
+            reports.mkdir(parents=True, exist_ok=True)
+
+            (reports / "design_autopilot_latest.json").write_text(
+                json.dumps({"overall": "PASS", "designs": []}),
+                encoding="utf-8",
+            )
+
+            chip_catalog_payload = {
+                "summary": {
+                    "reusable_ip_count": 4,
+                    "verification_ip_count": 2,
+                    "digital_subsystem_count": 1,
+                    "chip_profile_count": 2,
+                },
+                "reusable_ips": [
+                    {"key": "bandgap"},
+                    {"key": "buck_converter"},
+                    {"key": "ldo_analog"},
+                    {"key": "lin_transceiver"},
+                ],
+                "verification_ips": [
+                    {"key": "spi_vip"},
+                    {"key": "lin_vip"},
+                ],
+                "chip_profiles": [
+                    {"key": "lin_node_asic"},
+                    {"key": "power_management_unit"},
+                ],
+            }
+            (reports / "chip_catalog_latest.json").write_text(
+                json.dumps(chip_catalog_payload),
+                encoding="utf-8",
+            )
+
+            for technology in ("generic130", "generic65", "bcd180"):
+                (reports / f"chip_catalog_{technology}_latest.json").write_text(
+                    json.dumps(
+                        {
+                            "summary": {
+                                "compatible_ip_count": 4,
+                                "reusable_ip_count": 4,
+                                "compatible_chip_profile_count": 2,
+                                "chip_profile_count": 2,
+                            },
+                            "reusable_ips": [
+                                {"key": "bandgap", "compatible": True},
+                                {"key": "buck_converter", "compatible": True},
+                                {"key": "ldo_analog", "compatible": True},
+                                {"key": "lin_transceiver", "compatible": True},
+                            ],
+                            "verification_ips": [
+                                {"key": "spi_vip", "compatible": True},
+                                {"key": "lin_vip", "compatible": True},
+                            ],
+                            "chip_profiles": [
+                                {"key": "lin_node_asic", "compatible": True},
+                                {"key": "power_management_unit", "compatible": True},
+                            ],
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+
+            feedback = agent_cli_controller.collect_feedback(
+                repo_root=root,
+                validation_results=[{"id": "verify", "exit_code": 0}],
+                queue={
+                    "focus_areas": [],
+                    "priority_build_targets": {
+                        "reusable_ips": ["bandgap", "buck_converter", "ldo_analog", "lin_transceiver"],
+                        "verification_ips": ["spi_vip", "lin_vip"],
+                        "chip_profiles": ["lin_node_asic", "power_management_unit"],
+                    },
+                },
+            )
+
+            self.assertTrue(any("Harden reusable IP priority targets" in item for item in feedback["improvements"]))
+            self.assertTrue(any("Deepen verification IP priority targets" in item for item in feedback["improvements"]))
+            self.assertTrue(any("Expand chip profile priority targets" in item for item in feedback["improvements"]))
+            self.assertFalse(any(item.startswith("Expand the reusable chip library with additional IPs") for item in feedback["improvements"]))
 
     def test_run_cycle_writes_handshake_state_feedback_and_prompt(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

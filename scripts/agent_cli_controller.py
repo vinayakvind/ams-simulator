@@ -202,6 +202,7 @@ def load_queue(path: Path) -> dict[str, Any]:
     payload.setdefault("name", DEFAULT_QUEUE["name"])
     payload.setdefault("goal", DEFAULT_QUEUE["goal"])
     payload.setdefault("focus_areas", list(DEFAULT_QUEUE["focus_areas"]))
+    payload.setdefault("priority_build_targets", deepcopy(DEFAULT_QUEUE["priority_build_targets"]))
     payload.setdefault("steps", list(DEFAULT_QUEUE["steps"]))
     return payload
 
@@ -311,6 +312,86 @@ def _technology_gap_actions(technology: str, payload: dict[str, Any]) -> list[st
     return actions
 
 
+def _priority_target_actions(
+    queue: dict[str, Any],
+    chip_catalog: dict[str, Any] | None,
+    technology_catalogs: dict[str, dict[str, Any]],
+) -> tuple[list[str], list[str]]:
+    priority_targets = queue.get("priority_build_targets", {}) or {}
+    if not priority_targets:
+        return [], []
+
+    observations: list[str] = []
+    improvements: list[str] = []
+    configured_total = 0
+
+    category_specs = (
+        (
+            "reusable_ips",
+            "reusable_ips",
+            "reusable IP",
+            "Harden reusable IP priority targets with stronger generators, validation coverage, and example integrations",
+        ),
+        (
+            "verification_ips",
+            "verification_ips",
+            "verification IP",
+            "Deepen verification IP priority targets with richer protocol scenarios and mixed-signal regressions",
+        ),
+        (
+            "chip_profiles",
+            "chip_profiles",
+            "chip profile",
+            "Expand chip profile priority targets with assembled top-level references, automation coverage, and design collateral",
+        ),
+    )
+
+    for queue_key, catalog_key, label, hardening_message in category_specs:
+        targets = [str(item).strip() for item in priority_targets.get(queue_key, []) if str(item).strip()]
+        if not targets:
+            continue
+
+        configured_total += len(targets)
+        overall_entries = chip_catalog.get(catalog_key, []) if chip_catalog else []
+        overall_keys = {
+            str(entry.get("key", "")).strip()
+            for entry in overall_entries
+            if str(entry.get("key", "")).strip()
+        }
+        missing_targets = [target for target in targets if target not in overall_keys]
+        if missing_targets:
+            improvements.append(
+                f"Implement missing {label} priority targets: {', '.join(missing_targets[:6])}."
+            )
+            continue
+
+        technology_gaps: list[str] = []
+        for technology, payload in technology_catalogs.items():
+            compatible_keys = {
+                str(entry.get("key", "")).strip()
+                for entry in payload.get(catalog_key, [])
+                if str(entry.get("key", "")).strip() and entry.get("compatible", True)
+            }
+            missing_in_technology = [target for target in targets if target not in compatible_keys]
+            if missing_in_technology:
+                technology_gaps.append(f"{technology}: {', '.join(missing_in_technology[:4])}")
+
+        if technology_gaps:
+            improvements.append(
+                f"Close {label} priority-target technology gaps for {'; '.join(technology_gaps)}."
+            )
+            continue
+
+        improvements.append(f"{hardening_message}: {', '.join(targets[:4])}.")
+
+    if configured_total:
+        observations.append(
+            f"Priority backlog configured for {configured_total} targeted reusable IP, VIP, and chip-profile items."
+        )
+
+    return observations, improvements
+
+
 def collect_feedback(repo_root: Path, validation_results: list[dict[str, Any]], queue: dict[str, Any]) -> dict[str, Any]:
     """Collect improvement feedback from the latest reports and queue results."""
     observations: list[str] = []
@@ -353,17 +434,27 @@ def collect_feedback(repo_root: Path, validation_results: list[dict[str, Any]], 
             f"{summary.get('chip_profile_count', 0)} chip profiles."
         )
 
+    technology_catalogs: dict[str, dict[str, Any]] = {}
     for technology in ("generic130", "generic65", "bcd180"):
         payload = _load_chip_catalog(repo_root, suffix=f"_{technology}")
         if payload is None:
             improvements.append(f"Generate the {technology} chip catalog report because it is missing.")
             continue
+        technology_catalogs[technology] = payload
         summary = payload.get("summary", {})
         observations.append(
             f"{technology}: {summary.get('compatible_ip_count', 0)}/{summary.get('reusable_ip_count', 0)} reusable IPs and "
             f"{summary.get('compatible_chip_profile_count', 0)}/{summary.get('chip_profile_count', 0)} chip profiles are currently compatible."
         )
         improvements.extend(_technology_gap_actions(technology, payload))
+
+    priority_observations, priority_improvements = _priority_target_actions(
+        queue=queue,
+        chip_catalog=chip_catalog,
+        technology_catalogs=technology_catalogs,
+    )
+    observations.extend(priority_observations)
+    improvements.extend(priority_improvements)
 
     for focus_area in queue.get("focus_areas", []):
         observations.append(f"Workflow focus: {focus_area}")
