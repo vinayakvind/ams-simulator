@@ -1,6 +1,6 @@
 # Chip Assembly Catalog Report
 
-Generated: 2026-05-02T19:05:21.269170
+Generated: 2026-05-02T19:10:32.919409
 Technology filter: all
 
 ## Summary
@@ -51,13 +51,13 @@ Technology filter: all
 
 | IP | Domain | Category | Compatible | Technology Support |
 |----|--------|----------|------------|--------------------|
-| aes_accelerator | digital | security | yes | generic65, generic22, generic14 |
+| aes_accelerator | digital | security | yes | generic130, generic65, bcd180, generic22, generic14 |
 | analog_multiplexer | analog | interface | yes | generic180, generic130, generic65, bcd180 |
 | bandgap | analog | reference | yes | generic180, generic130, generic65, bcd180 |
-| battery_cell_monitor | analog | power | yes | generic130, generic65, generic22, generic14 |
+| battery_cell_monitor | analog | power | yes | generic130, generic65, bcd180, generic22, generic14 |
 | bias_generator | analog | bias | yes | generic180, generic130, generic65, bcd180 |
-| ble_transceiver | mixed | interface | yes | generic65, generic22, generic14 |
-| bms_controller | digital | sequencing | yes | generic65, generic22, generic14 |
+| ble_transceiver | mixed | interface | yes | generic130, generic65, bcd180, generic22, generic14 |
+| bms_controller | digital | sequencing | yes | generic130, generic65, bcd180, generic22, generic14 |
 | boost_converter | analog | power | yes | generic180, generic130, generic65, bcd180 |
 | buck_converter | analog | power | yes | generic180, generic130, generic65, bcd180 |
 | can_controller | digital | protocol | yes | generic180, generic130, generic65, bcd180 |
@@ -76,8 +76,8 @@ Technology filter: all
 | gpio_controller | digital | interface | yes | generic180, generic130, generic65, bcd180 |
 | i2c_controller | digital | protocol | yes | generic180, generic130, generic65, bcd180 |
 | i2s_audio_controller | digital | protocol | yes | generic180, generic130, generic65, bcd180 |
-| i3c_controller | digital | control | yes | generic65, generic22, generic14 |
-| imu_interface | mixed | sense | yes | generic65, generic22, generic14 |
+| i3c_controller | digital | control | yes | generic130, generic65, bcd180, generic22, generic14 |
+| imu_interface | mixed | sense | yes | generic130, generic65, bcd180, generic22, generic14 |
 | interrupt_controller | digital | sequencing | yes | generic180, generic130, generic65, bcd180 |
 | ldo_analog | analog | power | yes | generic180, generic130, generic65, bcd180 |
 | ldo_digital | analog | power | yes | generic180, generic130, generic65, bcd180 |
@@ -87,7 +87,7 @@ Technology filter: all
 | low_pass_filter | analog | filter | yes | generic180, generic130, generic65, bcd180 |
 | lvds_driver | mixed | interface | yes | generic180, generic130, generic65, bcd180 |
 | memory_compiler | digital | storage | yes | generic180, generic130, generic65, bcd180 |
-| nfc_controller | mixed | interface | yes | generic65, generic22, generic14 |
+| nfc_controller | mixed | interface | yes | generic130, generic65, bcd180, generic22, generic14 |
 | operational_amplifier | analog | sense | yes | generic180, generic130, generic65, bcd180 |
 | pll | mixed | sequencing | yes | generic180, generic130, generic65, bcd180 |
 | precision_voltage_reference | analog | reference | yes | generic180, generic130, generic65, bcd180 |
@@ -96,7 +96,7 @@ Technology filter: all
 | qi_wireless_rx | mixed | power | yes | generic65, generic22, generic14 |
 | register_file | digital | control | yes | generic180, generic130, generic65, bcd180 |
 | reset_generator | digital | sequencing | yes | generic180, generic130, generic65, bcd180 |
-| rf_front_end | mixed | interface | yes | generic22, generic14 |
+| rf_front_end | mixed | interface | yes | generic130, generic65, generic22, generic14 |
 | ring_oscillator | analog | sequencing | yes | generic180, generic130, generic65, bcd180 |
 | rs485_transceiver | mixed | interface | yes | generic180, generic130, generic65, bcd180 |
 | sample_hold_frontend | analog | converter | yes | generic180, generic130, generic65, bcd180 |
@@ -109,7 +109,7 @@ Technology filter: all
 | trim_circuit | analog | bias | yes | generic180, generic130, generic65, bcd180 |
 | true_random_number_generator | analog | security | yes | generic65, generic22, generic14 |
 | uart_controller | digital | protocol | yes | generic180, generic130, generic65, bcd180 |
-| uwb_transceiver | mixed | interface | yes | generic22, generic14 |
+| uwb_transceiver | mixed | interface | yes | generic130, generic65, generic22, generic14 |
 | voltage_ladder_dac | analog | converter | yes | generic180, generic130, generic65, bcd180 |
 | watchdog_timer | digital | sequencing | yes | generic180, generic130, generic65, bcd180 |
 

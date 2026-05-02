@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-02T19:09:54.835687",
+  "generated_at": "2026-05-02T19:12:42.115464",
   "technology_filter": "bcd180",
   "summary": {
     "technology_count": 4,
@@ -9,7 +9,7 @@
     "chip_profile_count": 19,
     "compatible_ip_count": 56,
     "compatible_digital_subsystem_count": 20,
-    "compatible_chip_profile_count": 17
+    "compatible_chip_profile_count": 19
   },
   "technologies": [
     {
@@ -3205,11 +3205,12 @@
       "technology_support": [
         "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],
       "key": "secure_iot_gateway",
-      "compatible": false
+      "compatible": true
     },
     {
       "name": "Sigma-Delta ADC Macro",
@@ -3293,11 +3294,12 @@
       "technology_support": [
         "generic130",
         "generic65",
+        "bcd180",
         "generic22",
         "generic14"
       ],
       "key": "smart_battery_pack",
-      "compatible": false
+      "compatible": true
     },
     {
       "name": "Wireless-Powered Sensor Node",

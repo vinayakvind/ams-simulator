@@ -1,6 +1,6 @@
 # Chip Assembly Catalog Report
 
-Generated: 2026-05-02T19:09:54.835687
+Generated: 2026-05-02T19:12:42.115464
 Technology filter: bcd180
 
 ## Summary
@@ -12,7 +12,7 @@ Technology filter: bcd180
 - Chip profiles: 19
 - Compatible IPs: 56
 - Compatible digital subsystems: 20
-- Compatible chip profiles: 17
+- Compatible chip profiles: 19
 
 ## Technologies
 
@@ -42,9 +42,9 @@ Technology filter: bcd180
 | precision_analog_frontend | yes | Lab instrumentation front-end with programmable gain, multi-threshold detection, and precision references. |
 | real_time_motor_controller | yes | Three-phase motor control ASIC with PWM generation, current sensing, and thermal protection. |
 | sar_adc_macro | yes | Converter-oriented chip scaffold centered on a reusable SAR ADC macro and digital control hooks. |
-| secure_iot_gateway | no | Enterprise-grade IoT gateway with integrated crypto, multi-protocol wireless, and secure boot. |
+| secure_iot_gateway | yes | Enterprise-grade IoT gateway with integrated crypto, multi-protocol wireless, and secure boot. |
 | sigma_delta_macro | yes | Oversampled converter scaffold centered on a reusable sigma-delta ADC macro and its control plane. |
-| smart_battery_pack | no | Multi-cell battery management system with wireless telemetry and active balancing. |
+| smart_battery_pack | yes | Multi-cell battery management system with wireless telemetry and active balancing. |
 | wireless_powered_sensor | yes | Battery-free or battery-assisted sensor node with Qi wireless charging and energy harvesting. |
 
 ## Reusable IPs

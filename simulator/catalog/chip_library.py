@@ -1233,7 +1233,7 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "blocks": ["bandgap", "ldo_analog", "ldo_digital", "boost_converter", "ble_transceiver", "nfc_controller", "uwb_transceiver", "rf_front_end", "aes_accelerator", "sha_accelerator", "true_random_number_generator", "i3c_controller", "uart_controller", "spi_controller", "register_file", "interrupt_controller", "control_logic", "watchdog_timer"],
         "vips": ["ble_vip", "nfc_vip", "i3c_vip", "crypto_vip", "emc_compliance_vip", "power_sequence_vip", "frequency_accuracy_vip"],
         "digital_subsystems": ["iot_wireless_plane", "security_crypto_plane", "multi_rail_power_control"],
-        "technology_support": ["generic130", "generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
     "wireless_powered_sensor": {
         "name": "Wireless-Powered Sensor Node",
@@ -1257,7 +1257,7 @@ CHIP_PROFILE_LIBRARY: dict[str, dict[str, Any]] = {
         "blocks": ["bandgap", "ldo_analog", "ldo_digital", "battery_cell_monitor", "bms_controller", "temperature_sensor", "watchdog_timer", "current_reference", "trim_circuit", "ble_transceiver", "i3c_controller", "uart_controller", "register_file", "interrupt_controller", "control_logic"],
         "vips": ["bms_vip", "ble_vip", "i3c_vip", "thermal_monitoring_vip", "current_consumption_vip", "power_sequence_vip"],
         "digital_subsystems": ["battery_management_plane", "multi_rail_power_control"],
-        "technology_support": ["generic130", "generic65", "generic22", "generic14"],
+        "technology_support": ["generic130", "generic65", "bcd180", "generic22", "generic14"],
     },
 
     "automotive_hvdc_pmic": {
